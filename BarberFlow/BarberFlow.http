@@ -1,6 +1,6 @@
-@BarberFlow_HostAddress = http://localhost:5199
+@BarberFlow.API_HostAddress = http://localhost:5199
 
-GET {{BarberFlow_HostAddress}}/weatherforecast/
+GET {{BarberFlow.API_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
