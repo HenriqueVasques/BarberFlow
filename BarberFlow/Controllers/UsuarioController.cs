@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BarberFlow.API.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BarberFlow.API.Controllers
@@ -7,5 +8,10 @@ namespace BarberFlow.API.Controllers
     [ApiController]
     public class UsuarioController : ControllerBase
     {
+        private readonly AppDbContext _appDbContext;
+        public UsuarioController(AppDbContext appDbContext)
+        {
+            _appDbContext = appDbContext;
+        }
     }
 }

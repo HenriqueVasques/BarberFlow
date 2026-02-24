@@ -6,10 +6,11 @@ namespace BarberFlow.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AgendamentoController : ControllerBase
+    public class BloqueioHorarioController : ControllerBase
     {
         private readonly AppDbContext _appDbContext;
-        public AgendamentoController(AppDbContext appDbContext)
+
+        public BloqueioHorarioController(AppDbContext appDbContext)
         {
             _appDbContext = appDbContext;
         }

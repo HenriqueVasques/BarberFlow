@@ -5,7 +5,7 @@ namespace BarberFlow.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class Horario_ProfissionalController : ControllerBase
+    public class EmpresaServicoController : ControllerBase
     {
     }
 }
