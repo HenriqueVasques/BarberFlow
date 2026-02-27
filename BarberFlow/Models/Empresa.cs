@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BarberFlow.API.Helpers;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace BarberFlow.API.Models
@@ -6,7 +7,8 @@ namespace BarberFlow.API.Models
     [Index(nameof(Slug), IsUnique = true)]
     public class Empresa
     {
-        public int Id { get; set; }
+        #region Properties
+        public long Id { get; set; }
         [Required, MaxLength(150)]
         public string Nome { get; set; }
         [Required, MaxLength(150)]
@@ -16,5 +18,19 @@ namespace BarberFlow.API.Models
         public DateTime DataAtualizacao { get; set; }
         public ICollection<Usuario> Usuarios { get; set; }
         public ICollection<Servico> Servicos { get; set; }
+        #endregion
+
+        #region Constructors
+        public Empresa(string nome, string cnpj)
+        {
+            Nome = nome;
+            CNPJ = cnpj;
+            DataCriacao = DateTime.UtcNow;
+            DataAtualizacao = DateTime.UtcNow;
+            //Ativo = true;
+        }
+
+        protected Empresa() {}
+        #endregion
     }
 }

@@ -124,7 +124,7 @@ namespace BarberFlow.API.Data
             // ProfissionalServico → EmpresaServico
             modelBuilder.Entity<ProfissionalServico>()
                 .HasOne(ps => ps.EmpresaServico)
-                .WithMany()
+                .WithMany(es => es.ProfissionaisServicos)
                 .HasForeignKey(ps => ps.EmpresaServicoId)
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -150,6 +150,17 @@ namespace BarberFlow.API.Data
                 .HasIndex(es => new { es.EmpresaId, es.ServicoId })
                 .IsUnique();
 
+            // 2. Travas de segurança para Dias da Semana (Índices Únicos)
+            // Impede a empresa de ter dois "domingos", por exemplo.
+            modelBuilder.Entity<HorarioFuncionamentoEmpresa>()
+                .HasIndex(h => new { h.EmpresaId, h.DiaSemana })
+                .IsUnique();
+
+            // Impede o profissional de ter duas "terças-feiras" cadastradas.
+            modelBuilder.Entity<HorarioProfissional>()
+                .HasIndex(hp => new { hp.ProfissionalId, hp.DiaSemana })
+                .IsUnique();
+
             base.OnModelCreating(modelBuilder);
 
             // Filtros para ignorar inativos automaticamente
@@ -162,6 +173,7 @@ namespace BarberFlow.API.Data
             modelBuilder.Entity<Servico>().Property(s => s.PrecoBase).HasPrecision(18, 2);
             modelBuilder.Entity<Agendamento>().Property(a => a.PrecoNoMomento).HasPrecision(18, 2);
             modelBuilder.Entity<Profissional>().Property(p => p.PercentualComissao).HasPrecision(5, 2);
+            modelBuilder.Entity<ProfissionalServico>().Property(p => p.PrecoPersonalizado).HasPrecision(18, 2);
         }
     }
 }
