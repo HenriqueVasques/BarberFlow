@@ -7,5 +7,6 @@
             Task Adicionar(Empresa empresa);
             Task<bool> ExisteSlug(string slug);
             Task<Empresa?> ObterPorId(long id);
-        }
+            Task<Empresa?> ObterPorSlug(string slug);
+    }
     }

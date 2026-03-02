@@ -50,8 +50,42 @@ namespace BarberFlow.API.Controllers
             catch(Exception ex) {
 
                 return BadRequest(new { error = ex.Message });
-            }
-            #endregion
+            }     
         }
+
+        [HttpGet("{slug}")]
+        public async Task<IActionResult> ObterEmpresaPorSlug([FromRoute] string slug)
+        {
+            
+            try
+            {
+                var empresa = await _empresaService.ObterEmpresaPorSlug(slug);
+
+                if (empresa == null)
+                {
+                    return NotFound(new { message = $"Empresa com slug '{slug}' não encontrada." });
+                }
+
+                var response = new EmpresaResponseDto
+                {
+                    Id = empresa.Id,
+                    Nome = empresa.Nome,
+                    Slug = empresa.Slug,
+                    CNPJ = empresa.CNPJ,
+                    DataCriacao = empresa.DataCriacao
+                };
+
+                return Ok(new
+                {
+                    message = "Empresa encontrada com sucesso!",
+                    dados = response
+                });
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }    
+        }
+        #endregion
     }
 }

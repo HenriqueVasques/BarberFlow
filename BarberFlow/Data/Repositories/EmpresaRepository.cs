@@ -28,5 +28,11 @@
             {
                 return await _appDbContext.Empresas.FindAsync(id);
             }
+
+            public async Task<Empresa?> ObterPorSlug(string slug)
+            {
+                return await _appDbContext.Empresas.AsNoTracking().FirstOrDefaultAsync(e => e.Slug == slug.ToLower());
+            }
+
         }
     }

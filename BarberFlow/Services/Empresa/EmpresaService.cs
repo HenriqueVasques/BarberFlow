@@ -27,6 +27,11 @@ namespace BarberFlow.API.Services
             await _repository.Adicionar(empresa);
             return empresa;
         }
+
+        public async Task<Empresa?> ObterEmpresaPorSlug(string slug)
+        {
+            return await _repository.ObterPorSlug(slug);
+        }
         #endregion
 
         #region Private Methods
