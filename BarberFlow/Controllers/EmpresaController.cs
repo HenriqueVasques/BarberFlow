@@ -1,4 +1,6 @@
-﻿using BarberFlow.API.DTOs.Empresa;
+﻿
+using BarberFlow.API.DTOs.Empresa;
+
 using BarberFlow.API.Models;
 using BarberFlow.API.Services;
 using Microsoft.AspNetCore.Http;
@@ -31,15 +33,18 @@ namespace BarberFlow.API.Controllers
                 {
                     return BadRequest("Dados inválidos.");
                 }
-                var novaEmpresa = await _empresaService.CriarEmpresa(dto);
+                var empresa = await _empresaService.CriarEmpresa(dto);
 
                 var response = new EmpresaResponseDto
                 {
-                    Id = novaEmpresa.Id,
-                    Nome = novaEmpresa.Nome,
-                    Slug = novaEmpresa.Slug,
-                    CNPJ = novaEmpresa.CNPJ,
-                    DataCriacao = novaEmpresa.DataCriacao
+                    Id = empresa.Id,
+                    Nome = empresa.Nome,
+                    Slug = empresa.Slug,
+                    CNPJ = empresa.CNPJ,
+                    DataAtualizacao = empresa.DataAtualizacao,
+                    DataCriacao = empresa.DataCriacao,
+                    IsDeleted = empresa.IsDeleted,
+                    Ativo = empresa.Ativo
                 };
                 return StatusCode(201, new
                 {
@@ -51,6 +56,84 @@ namespace BarberFlow.API.Controllers
 
                 return BadRequest(new { error = ex.Message });
             }     
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> AtualizarEmpresa([FromBody] EmpresaUpdateDto dto, long id)
+        {
+            try
+            {
+                if (dto == null)
+                {
+                    return BadRequest("Dados inválidos.");
+                }
+
+                var empresa = await _empresaService.AtualizarEmpresa(id, dto);
+
+                if (empresa == null)
+                {
+                    return NotFound(new { message = $"Empresa com id '{id}' não encontrada." });
+                }
+
+                var response = new EmpresaResponseDto
+                {
+                    Id = empresa.Id,
+                    Nome = empresa.Nome,
+                    Slug = empresa.Slug,
+                    CNPJ = empresa.CNPJ,
+                    DataAtualizacao = empresa.DataAtualizacao,
+                    DataCriacao = empresa.DataCriacao,
+                    IsDeleted = empresa.IsDeleted,
+                    Ativo = empresa.Ativo
+                };
+
+                return Ok(new
+                {
+                    message = "Empresa atualizada com sucesso!", 
+                    dados = response
+                });
+
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletarEmpresa(long id)
+        {
+            try
+            {
+                var empresa = await _empresaService.Deletar(id);
+
+                if (empresa == null)
+                {
+                    return NotFound(new { message = $"Empresa com id '{id}' não encontrada." });
+                }
+
+                var response = new EmpresaResponseDto
+                {
+                    Id = empresa.Id,
+                    Nome = empresa.Nome,
+                    Slug = empresa.Slug,
+                    CNPJ = empresa.CNPJ,
+                    DataAtualizacao = empresa.DataAtualizacao,
+                    DataCriacao = empresa.DataCriacao,
+                    IsDeleted = empresa.IsDeleted,
+                    Ativo = empresa.Ativo
+                };
+                return Ok(new 
+                {
+                    message = "Empresa removida com sucesso!",
+                    dados = response
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+           
         }
 
         [HttpGet("{slug}")]
@@ -72,7 +155,10 @@ namespace BarberFlow.API.Controllers
                     Nome = empresa.Nome,
                     Slug = empresa.Slug,
                     CNPJ = empresa.CNPJ,
-                    DataCriacao = empresa.DataCriacao
+                    DataAtualizacao = empresa.DataAtualizacao,
+                    DataCriacao = empresa.DataCriacao,
+                    IsDeleted = empresa.IsDeleted,
+                    Ativo = empresa.Ativo
                 };
 
                 return Ok(new
