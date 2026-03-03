@@ -19,19 +19,34 @@
                 await _appDbContext.SaveChangesAsync();
             }
 
-            public async Task<bool> ExisteSlug(string slug)
+            public async Task Atualizar(Empresa empresa)
             {
-                return await _appDbContext.Empresas.AnyAsync(e => e.Slug == slug);
+                _appDbContext.Empresas.Update(empresa);
+                await _appDbContext.SaveChangesAsync();
             }
+
+            public async Task Deletar(Empresa empresa)
+            {
+                _appDbContext.Empresas.Update(empresa);
+                await _appDbContext.SaveChangesAsync();
+            }
+
+            public async Task<bool> ExisteSlug(string slug)
+                {
+                    return await _appDbContext.Empresas.AnyAsync(e => e.Slug == slug);
+                }
 
             public async Task<Empresa?> ObterPorId(long id)
             {
-                return await _appDbContext.Empresas.FindAsync(id);
+                return await _appDbContext.Empresas
+                .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted);
             }
+
+            public async Task<bool> ExisteCnpj(string cnpj) => await _appDbContext.Empresas.AnyAsync(e => e.CNPJ == cnpj);
 
             public async Task<Empresa?> ObterPorSlug(string slug)
             {
-                return await _appDbContext.Empresas.AsNoTracking().FirstOrDefaultAsync(e => e.Slug == slug.ToLower());
+                return await _appDbContext.Empresas.AsNoTracking().FirstOrDefaultAsync(e => e.Slug == slug.ToLower() && !e.IsDeleted && e.Ativo); 
             }
 
         }
