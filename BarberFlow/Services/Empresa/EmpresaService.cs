@@ -21,11 +21,61 @@ namespace BarberFlow.API.Services
         #region Public Methods
         public async Task<Empresa> CriarEmpresa(EmpresaCreateDto dto)
         {
+            if (await _repository.ExisteCnpj(dto.CNPJ))
+            {
+                throw new Exception("Já existe uma empresa cadastrada com este CNPJ.");
+            }
+                
             var empresa = new Empresa(dto.Nome, dto.CNPJ);
             empresa.Slug = await GerarSlugUnico(dto.Nome);
 
             await _repository.Adicionar(empresa);
             return empresa;
+        }
+
+        public async Task<Empresa?> AtualizarEmpresa(long id, EmpresaUpdateDto dto)
+        {
+            Empresa? empresa = await _repository.ObterPorId(id);
+
+            if (empresa == null) 
+            {
+                return null;
+            }
+
+            if (empresa.CNPJ != dto.CNPJ)
+            {
+                if (await _repository.ExisteCnpj(dto.CNPJ))
+                    throw new Exception("O novo CNPJ informado já está em uso por outra empresa.");
+
+                empresa.CNPJ = dto.CNPJ;
+            }
+
+            if (empresa.Nome != dto.Nome)
+            {
+                empresa.Nome = dto.Nome;
+                empresa.Slug = await GerarSlugUnico(dto.Nome);
+            }
+
+            empresa.DataAtualizacao = DateTime.UtcNow;
+
+            await _repository.Atualizar(empresa);
+            return empresa;
+        }
+
+        public async Task <Empresa?> Deletar(long id)
+        {
+            Empresa? empresa = await _repository.ObterPorId(id);
+            if ( empresa == null)
+            {
+                return null;
+            }
+
+            empresa.IsDeleted = true;
+            empresa.Ativo = false;
+
+            await _repository.Deletar(empresa);
+            return empresa;
+
         }
 
         public async Task<Empresa?> ObterEmpresaPorSlug(string slug)
