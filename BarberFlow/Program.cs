@@ -1,4 +1,4 @@
-using BarberFlow.API.Data;
+using BarberFlow.API.Data.Context;
 using BarberFlow.API.Data.Repositories;
 using BarberFlow.API.Interfaces;
 using BarberFlow.API.Services;

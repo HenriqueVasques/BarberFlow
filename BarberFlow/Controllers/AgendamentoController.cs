@@ -1,4 +1,4 @@
-﻿using BarberFlow.API.Data;
+﻿using BarberFlow.API.Data.Context;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

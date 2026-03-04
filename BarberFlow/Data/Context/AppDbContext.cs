@@ -1,7 +1,7 @@
 ﻿using BarberFlow.API.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace BarberFlow.API.Data
+namespace BarberFlow.API.Data.Context
 {
     public class AppDbContext : DbContext
     {
