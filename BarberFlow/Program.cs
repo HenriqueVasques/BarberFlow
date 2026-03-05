@@ -17,10 +17,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Repositórios (Acesso a Dados)
 builder.Services.AddScoped<IEmpresaRepository, EmpresaRepository>();
 builder.Services.AddScoped<IServicoRepository, ServicoRepository>();
+builder.Services.AddScoped<IProfissionalRepository, ProfissionalRepository>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 
 // Serviços (Lógica de Negócio)
 builder.Services.AddScoped<EmpresaService>();
 builder.Services.AddScoped<ServicoService>();
+builder.Services.AddScoped<ProfissionalRepository>();
+builder.Services.AddScoped<UsuarioRepository>();
 
 // 3. SERVIÇOS DO FRAMEWORK (ASP.NET)
 builder.Services.AddControllers();
