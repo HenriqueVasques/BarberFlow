@@ -71,8 +71,8 @@ namespace BarberFlow.API.Controllers
                 }
                 var response = new ProfissionalResponseDto
                 {
-                    nome = profissional.Usuario.Nome,
-                    email = profissional.Usuario.Email,
+                    Nome = profissional.Usuario.Nome,
+                    Email = profissional.Usuario.Email,
                     EmpresaId = profissional.EmpresaId,
                     UsuarioId = profissional.UsuarioId,
                     PercentualComissao = profissional.PercentualComissao,
@@ -106,8 +106,8 @@ namespace BarberFlow.API.Controllers
 
                 var response = new ProfissionalResponseDto
                 {
-                    nome = profissional.Usuario.Nome,
-                    email = profissional.Usuario.Email,
+                    Nome = profissional.Usuario.Nome,
+                    Email = profissional.Usuario.Email,
                     EmpresaId = profissional.EmpresaId,
                     UsuarioId = profissional.UsuarioId,
                     PercentualComissao = profissional.PercentualComissao,
