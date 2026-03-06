@@ -18,5 +18,16 @@ namespace BarberFlow.API.Models
         public Usuario Usuario { get; set; }
         public ICollection<ProfissionalServico> ProfissionalServicos { get; set; }
         public ICollection<Agendamento> Agendamentos { get; set; }
+
+        public Profissional(long empresaId, long usuarioId, decimal percentualComissao)
+        {
+            EmpresaId = empresaId;
+            UsuarioId = usuarioId;
+            PercentualComissao = percentualComissao;
+            Ativo = true;
+            IsDeleted = false;
+            DataCriacao = DateTime.UtcNow;
+            DataAtualizacao = DateTime.UtcNow;
+        }
     }
 }
