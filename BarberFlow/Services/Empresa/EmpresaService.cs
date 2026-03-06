@@ -18,6 +18,22 @@ namespace BarberFlow.API.Services
         }
         #endregion
 
+        #region Private Methods
+        private async Task<string> GerarSlugUnico(string nome)
+        {
+            var slugBase = StringHelper.ToSlug(nome);
+            var slugFinal = slugBase;
+            int contador = 1;
+
+            while (await _repository.ExisteSlug(slugFinal))
+            {
+                slugFinal = $"{slugBase}-{contador++}";
+            }
+
+            return slugFinal;
+        }
+        #endregion
+
         #region Public Methods
         public async Task<Empresa> CriarEmpresa(EmpresaCreateDto dto)
         {
@@ -39,7 +55,7 @@ namespace BarberFlow.API.Services
 
             if (empresa == null) 
             {
-                return null;
+                throw new Exception($"Empresa com id {id} não encontrada.");
             }
 
             if (empresa.CNPJ != dto.CNPJ)
@@ -67,7 +83,7 @@ namespace BarberFlow.API.Services
             Empresa? empresa = await _repository.ObterPorId(id);
             if ( empresa == null)
             {
-                return null;
+                throw new Exception($"Empresa com id {id} não encontrada.");
             }
 
             empresa.IsDeleted = true;
@@ -81,22 +97,6 @@ namespace BarberFlow.API.Services
         public async Task<Empresa?> ObterEmpresaPorSlug(string slug)
         {
             return await _repository.ObterPorSlug(slug);
-        }
-        #endregion
-
-        #region Private Methods
-        private async Task<string> GerarSlugUnico(string nome)
-        {
-            var slugBase = StringHelper.ToSlug(nome);
-            var slugFinal = slugBase;
-            int contador = 1;
-
-            while (await _repository.ExisteSlug(slugFinal))
-            {
-                slugFinal = $"{slugBase}-{contador++}";
-            }
-
-            return slugFinal;
         }
         #endregion
     }

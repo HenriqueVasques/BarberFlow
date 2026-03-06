@@ -1,23 +1,35 @@
-﻿using BarberFlow.API.Interfaces;
+﻿using BarberFlow.API.Data.Context;
+using BarberFlow.API.Interfaces;
 using BarberFlow.API.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BarberFlow.API.Data.Repositories
 {
     public class ProfissionalRepository : IProfissionalRepository
     {
-        public Task Adicionar(Profissional profissional)
+        private readonly AppDbContext _appDbContext;
+
+        public ProfissionalRepository(AppDbContext appDbContext)
         {
-            throw new NotImplementedException();
+            _appDbContext = appDbContext;
         }
 
-        public Task Atualizar(Profissional profissional)
+        public async Task Adicionar(Profissional profissional)
         {
-            throw new NotImplementedException();
+            await _appDbContext.Profissionais.AddAsync(profissional);
+            await _appDbContext.SaveChangesAsync();
         }
 
-        public Task Deletar(Profissional profissional)
+        public async Task Atualizar(Profissional profissional)
         {
-            throw new NotImplementedException();
+            _appDbContext.Profissionais.Update(profissional);
+            await _appDbContext.SaveChangesAsync();
+        }
+
+        public async Task Deletar(Profissional profissional)
+        {
+            _appDbContext.Profissionais.Update(profissional);
+            await _appDbContext.SaveChangesAsync();
         }
 
         public Task<IEnumerable<Profissional>> ObterPorEmpresa(long empresaId)
@@ -25,9 +37,10 @@ namespace BarberFlow.API.Data.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<Profissional?> ObterPorId(long id)
+        public async Task<Profissional?> ObterPorId(long id)
         {
-            throw new NotImplementedException();
+            return await _appDbContext.Profissionais.Include(p => p.Usuario)
+                .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted && p.Ativo);
         }
     }
 }

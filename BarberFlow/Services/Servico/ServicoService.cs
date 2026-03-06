@@ -23,7 +23,7 @@ namespace BarberFlow.API.Services
 
             if(empresa == null)
             {
-                throw new Exception("Empresa não encontrada.");
+                throw new Exception($"Empresa com {dto.EmpresaId} não encontrada.");
             }
             var servico = new Servico(dto.Nome, dto.DuracaoMinutos, dto.PrecoBase, dto.EmpresaId);
             await _servicoRepository.Adicionar(servico);
@@ -36,7 +36,7 @@ namespace BarberFlow.API.Services
 
             if(servico == null)
             {
-                return null;
+                throw new Exception($"Serviço com {id}, não foi encontrado.");
             }
 
             servico.Nome = dto.Nome;
@@ -54,7 +54,7 @@ namespace BarberFlow.API.Services
 
             if(servico == null)
             {
-                return null;
+                throw new Exception($"Serviço com {id}, não foi encontrado.");
             }
 
             servico.IsDeleted = true;
@@ -69,7 +69,7 @@ namespace BarberFlow.API.Services
             var empresa = await _empresaRepository.ObterPorId(empresaId);
             if (empresa == null)
             {
-                throw new Exception("Empresa não encontrada.");
+                throw new Exception($"Empresa com {empresaId} não encontrada.");
             }
             return await _servicoRepository.ObterPorEmpresa(empresaId);
         }
