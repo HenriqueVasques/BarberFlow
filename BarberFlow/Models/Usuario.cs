@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+﻿
 using BarberFlow.API.Enums;
 
 namespace BarberFlow.API.Models
@@ -30,6 +30,7 @@ namespace BarberFlow.API.Models
             Email = email;
             Perfil = perfil;
             SenhaHash = senhaHash;
+            Ativo = true;
             DataCriacao = DateTime.UtcNow;
             DataAtualizacao = DateTime.UtcNow;
         }
