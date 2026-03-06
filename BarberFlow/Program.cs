@@ -23,8 +23,8 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 // Serviços (Lógica de Negócio)
 builder.Services.AddScoped<EmpresaService>();
 builder.Services.AddScoped<ServicoService>();
-builder.Services.AddScoped<ProfissionalRepository>();
-builder.Services.AddScoped<UsuarioRepository>();
+builder.Services.AddScoped<ProfissionalService>();
+builder.Services.AddScoped<UsuarioService>();
 
 // 3. SERVIÇOS DO FRAMEWORK (ASP.NET)
 builder.Services.AddControllers();
