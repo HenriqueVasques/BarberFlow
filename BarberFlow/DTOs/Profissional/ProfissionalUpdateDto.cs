@@ -1,6 +1,6 @@
 ﻿namespace BarberFlow.API.DTOs.Profissional
 {
-    public class ProfissionalResponseDto
+    public class ProfissionalUpdateDto
     {
     }
 }
