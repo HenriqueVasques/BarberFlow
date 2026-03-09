@@ -112,7 +112,7 @@ namespace BarberFlow.API.Services
             profissional.Usuario.Ativo = false;
             profissional.Usuario.DataAtualizacao = DateTime.UtcNow;
 
-            await _profissionalRepository.Atualizar(profissional);
+            await _profissionalRepository.Deletar(profissional);
 
             return profissional;
         }
