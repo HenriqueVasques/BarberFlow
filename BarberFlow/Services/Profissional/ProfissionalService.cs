@@ -116,5 +116,15 @@ namespace BarberFlow.API.Services
 
             return profissional;
         }
+
+        public async Task<IEnumerable<Profissional>> ObterProfissionaisPorEmpresa(long empresaId)
+        {
+            if (await _empresaRepository.ObterPorId(empresaId) == null)
+            {
+                throw new Exception($"Empresa com id {empresaId} não encontrada.");
+            }
+
+            return await _profissionalRepository.ObterPorEmpresa(empresaId);
+        }
     }
 }

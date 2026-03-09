@@ -32,9 +32,13 @@ namespace BarberFlow.API.Data.Repositories
             await _appDbContext.SaveChangesAsync();
         }
 
-        public Task<IEnumerable<Profissional>> ObterPorEmpresa(long empresaId)
+        public async Task<IEnumerable<Profissional>> ObterPorEmpresa(long empresaId)
         {
-            throw new NotImplementedException();
+            return await _appDbContext.Profissionais
+                .Where(p => p.EmpresaId == empresaId && !p.IsDeleted && p.Ativo)
+                .Include(p => p.Usuario)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<Profissional?> ObterPorId(long id)

@@ -129,7 +129,37 @@ namespace BarberFlow.API.Controllers
             {
                 return BadRequest(new { error = ex.Message });
             }
+        }
 
+        [HttpGet]
+        public async Task<IActionResult> ObterProfissionaisPorEmpresa(long empresaId)
+        {
+            try
+            {
+                var profissionais = await _profissionalService.ObterProfissionaisPorEmpresa(empresaId);
+
+                var response = profissionais.Select(profissional => new ProfissionalResponseDto
+                {
+                    Nome = profissional.Usuario.Nome,
+                    Email = profissional.Usuario.Email,
+                    EmpresaId = profissional.EmpresaId,
+                    UsuarioId = profissional.UsuarioId,
+                    PercentualComissao = profissional.PercentualComissao,
+                    DataCriacao = profissional.DataCriacao,
+                    DataAtualizacao = profissional.DataAtualizacao,
+                    IsDeleted = profissional.IsDeleted,
+                    Ativo = profissional.Ativo
+                }).ToList();
+                return Ok(new 
+                {
+                    message = "Profissionais obtidos com sucesso!",
+                    dados = response
+                });
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
     }
 }
