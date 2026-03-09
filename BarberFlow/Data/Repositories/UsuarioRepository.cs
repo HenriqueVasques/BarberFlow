@@ -16,13 +16,14 @@ namespace BarberFlow.API.Data.Repositories
 
         public async Task Adicionar(Usuario usuario)
         {
-                await _appDbContext.Usuarios.AddAsync(usuario);
-                await _appDbContext.SaveChangesAsync();
+            await _appDbContext.Usuarios.AddAsync(usuario);
+            await _appDbContext.SaveChangesAsync();
         }
 
-        public Task AlterarSenha(long id, string senha)
+        public async Task AlterarSenha(Usuario usuario)
         {
-            throw new NotImplementedException();
+             _appDbContext.Usuarios.Update(usuario);
+            await _appDbContext.SaveChangesAsync();
         }
 
         public async Task Atualizar(Usuario usuario)

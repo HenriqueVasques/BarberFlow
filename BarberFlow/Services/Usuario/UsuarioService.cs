@@ -88,6 +88,21 @@ namespace BarberFlow.API.Services
             await _usuarioRepository.Deletar(usuario);
             return usuario;
         }
+
+        public async Task AlterarSenha(long id, UsuarioAlterarSenhaDto dto)
+        {
+            var usuario = await _usuarioRepository.ObterPorId(id);
+            if (usuario == null)
+            {
+                throw new Exception($"Usuário com id {id} não encontrada.");
+            }
+
+            string senhaHash = CriptografarSenha(dto.Senha);
+            usuario.SenhaHash = senhaHash;
+            usuario.DataAtualizacao = DateTime.UtcNow;
+
+            await _usuarioRepository.AlterarSenha(usuario);
+        }
         #endregion
     }
 }

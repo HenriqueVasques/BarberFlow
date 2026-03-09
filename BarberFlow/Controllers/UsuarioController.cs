@@ -128,7 +128,29 @@ namespace BarberFlow.API.Controllers
             {
                 return BadRequest(new { error = ex.Message });
             }
-        }   
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> AlterarSenha(long id, UsuarioAlterarSenhaDto dto)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(dto.Senha))
+                {
+                    return BadRequest("A nova senha é obrigatória.");
+                }
+               await _usuarioService.AlterarSenha(id, dto);
+
+                return StatusCode(200, new
+                {
+                    message = "Senha alterada com sucesso!",
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
         #endregion
     }
 }

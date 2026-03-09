@@ -10,6 +10,6 @@ namespace BarberFlow.API.Interfaces
         public Task Atualizar(Usuario usuario);
         public Task Deletar(Usuario usuario);
         public Task<bool> ExisteEmail(string email);
-        public Task AlterarSenha(long id, string senha);
+        public Task AlterarSenha(Usuario usuario);
     }
 }
