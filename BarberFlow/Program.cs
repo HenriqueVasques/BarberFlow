@@ -1,9 +1,11 @@
+using BarberFlow.API.Configuration;
 using BarberFlow.API.Data.Context;
 using BarberFlow.API.Data.Repositories;
 using BarberFlow.API.Interfaces;
 using BarberFlow.API.Services;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,15 +21,24 @@ builder.Services.AddScoped<IEmpresaRepository, EmpresaRepository>();
 builder.Services.AddScoped<IServicoRepository, ServicoRepository>();
 builder.Services.AddScoped<IProfissionalRepository, ProfissionalRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IBloqueioHorarioRepository, BloqueioHorarioRepository>();
+builder.Services.AddScoped<IAgendamentoRepository, AgendamentoRepository>();
 
 // Serviços (Lógica de Negócio)
 builder.Services.AddScoped<EmpresaService>();
 builder.Services.AddScoped<ServicoService>();
 builder.Services.AddScoped<ProfissionalService>();
 builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<BloqueioHorarioService>();
+builder.Services.AddScoped<AgendamentoService>();
 
 // 3. SERVIÇOS DO FRAMEWORK (ASP.NET)
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Isso força o JSON a interpretar qualquer data que chegue como UTC
+        options.JsonSerializerOptions.Converters.Add(new JsonDateTimeConverter());
+    });
 
 // Documentação (Swagger/OpenApi)
 builder.Services.AddOpenApi();
