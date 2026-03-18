@@ -21,6 +21,8 @@ namespace BarberFlow.API.Data.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             //Agendamento → Empresa
             modelBuilder.Entity<Agendamento>()
                 .HasOne(a => a.Empresa)
