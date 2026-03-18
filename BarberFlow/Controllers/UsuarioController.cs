@@ -130,7 +130,7 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPut("{id}/alterar-senha")]
         public async Task<IActionResult> AlterarSenha(long id, UsuarioAlterarSenhaDto dto)
         {
             try
