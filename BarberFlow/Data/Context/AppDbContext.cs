@@ -163,8 +163,6 @@ namespace BarberFlow.API.Data.Context
                 .HasIndex(hp => new { hp.ProfissionalId, hp.DiaSemana })
                 .IsUnique();
 
-            base.OnModelCreating(modelBuilder);
-
             // Filtros para ignorar inativos automaticamente
             modelBuilder.Entity<Servico>().HasQueryFilter(s => !s.IsDeleted);
             modelBuilder.Entity<Profissional>().HasQueryFilter(p => !p.IsDeleted);
@@ -176,6 +174,24 @@ namespace BarberFlow.API.Data.Context
             modelBuilder.Entity<Agendamento>().Property(a => a.PrecoNoMomento).HasPrecision(18, 2);
             modelBuilder.Entity<Profissional>().Property(p => p.PercentualComissao).HasPrecision(5, 2);
             modelBuilder.Entity<ProfissionalServico>().Property(p => p.PrecoPersonalizado).HasPrecision(18, 2);
+
+            // Configurações para garantir que os DateTime sejam tratados como UTC
+            // Varre todas as entidades do seu banco
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                // Busca propriedades que são DateTime ou DateTime? (nullable)
+                var properties = entityType.GetProperties()
+                    .Where(p => p.ClrType == typeof(DateTime) || p.ClrType == typeof(DateTime?));
+
+                foreach (var property in properties)
+                {
+                    property.SetValueConverter(new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime, DateTime>(
+                        v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(), // Ao salvar no Banco
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Utc)            // Ao ler do Banco
+                    ));
+                }
+            }
+
         }
     }
 }
