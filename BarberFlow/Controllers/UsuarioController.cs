@@ -154,6 +154,72 @@ namespace BarberFlow.API.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+
+        [HttpGet("{id}/Usuario-Por-Id")]
+        public async Task<IActionResult> ObterUsuarioPorId(long id)
+        {
+            try
+            {
+                var usuario = await _usuarioService.ObterUsuarioPorId(id);
+                if (usuario == null)
+                {
+                    return NotFound($"Usuário com id {id} não encontrado.");
+                }
+                var response = new UsuarioResponseDto
+                {
+                    Id = usuario.Id,
+                    Nome = usuario.Nome,
+                    Email = usuario.Email,
+                    EmpresaId = usuario.EmpresaId,
+                    Perfil = usuario.Perfil,
+                    DataCriacao = usuario.DataCriacao,
+                    DataAtualizacao = usuario.DataAtualizacao,
+                    IsDeleted = usuario.IsDeleted
+                };
+                return StatusCode(200, new
+                {
+                    message = "Usuário encontrado com sucesso!",
+                    dados = response
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("{empresaId}Usuarios-Por-Empresa")]
+        public async Task<IActionResult> ObterUsuarioPorEmpresa(long empresaId)
+        {
+            try 
+            {
+                var usuarios = await _usuarioService.ObterUsuariosPorEmpresa(empresaId);
+                if (usuarios == null || !usuarios.Any())
+                {
+                    return NotFound($"Nenhum usuário encontrado para a empresa com id {empresaId}.");
+                }
+                var response = usuarios.Select(usuario => new UsuarioResponseDto
+                {
+                    Id = usuario.Id,
+                    Nome = usuario.Nome,
+                    Email = usuario.Email,
+                    EmpresaId = usuario.EmpresaId,
+                    Perfil = usuario.Perfil,
+                    DataCriacao = usuario.DataCriacao,
+                    DataAtualizacao = usuario.DataAtualizacao,
+                    IsDeleted = usuario.IsDeleted
+                }).ToList();
+                return StatusCode(200, new
+                {
+                    message = "Usuários encontrados com sucesso!",
+                    dados = response
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
         #endregion
     }
 }

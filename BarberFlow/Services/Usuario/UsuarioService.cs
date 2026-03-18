@@ -103,6 +103,20 @@ namespace BarberFlow.API.Services
 
             await _usuarioRepository.AlterarSenha(usuario);
         }
+
+        public async Task<Usuario?> ObterUsuarioPorId(long id)
+        {
+            return await _usuarioRepository.ObterPorId(id) ?? throw new Exception("A empresa não existe.");
+        }
+
+        public async Task<IEnumerable<Usuario>> ObterUsuariosPorEmpresa(long empresaId)
+        {
+            if (await _empresaRepository.ObterPorId(empresaId) == null) 
+            {
+                throw new Exception("A empresa não existe.");
+            }
+            return await _usuarioRepository.ObterPorEmpresa(empresaId);
+        }
         #endregion
     }
 }
