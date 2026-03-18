@@ -1,6 +1,5 @@
 ﻿
 using BarberFlow.API.DTOs.Empresa;
-
 using BarberFlow.API.Models;
 using BarberFlow.API.Services;
 using Microsoft.AspNetCore.Http;
