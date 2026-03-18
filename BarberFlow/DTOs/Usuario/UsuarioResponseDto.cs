@@ -4,6 +4,7 @@ namespace BarberFlow.API.DTOs.Usuario
 {
     public class UsuarioResponseDto
     {
+        public long Id { get; set; }
         public string Nome { get; set; }
         public string Email { get; set; }
         public long EmpresaId { get; set; }

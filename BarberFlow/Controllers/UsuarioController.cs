@@ -38,6 +38,7 @@ namespace BarberFlow.API.Controllers
 
                 var response = new UsuarioResponseDto
                 {
+                    Id = usuario.Id,
                     Nome = usuario.Nome,
                     Email = usuario.Email,
                     EmpresaId = usuario.EmpresaId,
@@ -59,7 +60,7 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<IActionResult> AtualizarUsuario(long id, UsuarioUpdateDto dto)
         {
             try
@@ -75,6 +76,7 @@ namespace BarberFlow.API.Controllers
                 }
                 var response = new UsuarioResponseDto
                 {
+                    Id = usuario.Id,
                     Nome = usuario.Nome,
                     Email = usuario.Email,
                     EmpresaId = usuario.EmpresaId,
@@ -108,6 +110,7 @@ namespace BarberFlow.API.Controllers
 
                 var response = new UsuarioResponseDto
                 {
+                    Id = usuario.Id,
                     Nome = usuario.Nome,
                     Email = usuario.Email,
                     EmpresaId = usuario.EmpresaId,

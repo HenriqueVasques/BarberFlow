@@ -34,7 +34,9 @@ namespace BarberFlow.API.Controllers
 
                 var response = new ProfissionalResponseDto
                 {
+                    Id = profissional.Id,
                     Nome = profissional.Usuario.Nome,
+                    NomeEmpresa = profissional.Empresa.Nome,
                     Email = profissional.Usuario.Email,
                     EmpresaId = profissional.EmpresaId,
                     UsuarioId = profissional.UsuarioId,
@@ -73,7 +75,9 @@ namespace BarberFlow.API.Controllers
                 }
                 var response = new ProfissionalResponseDto
                 {
+                    Id = profissional.Id,
                     Nome = profissional.Usuario.Nome,
+                    NomeEmpresa = profissional.Empresa.Nome,
                     Email = profissional.Usuario.Email,
                     EmpresaId = profissional.EmpresaId,
                     UsuarioId = profissional.UsuarioId,
@@ -108,7 +112,9 @@ namespace BarberFlow.API.Controllers
 
                 var response = new ProfissionalResponseDto
                 {
+                    Id = profissional.Id,
                     Nome = profissional.Usuario.Nome,
+                    NomeEmpresa = profissional.Empresa.Nome,
                     Email = profissional.Usuario.Email,
                     EmpresaId = profissional.EmpresaId,
                     UsuarioId = profissional.UsuarioId,
@@ -140,7 +146,9 @@ namespace BarberFlow.API.Controllers
 
                 var response = profissionais.Select(profissional => new ProfissionalResponseDto
                 {
+                    Id = profissional.Id,
                     Nome = profissional.Usuario.Nome,
+                    NomeEmpresa = profissional.Empresa.Nome,
                     Email = profissional.Usuario.Email,
                     EmpresaId = profissional.EmpresaId,
                     UsuarioId = profissional.UsuarioId,
