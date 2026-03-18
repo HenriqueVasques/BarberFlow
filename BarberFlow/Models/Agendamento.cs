@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using BarberFlow.API.Enums;
+using System.Numerics;
 
 namespace BarberFlow.API.Models
 {
@@ -11,8 +12,8 @@ namespace BarberFlow.API.Models
         public long ServicoId { get; set; }
         public DateTime DataHoraInicio { get; set; }
         public DateTime DataHoraFim { get; set; }
-        public int Status { get; set; }
-        public int FormaPagamento { get; set; }
+        public StatusAgendamento Status { get; set; } = StatusAgendamento.Pendente;
+        public int ?FormaPagamento { get; set; }
         public decimal PrecoNoMomento { get; set; }
         public DateTime DataCriacao { get; set; }
         public DateTime DataAtualizacao { get; set; }
