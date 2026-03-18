@@ -6,4 +6,11 @@
         Profissional = 2,
         Cliente = 3
     }
+    public enum StatusAgendamento
+    {
+        Pendente = 1,
+        Confirmado = 2,
+        Concluido = 3,
+        Cancelado = 4
+    }
 }
