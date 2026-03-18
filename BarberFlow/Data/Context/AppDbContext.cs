@@ -1,17 +1,17 @@
 ﻿using BarberFlow.API.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BarberFlow.API.Data.Context
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions dbContextOptions ) : base(dbContextOptions) { }
+        public AppDbContext(DbContextOptions dbContextOptions) : base(dbContextOptions) { }
 
         public DbSet<Agendamento> Agendamentos { get; set; }
         public DbSet<BloqueioHorario> Bloqueio_Horarios { get; set; }
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Empresa> Empresas { get; set; }
-        public DbSet<EmpresaServico> EmpresaServico { get; set; }
         public DbSet<HorarioFuncionamentoEmpresa> HorarioFuncionamentoEmpresas { get; set; }
         public DbSet<HorarioProfissional> HorarioProfissionais { get; set; }
         public DbSet<Profissional> Profissionais { get; set; }
@@ -23,175 +23,154 @@ namespace BarberFlow.API.Data.Context
         {
             base.OnModelCreating(modelBuilder);
 
-            //Agendamento → Empresa
+            // --- AGENDAMENTO ---
             modelBuilder.Entity<Agendamento>()
                 .HasOne(a => a.Empresa)
                 .WithMany()
                 .HasForeignKey(a => a.EmpresaId);
 
-            //Agendamento → Cliente
             modelBuilder.Entity<Agendamento>()
                 .HasOne(a => a.Cliente)
                 .WithMany(c => c.Agendamentos)
                 .HasForeignKey(a => a.ClienteId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //Agendamento → Profissional
             modelBuilder.Entity<Agendamento>()
                 .HasOne(a => a.Profissional)
                 .WithMany(p => p.Agendamentos)
                 .HasForeignKey(a => a.ProfissionalId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //Agendamento → Servico
             modelBuilder.Entity<Agendamento>()
                 .HasOne(a => a.Servico)
                 .WithMany()
                 .HasForeignKey(a => a.ServicoId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // BloqueioHorario → Empresa
+            // --- BLOQUEIO HORÁRIO ---
             modelBuilder.Entity<BloqueioHorario>()
                 .HasOne(bh => bh.Empresa)
                 .WithMany()
                 .HasForeignKey(bh => bh.EmpresaId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // BloqueioHorario → Profissional
             modelBuilder.Entity<BloqueioHorario>()
                 .HasOne(bh => bh.Profissional)
                 .WithMany()
                 .HasForeignKey(bh => bh.ProfissionalId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Cliente → Empresa
+            // --- CLIENTE ---
             modelBuilder.Entity<Cliente>()
                 .HasOne(c => c.Empresa)
                 .WithMany()
                 .HasForeignKey(c => c.EmpresaId);
 
-            // EmpresaServico → Empresa
-            modelBuilder.Entity<EmpresaServico>()
-                .HasOne(es => es.Empresa)
+            modelBuilder.Entity<Cliente>()
+                .HasOne(c => c.Usuario)
                 .WithMany()
-                .HasForeignKey(es => es.EmpresaId)
+                .HasForeignKey(c => c.UsuarioId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // EmpresaServico → Servico
-            modelBuilder.Entity<EmpresaServico>()
-                .HasOne(es => es.Servico)
-                .WithMany()
-                .HasForeignKey(es => es.ServicoId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // HorarioFuncionamentoEmpresa → Empresa
+            // --- HORÁRIOS ---
             modelBuilder.Entity<HorarioFuncionamentoEmpresa>()
                 .HasOne(hfe => hfe.Empresa)
                 .WithMany()
                 .HasForeignKey(hfe => hfe.EmpresaId);
 
-            // HorarioProfissional → Empresa
             modelBuilder.Entity<HorarioProfissional>()
                 .HasOne(hp => hp.Empresa)
                 .WithMany()
                 .HasForeignKey(hp => hp.EmpresaId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // HorarioProfissional → Profissional
             modelBuilder.Entity<HorarioProfissional>()
                 .HasOne(hp => hp.Profissional)
                 .WithMany()
                 .HasForeignKey(hp => hp.ProfissionalId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Profissional → Empresa
+            // --- PROFISSIONAL ---
             modelBuilder.Entity<Profissional>()
                 .HasOne(p => p.Empresa)
                 .WithMany()
                 .HasForeignKey(p => p.EmpresaId);
 
-            // Profissional → Usuario
             modelBuilder.Entity<Profissional>()
                 .HasOne(p => p.Usuario)
                 .WithMany()
                 .HasForeignKey(p => p.UsuarioId);
 
-            // ProfissionalServico → Profissional
+            // --- PROFISSIONAL SERVIÇO (M:N) ---
             modelBuilder.Entity<ProfissionalServico>()
-            .HasOne(ps => ps.Profissional)
-            .WithMany(p => p.ProfissionalServicos) 
-            .HasForeignKey(ps => ps.ProfissionalId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-            // ProfissionalServico → EmpresaServico
-            modelBuilder.Entity<ProfissionalServico>()
-                .HasOne(ps => ps.EmpresaServico)
-                .WithMany(es => es.ProfissionaisServicos)
-                .HasForeignKey(ps => ps.EmpresaServicoId)
+                .HasOne(ps => ps.Profissional)
+                .WithMany(p => p.ProfissionalServicos)
+                .HasForeignKey(ps => ps.ProfissionalId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Servico → Empresa
+            modelBuilder.Entity<ProfissionalServico>()
+                .HasOne(ps => ps.Servico)
+                .WithMany()
+                .HasForeignKey(ps => ps.ServicoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // --- SERVICO ---
             modelBuilder.Entity<Servico>()
                 .HasOne(s => s.Empresa)
                 .WithMany(e => e.Servicos)
                 .HasForeignKey(s => s.EmpresaId);
 
-            // Usuario → Empresa
+            // --- USUARIO ---
             modelBuilder.Entity<Usuario>()
                 .HasOne(u => u.Empresa)
                 .WithMany(e => e.Usuarios)
                 .HasForeignKey(u => u.EmpresaId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Índice único para evitar duplicidade
+            // --- ÍNDICES ÚNICOS ---
+
+            // Impede duplicar o mesmo serviço para o mesmo profissional
             modelBuilder.Entity<ProfissionalServico>()
-                .HasIndex(ps => new { ps.ProfissionalId, ps.EmpresaServicoId })
+                .HasIndex(ps => new { ps.ProfissionalId, ps.ServicoId })
                 .IsUnique();
 
-            modelBuilder.Entity<EmpresaServico>()
-                .HasIndex(es => new { es.EmpresaId, es.ServicoId })
-                .IsUnique();
-
-            // 2. Travas de segurança para Dias da Semana (Índices Únicos)
-            // Impede a empresa de ter dois "domingos", por exemplo.
+            // Impede a empresa de ter dois horários para o mesmo dia
             modelBuilder.Entity<HorarioFuncionamentoEmpresa>()
                 .HasIndex(h => new { h.EmpresaId, h.DiaSemana })
                 .IsUnique();
 
-            // Impede o profissional de ter duas "terças-feiras" cadastradas.
+            // Impede o profissional de ter dois turnos no mesmo dia
             modelBuilder.Entity<HorarioProfissional>()
                 .HasIndex(hp => new { hp.ProfissionalId, hp.DiaSemana })
                 .IsUnique();
 
-            // Filtros para ignorar inativos automaticamente
+            // --- FILTROS GLOBAIS (SOFT DELETE) ---
             modelBuilder.Entity<Servico>().HasQueryFilter(s => !s.IsDeleted);
             modelBuilder.Entity<Profissional>().HasQueryFilter(p => !p.IsDeleted);
             modelBuilder.Entity<Cliente>().HasQueryFilter(c => !c.IsDeleted);
             modelBuilder.Entity<Usuario>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<BloqueioHorario>().HasQueryFilter(bh => !bh.IsDeleted);
 
-            // Configurações de precisão para campos decimais
+            // --- PRECISÃO DECIMAL ---
             modelBuilder.Entity<Servico>().Property(s => s.PrecoBase).HasPrecision(18, 2);
             modelBuilder.Entity<Agendamento>().Property(a => a.PrecoNoMomento).HasPrecision(18, 2);
             modelBuilder.Entity<Profissional>().Property(p => p.PercentualComissao).HasPrecision(5, 2);
             modelBuilder.Entity<ProfissionalServico>().Property(p => p.PrecoPersonalizado).HasPrecision(18, 2);
 
-            // Configurações para garantir que os DateTime sejam tratados como UTC
-            // Varre todas as entidades do seu banco
+            // --- CONVERSOR UTC (POSTGRESQL COMPLIANCE) ---
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
-                // Busca propriedades que são DateTime ou DateTime? (nullable)
                 var properties = entityType.GetProperties()
                     .Where(p => p.ClrType == typeof(DateTime) || p.ClrType == typeof(DateTime?));
 
                 foreach (var property in properties)
                 {
-                    property.SetValueConverter(new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime, DateTime>(
-                        v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(), // Ao salvar no Banco
-                        v => DateTime.SpecifyKind(v, DateTimeKind.Utc)            // Ao ler do Banco
+                    property.SetValueConverter(new ValueConverter<DateTime, DateTime>(
+                        v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
                     ));
                 }
             }
-
         }
     }
 }
