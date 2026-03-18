@@ -25,6 +25,7 @@
                 PrecoBase = precoBase;
                 DataCriacao = DateTime.UtcNow;
                 DataAtualizacao = DateTime.UtcNow;
+                Ativo = true;
             }
         }
     }

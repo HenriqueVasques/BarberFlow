@@ -6,6 +6,7 @@ namespace BarberFlow.API.Models
     {
         public long Id { get; set; }
         public long EmpresaId { get; set; }
+        public long UsuarioId { get; set; }
         public string Nome { get; set; }
         public string Telefone { get; set; }
         public string Whatsapp { get; set; }
@@ -16,6 +17,7 @@ namespace BarberFlow.API.Models
 
         //navegation properties
         public Empresa Empresa { get; set; }
+        public Usuario Usuario { get; set; }
         public ICollection<Agendamento> Agendamentos { get; set; }
 
         //segurança e privacidade
