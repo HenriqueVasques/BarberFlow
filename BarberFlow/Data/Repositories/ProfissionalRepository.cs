@@ -37,13 +37,16 @@ namespace BarberFlow.API.Data.Repositories
             return await _appDbContext.Profissionais
                 .Where(p => p.EmpresaId == empresaId && !p.IsDeleted && p.Ativo)
                 .Include(p => p.Usuario)
+                .Include(p => p.Empresa)
                 .AsNoTracking()
                 .ToListAsync();
         }
 
         public async Task<Profissional?> ObterPorId(long id)
         {
-            return await _appDbContext.Profissionais.Include(p => p.Usuario)
+            return await _appDbContext.Profissionais
+                .Include(p => p.Usuario)
+                .Include(p => p.Empresa)
                 .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted && p.Ativo);
         }
     }

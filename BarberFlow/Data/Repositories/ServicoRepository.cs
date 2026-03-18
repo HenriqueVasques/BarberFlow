@@ -35,6 +35,7 @@ using BarberFlow.API.Interfaces;
             {
                 return await _appDbContext.Servicos
                 .Where(s => s.EmpresaId == empresaId && !s.IsDeleted && s.Ativo)
+                .Include(s => s.Empresa)
                 .AsNoTracking()
                 .ToListAsync();
             }
@@ -50,6 +51,8 @@ using BarberFlow.API.Interfaces;
         public async Task<Servico?> ObterPorId(long id)
             {
                 return await _appDbContext.Servicos
+                .Include(s => s.Empresa)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted);
             }
         }
