@@ -87,8 +87,8 @@ namespace BarberFlow.API.Services
                 }
             }
 
-            profissional.Usuario.Nome = dto.Nome;
-            profissional.Usuario.Email = dto.Email;
+            if (dto.Nome != null || dto.Nome == string.Empty) profissional.Usuario.Nome = dto.Nome;
+            if (dto.Email == string.Empty || dto.Email != null) profissional.Usuario.Email = dto.Email;
             profissional.Usuario.DataAtualizacao = DateTime.UtcNow;
             profissional.PercentualComissao = dto.PercentualComissao;
             profissional.DataAtualizacao = DateTime.UtcNow;
