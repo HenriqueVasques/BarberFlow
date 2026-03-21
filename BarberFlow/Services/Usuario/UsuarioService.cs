@@ -43,7 +43,7 @@ namespace BarberFlow.API.Services
 
             string senhaHash = CriptografarSenha(dto.Senha);
 
-            var usuario = new Usuario(dto.Nome, dto.Email, senhaHash, dto.EmpresaId, PerfilUsuario.Administrador);
+            var usuario = new Usuario(dto.Nome, dto.Email, senhaHash, dto.EmpresaId, PerfilUsuario.Cliente);
             await _usuarioRepository.Adicionar(usuario);
             return usuario;
         }

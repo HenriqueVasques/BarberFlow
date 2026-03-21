@@ -120,6 +120,8 @@ namespace BarberFlow.API.Controllers
         #endregion
 
         #region Métodos Auxiliares (Private)
+
+        /// Centraliza o mapeamento para evitar repetição de código (DRY - Don't Repeat Yourself)
         private static AgendamentoResponseDto MapearParaResponseDto(Agendamento agendamento)
         {
             return new AgendamentoResponseDto

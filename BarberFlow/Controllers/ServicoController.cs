@@ -27,7 +27,18 @@ namespace BarberFlow.API.Controllers
                 }
                 var servico = await _servicoService.CriarServico(dto);
                 
-                var response = MapearParaResponseDto(servico);
+                var response = new ServicoResponseDto 
+                {
+                    Id = servico.Id,
+                    Nome = servico.Nome,
+                    NomeEmpresa = servico.Empresa.Nome,
+                    DuracaoMinutos = servico.DuracaoMinutos,
+                    PrecoBase = servico.PrecoBase,
+                    DataCriacao = servico.DataCriacao,
+                    DataAtualizacao = servico.DataAtualizacao,
+                    IsDeleted = servico.IsDeleted,
+                    Ativo = servico.Ativo
+                };
                 return StatusCode(201, new 
                 {
                     message = "Serviço criado com sucesso!",
@@ -57,7 +68,18 @@ namespace BarberFlow.API.Controllers
                     return NotFound(new { message = $"Serviço com id '{id}' não encontrado." });
                 }
 
-                var response = MapearParaResponseDto(servico);
+                var response = new ServicoResponseDto 
+                {
+                    Id = servico.Id,
+                    Nome = servico.Nome,
+                    NomeEmpresa = servico.Empresa.Nome,
+                    DuracaoMinutos = servico.DuracaoMinutos,
+                    PrecoBase = servico.PrecoBase,
+                    DataCriacao = servico.DataCriacao,
+                    DataAtualizacao = servico.DataAtualizacao,
+                    IsDeleted = servico.IsDeleted,
+                    Ativo = servico.Ativo
+                };
                 return Ok(new 
                 {
                     message = "Serviço atualizado com sucesso!",
@@ -82,7 +104,18 @@ namespace BarberFlow.API.Controllers
                     return NotFound(new { message = $"Serviço com id '{id}' não encontrado." });
                 }
 
-                var response = MapearParaResponseDto(servico);
+                var response = new ServicoResponseDto 
+                {
+                    Id = servico.Id,
+                    Nome = servico.Nome,
+                    NomeEmpresa = servico.Empresa.Nome,
+                    DuracaoMinutos = servico.DuracaoMinutos,
+                    PrecoBase = servico.PrecoBase,
+                    DataCriacao = servico.DataCriacao,
+                    DataAtualizacao = servico.DataAtualizacao,
+                    IsDeleted = servico.IsDeleted,
+                    Ativo = servico.Ativo
+                };
                 return Ok(new 
                 {
                     message = "Serviço deletado com sucesso!",
@@ -121,22 +154,6 @@ namespace BarberFlow.API.Controllers
             catch(Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
-            };
-        }
-
-        private static ServicoResponseDto MapearParaResponseDto(Servico servico)
-        {
-            return new ServicoResponseDto
-            {
-                Id = servico.Id,
-                Nome = servico.Nome,
-                NomeEmpresa = servico.Empresa?.Nome ?? "N/A",
-                DuracaoMinutos = servico.DuracaoMinutos,
-                PrecoBase = servico.PrecoBase,
-                DataCriacao = servico.DataCriacao,
-                DataAtualizacao = servico.DataAtualizacao,
-                IsDeleted = servico.IsDeleted,
-                Ativo = servico.Ativo
             };
         }
     }
