@@ -5,7 +5,6 @@ using BarberFlow.API.Interfaces;
 using BarberFlow.API.Services;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +22,7 @@ builder.Services.AddScoped<IProfissionalRepository, ProfissionalRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IBloqueioHorarioRepository, BloqueioHorarioRepository>();
 builder.Services.AddScoped<IAgendamentoRepository, AgendamentoRepository>();
+builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 
 // Serviços (Lógica de Negócio)
 builder.Services.AddScoped<EmpresaService>();
@@ -31,6 +31,7 @@ builder.Services.AddScoped<ProfissionalService>();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<BloqueioHorarioService>();
 builder.Services.AddScoped<AgendamentoService>();
+builder.Services.AddScoped<ClienteService>();
 
 // 3. SERVIÇOS DO FRAMEWORK (ASP.NET)
 builder.Services.AddControllers()
