@@ -98,6 +98,25 @@ namespace BarberFlow.API.Services
             await _repositoryBloqueioHorario.Deletar(bloqueio);
             return bloqueio;
         }
+
+        public async Task<IEnumerable<BloqueioHorario>> ObterPorEmpresaId(long empresaId)
+        {
+            var bloqueio = await _repositoryBloqueioHorario.ObterPorEmpresaId(empresaId);
+            if (bloqueio == null)
+            {
+                throw new Exception($"Empresa com id {empresaId} não tem bloqueios de horario.");
+            }
+            return bloqueio;
+        }
+        public async Task<IEnumerable<BloqueioHorario>> ObterPorProfissionalId(long profissionalId)
+        {
+            var bloqueio = await _repositoryBloqueioHorario.ObterPorProfissionalId(profissionalId);
+            if (bloqueio == null)
+            {
+                throw new Exception($"Profissional com id {profissionalId} não possui bloqueios de horario.");
+            }
+            return bloqueio;
+        }
         #endregion
     }
 }

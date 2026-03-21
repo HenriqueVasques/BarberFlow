@@ -35,8 +35,9 @@ namespace BarberFlow.API.Data.Repositories
         public async Task<IEnumerable<BloqueioHorario>> ObterPorEmpresaId(long empresaId)
         {
             return await _appDbContext.Bloqueio_Horarios
-                .Where(b=> b.EmpresaId == empresaId)
-                .Include(b => b.Profissional)
+                .Where(b=> b.EmpresaId == empresaId && !b.IsDeleted)
+                .Include(b => b.Empresa)
+                .Include(b => b.Profissional).ThenInclude(b => b.Usuario)
                 .OrderBy(b => b.DataHoraInicio)
                 .AsNoTracking()
                 .ToListAsync();
@@ -53,8 +54,9 @@ namespace BarberFlow.API.Data.Repositories
         public async Task<IEnumerable<BloqueioHorario>> ObterPorProfissionalId(long profissionalId)
         {
             return await _appDbContext.Bloqueio_Horarios
-                .Where(b => b.ProfissionalId == profissionalId)
-                .Include(b => b.Profissional)
+                .Where(b => b.ProfissionalId == profissionalId && !b.IsDeleted)
+                .Include(b => b.Empresa)
+                .Include(b => b.Profissional).ThenInclude(b => b.Usuario)
                 .OrderBy(b => b.DataHoraInicio)
                 .AsNoTracking()
                 .ToListAsync();
