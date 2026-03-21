@@ -1,5 +1,5 @@
-﻿using BarberFlow.API.Data.Repositories;
-using BarberFlow.API.DTOs.Agendamento;
+﻿using BarberFlow.API.DTOs.Agendamento;
+using BarberFlow.API.Enums;
 using BarberFlow.API.Interfaces;
 using BarberFlow.API.Models;
 
@@ -10,36 +10,33 @@ namespace BarberFlow.API.Services
         private readonly IAgendamentoRepository _agendamentoRepository;
         private readonly IServicoRepository _servicoRepository;
         private readonly IProfissionalRepository _profissionalRepository;
-        private readonly IUsuarioRepository _usuarioRepository;
+        private readonly IClienteRepository _clienteRepository;
 
-
-        public AgendamentoService(IAgendamentoRepository agendamentoRepository, IServicoRepository servicoRepository, IUsuarioRepository usuarioRepository, IProfissionalRepository profissionalRepository)
+        public AgendamentoService( IAgendamentoRepository agendamentoRepository, IServicoRepository servicoRepository, IProfissionalRepository profissionalRepository, IClienteRepository clienteRepository)
         {
             _agendamentoRepository = agendamentoRepository;
             _servicoRepository = servicoRepository;
+            _profissionalRepository = profissionalRepository;
+            _clienteRepository = clienteRepository;
         }
 
         public async Task<Agendamento> AdicionarAgendamento(AgendamentoCreateDto dto)
         {
-            var servico = await _servicoRepository.ObterPorId(dto.ServicoId);
-            if (servico == null)
-            {
-                throw new Exception($"Serviço com id {dto.ServicoId} não encontrado.");
-            }
+            var servico = await _servicoRepository.ObterPorId(dto.ServicoId)
+                ?? throw new Exception($"Serviço ID {dto.ServicoId} não encontrado.");
 
-            var cliente = await _usuarioRepository.ObterPorId(dto.ClienteId);
-            if (cliente == null) throw new Exception($"Cliente com ID {dto.ClienteId} não encontrado.");
+            var cliente = await _clienteRepository.ObterPorId(dto.ClienteId)
+                ?? throw new Exception($"Cliente ID {dto.ClienteId} não encontrado.");
 
-            // 3. Validar Profissional
-            var profissional = await _profissionalRepository.ObterPorId(dto.ProfissionalId);
-            if (profissional == null) throw new Exception("Profissional não encontrado.");
+            var profissional = await _profissionalRepository.ObterPorId(dto.ProfissionalId)
+                ?? throw new Exception("Profissional não encontrado.");
 
             var dataFimCalculada = dto.DataHoraInicio.AddMinutes(servico.DuracaoMinutos);
 
-            var conflito = await _agendamentoRepository.EstaOcupado(dto.ProfissionalId, dto.DataHoraInicio, dataFimCalculada);
-            if (conflito)
+            var ocupado = await _agendamentoRepository.EstaOcupado(dto.ProfissionalId, dto.DataHoraInicio, dataFimCalculada);
+            if (ocupado)
             {
-                throw new Exception("O profissional não está disponível nesse horário.");
+                throw new Exception("O profissional já possui um agendamento ou bloqueio neste horário.");
             }
 
             var agendamento = new Agendamento
@@ -51,41 +48,43 @@ namespace BarberFlow.API.Services
                 PrecoNoMomento = servico.PrecoBase,
                 DataHoraInicio = dto.DataHoraInicio,
                 DataHoraFim = dataFimCalculada,
-                Status = Enums.StatusAgendamento.Pendente,
+                Status = StatusAgendamento.Pendente,
                 DataCriacao = DateTime.UtcNow,
                 DataAtualizacao = DateTime.UtcNow
             };
 
             await _agendamentoRepository.Adicionar(agendamento);
+
+            return await _agendamentoRepository.ObterPorId(agendamento.Id)
+                ?? throw new Exception("Erro crítico ao recuperar o agendamento após a criação.");
+        }
+
+        public async Task<Agendamento> Cancelar(long id)
+        {
+            var agendamento = await _agendamentoRepository.ObterPorId(id)
+                ?? throw new Exception($"Agendamento ID {id} não encontrado.");
+
+            if (agendamento.Status == StatusAgendamento.Cancelado || agendamento.Status == StatusAgendamento.Finalizado)
+            {
+                throw new Exception("Não é possível cancelar um agendamento que já foi finalizado ou cancelado.");
+            }
+
+            agendamento.Status = StatusAgendamento.Cancelado;
+            agendamento.DataAtualizacao = DateTime.UtcNow;
+
+            await _agendamentoRepository.Atualizar(agendamento);
             return agendamento;
         }
 
-        public async Task Cancelar(long id)
+        public async Task<List<Agendamento>> ObterAgendaPorPeriodo(long profissionalId, long empresaId, DateTime inicio, DateTime fim, List<StatusAgendamento> statusFiltro)
         {
-            var agendamento = await _agendamentoRepository.ObterPorId(id);
-            if (agendamento == null)
-            {
-                throw new Exception($"Agendamento com id {id} não encontrado.");
-            }
-
-            if (agendamento.Status == Enums.StatusAgendamento.Cancelado || agendamento.Status == Enums.StatusAgendamento.Concluido)
-            {
-                throw new Exception("Não é possível alterar o status de um agendamento cancelado ou finalizado.");
-            }
-            agendamento.Status = Enums.StatusAgendamento.Cancelado;
-            agendamento.DataAtualizacao = DateTime.UtcNow;
-            await _agendamentoRepository.Atualizar(agendamento);
+            return await _agendamentoRepository.ObterAgendaPorPeriodo(profissionalId, empresaId, inicio, fim, statusFiltro);
         }
 
-        public async Task<List<Agendamento>> ObterAgendaProfissionalPorData(long profissionalId, long empresaId, DateTime data)
+        public async Task<Agendamento> ObterPorId(long id)
         {
-            var agenda = await _agendamentoRepository.ObterAgendaProfissionalPorData(profissionalId, empresaId, data);
-            if (agenda == null || !agenda.Any())
-            {
-                throw new Exception($"Nenhum agendamento encontrado para o profissional {profissionalId} na data {data.ToShortDateString()}.");
-            }
-            
-            return agenda;
+            return await _agendamentoRepository.ObterPorId(id)
+                ?? throw new Exception($"Agendamento ID {id} não encontrado.");
         }
     }
 }
