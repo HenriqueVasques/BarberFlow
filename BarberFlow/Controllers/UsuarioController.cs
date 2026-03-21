@@ -1,4 +1,5 @@
 ﻿using BarberFlow.API.DTOs.Usuario;
+using BarberFlow.API.Models;
 using BarberFlow.API.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,18 +37,7 @@ namespace BarberFlow.API.Controllers
                     return BadRequest("Não foi possível criar o usuário.");
                 }
 
-                var response = new UsuarioResponseDto
-                {
-                    Id = usuario.Id,
-                    Nome = usuario.Nome,
-                    Email = usuario.Email,
-                    EmpresaId = usuario.EmpresaId,
-                    Perfil = usuario.Perfil,
-                    DataCriacao = usuario.DataCriacao,
-                    DataAtualizacao = usuario.DataAtualizacao,
-                    IsDeleted = usuario.IsDeleted
-                };
-
+                var response = MapearParaResponseDto(usuario);
                 return StatusCode(201, new
                 {
                     message = "Usuário criado com sucesso!",
@@ -74,17 +64,7 @@ namespace BarberFlow.API.Controllers
                 {
                     return NotFound($"Usuário com id {id} não encontrado.");
                 }
-                var response = new UsuarioResponseDto
-                {
-                    Id = usuario.Id,
-                    Nome = usuario.Nome,
-                    Email = usuario.Email,
-                    EmpresaId = usuario.EmpresaId,
-                    Perfil = usuario.Perfil,
-                    DataCriacao = usuario.DataCriacao,
-                    DataAtualizacao = usuario.DataAtualizacao,
-                    IsDeleted = usuario.IsDeleted
-                };
+                var response = MapearParaResponseDto(usuario);
                 return StatusCode(201, new
                 {
                     message = "Usuário atualizado com sucesso!",
@@ -108,18 +88,7 @@ namespace BarberFlow.API.Controllers
                     return NotFound($"Usuário com id {id} não encontrado.");
                 }
 
-                var response = new UsuarioResponseDto
-                {
-                    Id = usuario.Id,
-                    Nome = usuario.Nome,
-                    Email = usuario.Email,
-                    EmpresaId = usuario.EmpresaId,
-                    Perfil = usuario.Perfil,
-                    DataCriacao = usuario.DataCriacao,
-                    DataAtualizacao = usuario.DataAtualizacao,
-                    IsDeleted = usuario.IsDeleted
-                };
-
+                var response = MapearParaResponseDto(usuario);
                 return StatusCode(201, new
                 {
                     message = "Empresa encontrada com sucesso!",
@@ -165,17 +134,7 @@ namespace BarberFlow.API.Controllers
                 {
                     return NotFound($"Usuário com id {id} não encontrado.");
                 }
-                var response = new UsuarioResponseDto
-                {
-                    Id = usuario.Id,
-                    Nome = usuario.Nome,
-                    Email = usuario.Email,
-                    EmpresaId = usuario.EmpresaId,
-                    Perfil = usuario.Perfil,
-                    DataCriacao = usuario.DataCriacao,
-                    DataAtualizacao = usuario.DataAtualizacao,
-                    IsDeleted = usuario.IsDeleted
-                };
+                var response = MapearParaResponseDto(usuario);
                 return StatusCode(200, new
                 {
                     message = "Usuário encontrado com sucesso!",
@@ -219,6 +178,23 @@ namespace BarberFlow.API.Controllers
             {
                 return BadRequest(new { error = ex.Message });
             }
+        }
+        #endregion
+
+        #region private methods
+        private UsuarioResponseDto MapearParaResponseDto(Usuario usuario)
+        {
+            return new UsuarioResponseDto
+            {
+                Id = usuario.Id,
+                Nome = usuario.Nome,
+                Email = usuario.Email,
+                EmpresaId = usuario.EmpresaId,
+                Perfil = usuario.Perfil,
+                DataCriacao = usuario.DataCriacao,
+                DataAtualizacao = usuario.DataAtualizacao,
+                IsDeleted = usuario.IsDeleted
+            };
         }
         #endregion
     }

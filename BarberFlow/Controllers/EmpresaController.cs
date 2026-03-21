@@ -34,17 +34,7 @@ namespace BarberFlow.API.Controllers
                 }
                 var empresa = await _empresaService.CriarEmpresa(dto);
 
-                var response = new EmpresaResponseDto
-                {
-                    Id = empresa.Id,
-                    Nome = empresa.Nome,
-                    Slug = empresa.Slug,
-                    CNPJ = empresa.CNPJ,
-                    DataAtualizacao = empresa.DataAtualizacao,
-                    DataCriacao = empresa.DataCriacao,
-                    IsDeleted = empresa.IsDeleted,
-                    Ativo = empresa.Ativo
-                };
+                var response = MapearParaResponseDto(empresa);
                 return StatusCode(201, new
                 {
                     message = "Empresa criada com sucesso!",
@@ -74,17 +64,7 @@ namespace BarberFlow.API.Controllers
                     return NotFound(new { message = $"Empresa com id '{id}' não encontrada." });
                 }
 
-                var response = new EmpresaResponseDto
-                {
-                    Id = empresa.Id,
-                    Nome = empresa.Nome,
-                    Slug = empresa.Slug,
-                    CNPJ = empresa.CNPJ,
-                    DataAtualizacao = empresa.DataAtualizacao,
-                    DataCriacao = empresa.DataCriacao,
-                    IsDeleted = empresa.IsDeleted,
-                    Ativo = empresa.Ativo
-                };
+                var response = MapearParaResponseDto(empresa);
 
                 return Ok(new
                 {
@@ -111,17 +91,7 @@ namespace BarberFlow.API.Controllers
                     return NotFound(new { message = $"Empresa com id '{id}' não encontrada." });
                 }
 
-                var response = new EmpresaResponseDto
-                {
-                    Id = empresa.Id,
-                    Nome = empresa.Nome,
-                    Slug = empresa.Slug,
-                    CNPJ = empresa.CNPJ,
-                    DataAtualizacao = empresa.DataAtualizacao,
-                    DataCriacao = empresa.DataCriacao,
-                    IsDeleted = empresa.IsDeleted,
-                    Ativo = empresa.Ativo
-                };
+                var response = MapearParaResponseDto(empresa);
                 return Ok(new 
                 {
                     message = "Empresa removida com sucesso!",
@@ -148,17 +118,7 @@ namespace BarberFlow.API.Controllers
                     return NotFound(new { message = $"Empresa com slug '{slug}' não encontrada." });
                 }
 
-                var response = new EmpresaResponseDto
-                {
-                    Id = empresa.Id,
-                    Nome = empresa.Nome,
-                    Slug = empresa.Slug,
-                    CNPJ = empresa.CNPJ,
-                    DataAtualizacao = empresa.DataAtualizacao,
-                    DataCriacao = empresa.DataCriacao,
-                    IsDeleted = empresa.IsDeleted,
-                    Ativo = empresa.Ativo
-                };
+                var response = MapearParaResponseDto(empresa);
 
                 return Ok(new
                 {
@@ -171,6 +131,23 @@ namespace BarberFlow.API.Controllers
                 return BadRequest(new { error = ex.Message });
             }    
         }
+        #endregion
+
+        #region Private Methods
+       private EmpresaResponseDto MapearParaResponseDto(Empresa empresa)
+       {
+            return new EmpresaResponseDto
+            {
+                Id = empresa.Id,
+                Nome = empresa.Nome,
+                Slug = empresa.Slug,
+                CNPJ = empresa.CNPJ,
+                DataAtualizacao = empresa.DataAtualizacao,
+                DataCriacao = empresa.DataCriacao,
+                IsDeleted = empresa.IsDeleted,
+                Ativo = empresa.Ativo
+            };
+       }
         #endregion
     }
 }

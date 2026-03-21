@@ -1,4 +1,5 @@
 ﻿using BarberFlow.API.DTOs.Profissional;
+using BarberFlow.API.Models;
 using BarberFlow.API.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,21 +33,7 @@ namespace BarberFlow.API.Controllers
                     return BadRequest("Não foi possível criar o profissional.");
                 }
 
-                var response = new ProfissionalResponseDto
-                {
-                    Id = profissional.Id,
-                    Nome = profissional.Usuario.Nome,
-                    NomeEmpresa = profissional.Empresa.Nome,
-                    Email = profissional.Usuario.Email,
-                    EmpresaId = profissional.EmpresaId,
-                    UsuarioId = profissional.UsuarioId,
-                    PercentualComissao = profissional.PercentualComissao,
-                    DataCriacao = profissional.DataCriacao,
-                    DataAtualizacao = profissional.DataAtualizacao,
-                    IsDeleted = profissional.IsDeleted,
-                    Ativo = profissional.Ativo
-                };
-
+                var response = MapearParaResponseDto(profissional);
                 return StatusCode(201, new 
                 {
                     message = "Profissional criado com sucesso!",
@@ -73,20 +60,7 @@ namespace BarberFlow.API.Controllers
                 {
                     return NotFound("Profissional não encontrado.");
                 }
-                var response = new ProfissionalResponseDto
-                {
-                    Id = profissional.Id,
-                    Nome = profissional.Usuario.Nome,
-                    NomeEmpresa = profissional.Empresa.Nome,
-                    Email = profissional.Usuario.Email,
-                    EmpresaId = profissional.EmpresaId,
-                    UsuarioId = profissional.UsuarioId,
-                    PercentualComissao = profissional.PercentualComissao,
-                    DataCriacao = profissional.DataCriacao,
-                    DataAtualizacao = profissional.DataAtualizacao,
-                    IsDeleted = profissional.IsDeleted,
-                    Ativo = profissional.Ativo
-                };
+                var response = MapearParaResponseDto(profissional);
                 return Ok(new 
                 {
                     message = "Profissional atualizado com sucesso!",
@@ -110,21 +84,7 @@ namespace BarberFlow.API.Controllers
                     return NotFound("Profissional não encontrado.");
                 }
 
-                var response = new ProfissionalResponseDto
-                {
-                    Id = profissional.Id,
-                    Nome = profissional.Usuario.Nome,
-                    NomeEmpresa = profissional.Empresa.Nome,
-                    Email = profissional.Usuario.Email,
-                    EmpresaId = profissional.EmpresaId,
-                    UsuarioId = profissional.UsuarioId,
-                    PercentualComissao = profissional.PercentualComissao,
-                    DataCriacao = profissional.DataCriacao,
-                    DataAtualizacao = profissional.DataAtualizacao,
-                    IsDeleted = profissional.IsDeleted,
-                    Ativo = profissional.Ativo
-                };
-
+                var response = MapearParaResponseDto(profissional);
                 return Ok(new
                 {
                     message = "Profissional deletado com sucesso!",
@@ -137,7 +97,7 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("Profissionais-Por-Empresa")]
         public async Task<IActionResult> ObterProfissionaisPorEmpresa(long empresaId)
         {
             try
@@ -168,6 +128,47 @@ namespace BarberFlow.API.Controllers
             {
                 return BadRequest(new { error = ex.Message });
             }
+        }
+
+        [HttpGet("Profissional-Por-Id")]
+        public async Task<IActionResult> ObterProfissionalPorId(long id)
+        {
+            try
+            {
+                var profissional = await _profissionalService.ObterPorId(id);
+                if (profissional == null)
+                {
+                    return NotFound("Profissional não encontrado.");
+                }
+                var response = MapearParaResponseDto(profissional);
+                return Ok(new 
+                {
+                    message = "Profissional obtido com sucesso!",
+                    dados = response
+                });
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        private static ProfissionalResponseDto MapearParaResponseDto(Profissional profissional)
+        {
+            return new ProfissionalResponseDto
+            {
+                Id = profissional.Id,
+                Nome = profissional.Usuario?.Nome ?? "N/A",
+                NomeEmpresa = profissional.Empresa?.Nome ?? "N/A",
+                Email = profissional.Usuario?.Email ?? "N/A",
+                EmpresaId = profissional.EmpresaId,
+                UsuarioId = profissional.UsuarioId,
+                PercentualComissao = profissional.PercentualComissao,
+                DataCriacao = profissional.DataCriacao,
+                DataAtualizacao = profissional.DataAtualizacao,
+                IsDeleted = profissional.IsDeleted,
+                Ativo = profissional.Ativo
+            };
         }
     }
 }

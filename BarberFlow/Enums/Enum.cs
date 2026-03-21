@@ -10,7 +10,7 @@
     {
         Pendente = 1,
         Confirmado = 2,
-        Concluido = 3,
+        Finalizado = 3,
         Cancelado = 4
     }
 }
