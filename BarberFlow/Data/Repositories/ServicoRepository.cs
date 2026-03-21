@@ -53,7 +53,7 @@ using BarberFlow.API.Interfaces;
                 return await _appDbContext.Servicos
                 .Include(s => s.Empresa)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted);
+                .FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted && s.Ativo);
             }
         }
     }

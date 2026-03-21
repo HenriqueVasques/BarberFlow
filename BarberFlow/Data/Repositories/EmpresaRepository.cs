@@ -40,7 +40,7 @@ using BarberFlow.API.Interfaces;
             public async Task<Empresa?> ObterPorId(long id)
             {
                 return await _appDbContext.Empresas
-                .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted);
+                .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted && e.Ativo);
             }
 
             public async Task<bool> ExisteCnpj(string cnpj) => await _appDbContext.Empresas.AnyAsync(e => e.CNPJ == cnpj);
