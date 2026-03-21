@@ -84,7 +84,7 @@ namespace BarberFlow.API.Controllers
         }
 
         [HttpGet("agenda")]
-        public async Task<IActionResult> ObterAgenda( [FromQuery] long profissionalId, [FromQuery] long empresaId, [FromQuery] DateTime inicio, [FromQuery] DateTime fim, [FromQuery] List<StatusAgendamento> status)
+        public async Task<IActionResult> ObterAgenda([FromQuery] long profissionalId, [FromQuery] long empresaId, [FromQuery] DateTime inicio, [FromQuery] DateTime fim, [FromQuery] List<StatusAgendamento> status)
         {
             try
             {
@@ -120,8 +120,6 @@ namespace BarberFlow.API.Controllers
         #endregion
 
         #region Métodos Auxiliares (Private)
-
-        /// Centraliza o mapeamento para evitar repetição de código (DRY - Don't Repeat Yourself)
         private static AgendamentoResponseDto MapearParaResponseDto(Agendamento agendamento)
         {
             return new AgendamentoResponseDto
