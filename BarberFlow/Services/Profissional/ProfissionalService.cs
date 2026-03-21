@@ -25,7 +25,6 @@ namespace BarberFlow.API.Services
         public async Task<Profissional?> CriarProfissional(ProfissionalCreateDto dto)
         {
             using IDbContextTransaction transaction = await _appDbContext.Database.BeginTransactionAsync();
-
             try
             {
                 if (await _usuarioRepository.ExisteEmail(dto.Email))
@@ -59,9 +58,7 @@ namespace BarberFlow.API.Services
                 );
 
                 await _profissionalRepository.Adicionar(profissional);
-
                 await transaction.CommitAsync();
-
                 return profissional;
             }
             catch (Exception)
@@ -71,7 +68,7 @@ namespace BarberFlow.API.Services
             }
         }
 
-        public async Task<Profissional?> AtualizarProfissional(long id, ProfissionalUpdateDto dto)
+        public async Task<Profissional> AtualizarProfissional(long id, ProfissionalUpdateDto dto)
         {
             var profissional = await _profissionalRepository.ObterPorId(id);
             if (profissional == null)
@@ -79,22 +76,23 @@ namespace BarberFlow.API.Services
                 throw new Exception($"Profissional com id {id} não encontrado.");
             }
 
-            if(profissional.Usuario.Email != dto.Email)
+            if (!string.IsNullOrWhiteSpace(dto.Email) && profissional.Usuario.Email != dto.Email)
             {
                 if (await _usuarioRepository.ExisteEmail(dto.Email))
                 {
-                    throw new Exception("Este e-mail já está em uso.");
+                    throw new Exception("Este e-mail já está em uso por outro usuário.");
                 }
+                profissional.Usuario.Email = dto.Email;
             }
 
-            if (dto.Nome != null || dto.Nome == string.Empty) profissional.Usuario.Nome = dto.Nome;
-            if (dto.Email == string.Empty || dto.Email != null) profissional.Usuario.Email = dto.Email;
+            if (!string.IsNullOrWhiteSpace(dto.Nome)) profissional.Usuario.Nome = dto.Nome;
             profissional.Usuario.DataAtualizacao = DateTime.UtcNow;
             profissional.PercentualComissao = dto.PercentualComissao;
             profissional.DataAtualizacao = DateTime.UtcNow;
 
             await _profissionalRepository.Atualizar(profissional);
-            return profissional;
+            var profissionalRecuperado = await _profissionalRepository.ObterPorId(profissional.Id);
+            return profissionalRecuperado ?? throw new Exception("Erro ao recuperar Cliente criado.");
         }
 
         public async Task<Profissional?> DeletarProfissional(long id)
@@ -124,7 +122,21 @@ namespace BarberFlow.API.Services
                 throw new Exception($"Empresa com id {empresaId} não encontrada.");
             }
 
-            return await _profissionalRepository.ObterPorEmpresa(empresaId);
+            
+            var profissionais =  await _profissionalRepository.ObterPorEmpresa(empresaId);
+            if(profissionais == null || !profissionais.Any()) throw new Exception($"Empresa com ID {empresaId} não tem profissionais cadastrados.");
+            return profissionais;
+        }
+
+        public async Task<Profissional> ObterPorId(long id)
+        {
+            var profissional = await _profissionalRepository.ObterPorId(id);
+            if (profissional == null)
+            {
+                throw new Exception($"Profissional com id {id} não encontrado.");
+            }
+
+            return profissional;
         }
     }
 }
