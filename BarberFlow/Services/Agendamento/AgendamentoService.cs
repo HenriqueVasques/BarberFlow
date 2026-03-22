@@ -12,7 +12,11 @@ namespace BarberFlow.API.Services
         private readonly IProfissionalRepository _profissionalRepository;
         private readonly IClienteRepository _clienteRepository;
 
-        public AgendamentoService( IAgendamentoRepository agendamentoRepository, IServicoRepository servicoRepository, IProfissionalRepository profissionalRepository, IClienteRepository clienteRepository)
+        public AgendamentoService(
+            IAgendamentoRepository agendamentoRepository,
+            IServicoRepository servicoRepository,
+            IProfissionalRepository profissionalRepository,
+            IClienteRepository clienteRepository)
         {
             _agendamentoRepository = agendamentoRepository;
             _servicoRepository = servicoRepository;
@@ -20,8 +24,14 @@ namespace BarberFlow.API.Services
             _clienteRepository = clienteRepository;
         }
 
+        #region Ações de Escrita (Regras de Negócio)
+
+        // Orquestra a criação do agendamento: valida dados, calcula horários e verifica disponibilidade
         public async Task<Agendamento> AdicionarAgendamento(AgendamentoCreateDto dto)
         {
+            if (dto == null)
+                throw new Exception("Os dados não foram preenchidos.");
+
             var servico = await _servicoRepository.ObterPorId(dto.ServicoId)
                 ?? throw new Exception($"Serviço ID {dto.ServicoId} não encontrado.");
 
@@ -59,15 +69,14 @@ namespace BarberFlow.API.Services
                 ?? throw new Exception("Erro crítico ao recuperar o agendamento após a criação.");
         }
 
+        // Valida e processa o cancelamento de um agendamento ativo
         public async Task<Agendamento> Cancelar(long id)
         {
             var agendamento = await _agendamentoRepository.ObterPorId(id)
                 ?? throw new Exception($"Agendamento ID {id} não encontrado.");
 
             if (agendamento.Status == StatusAgendamento.Cancelado || agendamento.Status == StatusAgendamento.Finalizado)
-            {
                 throw new Exception("Não é possível cancelar um agendamento que já foi finalizado ou cancelado.");
-            }
 
             agendamento.Status = StatusAgendamento.Cancelado;
             agendamento.DataAtualizacao = DateTime.UtcNow;
@@ -76,15 +85,90 @@ namespace BarberFlow.API.Services
             return agendamento;
         }
 
-        public async Task<List<Agendamento>> ObterAgendaPorPeriodo(long profissionalId, long empresaId, DateTime inicio, DateTime fim, List<StatusAgendamento> statusFiltro)
+        // Conclui o atendimento e atualiza o registro no banco
+        public async Task<Agendamento> Finalizar(long id)
         {
-            return await _agendamentoRepository.ObterAgendaPorPeriodo(profissionalId, empresaId, inicio, fim, statusFiltro);
+            var agendamento = await _agendamentoRepository.ObterPorId(id)
+                ?? throw new Exception($"Agendamento ID {id} não encontrado.");
+
+            if (agendamento.Status == StatusAgendamento.Cancelado || agendamento.Status == StatusAgendamento.Finalizado)
+                throw new Exception("Não é possível finalizar um agendamento que já foi finalizado ou cancelado.");
+
+            agendamento.Status = StatusAgendamento.Finalizado;
+            agendamento.DataAtualizacao = DateTime.UtcNow;
+
+            await _agendamentoRepository.Atualizar(agendamento);
+            return agendamento;
         }
 
+        #endregion
+
+        #region Visão: Geral
+
+        // Recupera um agendamento específico via repositório
         public async Task<Agendamento> ObterPorId(long id)
         {
             return await _agendamentoRepository.ObterPorId(id)
                 ?? throw new Exception($"Agendamento ID {id} não encontrado.");
         }
+
+        #endregion
+
+        #region Visão: Cliente
+
+        // Consulta o repositório para buscar o próximo compromisso na agenda do cliente
+        public async Task<Agendamento?> ObterProximoAgendamentoCliente(long clienteId)
+        {
+            return await _agendamentoRepository.ObterProximoAgendamentoCliente(clienteId);
+        }
+
+        // Obtém a lista histórica dos últimos atendimentos do cliente
+        public async Task<List<Agendamento>> ObterHistoricoCliente(long clienteId)
+        {
+            if (clienteId <= 0)
+                throw new Exception("ID do cliente inválido.");
+
+            return await _agendamentoRepository.ObterUltimosPorCliente(clienteId, 10);
+        }
+
+        #endregion
+
+        #region Visão: Profissional / Admin (Agenda e Relatórios)
+
+        // Recupera a lista de agendamentos filtrada por período e status
+        public async Task<List<Agendamento>> ObterAgendaPorPeriodo(long? profissionalId, long empresaId, DateTime inicio, DateTime fim, List<StatusAgendamento> statusFiltro)
+        {
+            if (inicio == default || inicio == DateTime.MinValue)
+                throw new Exception("A data inicial precisa ser preenchida");
+
+            if (fim == default || fim == DateTime.MinValue)
+                throw new Exception("A data final precisa ser preenchida");
+
+            if (inicio >= fim)
+                throw new Exception("A data final precisa ser maior que a inicial");
+
+            return await _agendamentoRepository.ObterAgendaPorPeriodo(profissionalId, empresaId, inicio, fim, statusFiltro);
+        }
+
+        // Consolida os dados financeiros e de volume para o resumo diário do dashboard
+        public async Task<DashboardResumoDto> ObterResumoPorDia(long empresaId, DateTime data)
+        {
+            if (data == default || data == DateTime.MinValue)
+                throw new Exception("A data precisa ser preenchida");
+            if (data > DateTime.UtcNow)
+                throw new Exception("A data não pode ser maior que o dia de hoje");
+
+            var totalFaturamento = await _agendamentoRepository.ObterFaturamentoPorDia(empresaId, data);
+            var quantidadeAtendimentos = await _agendamentoRepository.ContarAgendamentoPorDia(empresaId, data);
+
+            return new DashboardResumoDto
+            {
+                Data = data,
+                FaturamentoTotal = totalFaturamento,
+                QuantidadeAtendimentos = quantidadeAtendimentos
+            };
+        }
+
+        #endregion
     }
 }
