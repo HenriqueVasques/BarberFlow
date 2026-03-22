@@ -49,15 +49,5 @@ namespace BarberFlow.API.Data.Repositories
                 .Include(c => c.Usuario)
                 .FirstOrDefaultAsync();
         }
-        public async Task<Cliente?> ObterPorIdParaTrazerAgendamento(long id)
-        {
-            return await _appDbContext.Clientes
-                .Where(c => c.Id == id && !c.IsDeleted && c.Ativo)
-                .Include(c => c.Empresa)
-                .Include(c => c.Usuario)
-                .Include(c => c.Agendamentos.Take(10)) //take para trazer os ultimos (n) agendamentos
-                .AsNoTracking()
-                .FirstOrDefaultAsync();
-        }
     }
 }
