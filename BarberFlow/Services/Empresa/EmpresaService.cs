@@ -37,11 +37,12 @@ namespace BarberFlow.API.Services
         #region Public Methods
         public async Task<Empresa> CriarEmpresa(EmpresaCreateDto dto)
         {
+            if (dto == null)
+                throw new Exception("Os ados não foram preenchidos.");
+
             if (await _repository.ExisteCnpj(dto.CNPJ))
-            {
                 throw new Exception("Já existe uma empresa cadastrada com este CNPJ.");
-            }
-                
+
             var empresa = new Empresa(dto.Nome, dto.CNPJ);
             empresa.Slug = await GerarSlugUnico(dto.Nome);
 
@@ -51,12 +52,14 @@ namespace BarberFlow.API.Services
 
         public async Task<Empresa?> AtualizarEmpresa(long id, EmpresaUpdateDto dto)
         {
-            Empresa? empresa = await _repository.ObterPorId(id);
+            if (dto == null)
+                throw new Exception("Os ados não foram preenchidos.");
+
+            var empresa = await _repository.ObterPorId(id);
 
             if (empresa == null) 
-            {
                 throw new Exception($"Empresa com id {id} não encontrada.");
-            }
+
 
             if (empresa.CNPJ != dto.CNPJ)
             {
@@ -80,11 +83,9 @@ namespace BarberFlow.API.Services
 
         public async Task <Empresa?> Deletar(long id)
         {
-            Empresa? empresa = await _repository.ObterPorId(id);
+            var empresa = await _repository.ObterPorId(id);
             if ( empresa == null)
-            {
                 throw new Exception($"Empresa com id {id} não encontrada.");
-            }
 
             empresa.IsDeleted = true;
             empresa.Ativo = false;

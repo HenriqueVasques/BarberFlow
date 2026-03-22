@@ -29,9 +29,7 @@ namespace BarberFlow.API.Services
             try
             {
                 if (dto == null)
-                {
                     throw new ArgumentNullException(nameof(dto), "O objeto dto não pode ser nulo.");
-                }
 
                 var empresa = await _empresaRepository.ObterPorId(dto.EmpresaId);
                 if (empresa == null) throw new Exception($"Empresa com ID {dto.EmpresaId} não encontrada.");
@@ -71,6 +69,9 @@ namespace BarberFlow.API.Services
 
         public async Task<Cliente> AtualizarCliente(long id, ClienteUpdateDto dto) 
         {
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto), "O objeto dto não pode ser nulo.");
+
             var cliente = await _clienteRepository.ObterPorId(id) 
                 ?? throw new Exception($"Cliente com ID {id} não encontrado.");
 

@@ -21,11 +21,6 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                if (dto == null)
-                {
-                    return BadRequest("Dados inválidos.");
-                }
-
                 var profissional = await _profissionalService.CriarProfissional(dto);
 
                 if (profissional == null)
@@ -51,10 +46,6 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                if (dto == null)
-                {
-                    return BadRequest("Dados inválidos.");
-                }
                 var profissional = await _profissionalService.AtualizarProfissional(id, dto);
                 if (profissional == null)
                 {
@@ -80,9 +71,7 @@ namespace BarberFlow.API.Controllers
             {
                 var profissional = await _profissionalService.DeletarProfissional(id);
                 if (profissional == null)
-                {
                     return NotFound("Profissional não encontrado.");
-                }
 
                 var response = MapearParaResponseDto(profissional);
                 return Ok(new

@@ -27,6 +27,9 @@ namespace BarberFlow.API.Services
             using IDbContextTransaction transaction = await _appDbContext.Database.BeginTransactionAsync();
             try
             {
+                if (dto == null)
+                    throw new Exception("Os ados não foram preenchidos.");
+
                 if (await _usuarioRepository.ExisteEmail(dto.Email))
                 {
                     throw new Exception("Este e-mail já está em uso.");
@@ -70,11 +73,12 @@ namespace BarberFlow.API.Services
 
         public async Task<Profissional> AtualizarProfissional(long id, ProfissionalUpdateDto dto)
         {
+            if (dto == null)
+                throw new Exception("Os ados não foram preenchidos.");
+
             var profissional = await _profissionalRepository.ObterPorId(id);
             if (profissional == null)
-            {
                 throw new Exception($"Profissional com id {id} não encontrado.");
-            }
 
             if (!string.IsNullOrWhiteSpace(dto.Email) && profissional.Usuario.Email != dto.Email)
             {
@@ -99,9 +103,8 @@ namespace BarberFlow.API.Services
         {
             var profissional = await _profissionalRepository.ObterPorId(id);
             if (profissional == null)
-            {
                 throw new Exception($"Profissional com id {id} não encontrado.");
-            }
+
             profissional.IsDeleted = true;
             profissional.Ativo = false;
             profissional.DataAtualizacao = DateTime.UtcNow;
@@ -118,11 +121,8 @@ namespace BarberFlow.API.Services
         public async Task<IEnumerable<Profissional>> ObterProfissionaisPorEmpresa(long empresaId)
         {
             if (await _empresaRepository.ObterPorId(empresaId) == null)
-            {
                 throw new Exception($"Empresa com id {empresaId} não encontrada.");
-            }
-
-            
+  
             var profissionais =  await _profissionalRepository.ObterPorEmpresa(empresaId);
             if(profissionais == null || !profissionais.Any()) throw new Exception($"Empresa com ID {empresaId} não tem profissionais cadastrados.");
             return profissionais;
@@ -132,9 +132,7 @@ namespace BarberFlow.API.Services
         {
             var profissional = await _profissionalRepository.ObterPorId(id);
             if (profissional == null)
-            {
                 throw new Exception($"Profissional com id {id} não encontrado.");
-            }
 
             return profissional;
         }

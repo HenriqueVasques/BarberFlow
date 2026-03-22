@@ -30,6 +30,9 @@ namespace BarberFlow.API.Services
         #region public methods
         public async Task<Usuario?> CriarUsuario(UsuarioCreateDto dto)
         {
+            if (dto == null)
+                throw new Exception("Os ados não foram preenchidos.");
+
             var empresa = await _empresaRepository.ObterPorId(dto.EmpresaId);
             if (empresa == null)
             {
@@ -50,24 +53,24 @@ namespace BarberFlow.API.Services
 
         public async Task<Usuario?> AtualizarUsuario(long id, UsuarioUpdateDto dto)
         {
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto), "O objeto dto não pode ser nulo.");
+
             var usuario = await _usuarioRepository.ObterPorId(id);
             if (usuario == null)
-            {
                 throw new Exception($"Usuário com id {id} não encontrada.");
-            }
 
             if (usuario.Email != dto.Email)
             {
                 if (await _usuarioRepository.ExisteEmail(dto.Email))
-                {
                     throw new Exception("O novo e-mail informado já está em uso por outro usuário.");
-                }
+
                 usuario.Email = dto.Email;
             }
             if (dto.Nome == null)
-            {
+
                 throw new Exception("O nome precisa ser preenchido.");
-            }
+
             usuario.Nome = dto.Nome;
             usuario.DataAtualizacao = DateTime.UtcNow;
 
@@ -79,9 +82,8 @@ namespace BarberFlow.API.Services
         {
             var usuario = await _usuarioRepository.ObterPorId(id);
             if (usuario == null)
-            {
                 throw new Exception($"Usuário com id {id} não encontrada.");
-            }
+
             usuario.IsDeleted = true;
             usuario.Ativo = false;
 
@@ -93,9 +95,7 @@ namespace BarberFlow.API.Services
         {
             var usuario = await _usuarioRepository.ObterPorId(id);
             if (usuario == null)
-            {
                 throw new Exception($"Usuário com id {id} não encontrada.");
-            }
 
             string senhaHash = CriptografarSenha(dto.Senha);
             usuario.SenhaHash = senhaHash;
@@ -112,9 +112,8 @@ namespace BarberFlow.API.Services
         public async Task<IEnumerable<Usuario>> ObterUsuariosPorEmpresa(long empresaId)
         {
             if (await _empresaRepository.ObterPorId(empresaId) == null)
-            {
                 throw new Exception("A empresa não existe.");
-            }
+
             return await _usuarioRepository.ObterPorEmpresa(empresaId);
         }
         #endregion

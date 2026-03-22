@@ -26,11 +26,6 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                if (dto == null)
-                {
-                    return BadRequest("Dados do usuário são obrigatórios.");
-                }
-
                 var usuario = await _usuarioService.CriarUsuario(dto);
                 if (usuario == null)
                 {
@@ -55,10 +50,6 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                if (dto == null)
-                {
-                    return BadRequest("Dados do usuário são obrigatórios.");
-                }
                 var usuario = await _usuarioService.AtualizarUsuario(id, dto);
                 if (usuario == null)
                 {

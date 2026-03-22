@@ -21,10 +21,6 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                if (dto == null)
-                {
-                    return BadRequest("Dados inválidos.");
-                }
                 var servico = await _servicoService.CriarServico(dto);
 
                 var response = MapearParaResponseDto(servico);
@@ -45,11 +41,6 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                if (dto == null)
-                {
-                    return BadRequest("Dados inválidos.");
-                }
-
                 var servico = await _servicoService.AtualizarServico(id, dto);
 
                 if (servico == null)

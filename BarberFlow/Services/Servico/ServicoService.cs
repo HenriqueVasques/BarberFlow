@@ -19,12 +19,14 @@ namespace BarberFlow.API.Services
 
         public async Task<Servico> CriarServico(ServicoCreateDto dto)
         {
+            if (dto == null)
+                throw new Exception("Os ados não foram preenchidos.");
+
             var empresa = await _empresaRepository.ObterPorId(dto.EmpresaId);
 
             if(empresa == null)
-            {
                 throw new Exception($"Empresa com {dto.EmpresaId} não encontrada.");
-            }
+
             var servico = new Servico(dto.Nome, dto.DuracaoMinutos, dto.PrecoBase, dto.EmpresaId);
             await _servicoRepository.Adicionar(servico);
             return servico;
@@ -32,12 +34,13 @@ namespace BarberFlow.API.Services
 
         public async Task<Servico?> AtualizarServico(long id, ServicoUpdateDto dto)
         {
+            if (dto == null)
+                throw new Exception("Os ados não foram preenchidos.");
+
             var servico = await _servicoRepository.ObterPorId(id);
 
             if(servico == null)
-            {
                 throw new Exception($"Serviço com {id}, não foi encontrado.");
-            }
 
             servico.Nome = dto.Nome;
             servico.DuracaoMinutos = dto.DuracaoMinutos;

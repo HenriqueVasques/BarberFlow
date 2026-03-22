@@ -27,10 +27,6 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                if (dto == null)
-                {
-                    return BadRequest("Dados inválidos.");
-                }
                 var empresa = await _empresaService.CriarEmpresa(dto);
 
                 var response = MapearParaResponseDto(empresa);
@@ -52,11 +48,6 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                if (dto == null)
-                {
-                    return BadRequest("Dados inválidos.");
-                }
-
                 var empresa = await _empresaService.AtualizarEmpresa(id, dto);
 
                 if (empresa == null)

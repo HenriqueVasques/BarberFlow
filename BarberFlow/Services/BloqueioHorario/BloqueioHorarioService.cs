@@ -26,6 +26,8 @@ namespace BarberFlow.API.Services
         #region Public Methods
         public async Task<BloqueioHorario> CriarBloqueioHorario(BloqueioHorarioCreateDto dto)
         {
+            if (dto == null)
+                throw new Exception("Os ados não foram preenchidos.");
 
             var empresa = await _repositoryEmpresa.ObterPorId(dto.EmpresaId)
                 ?? throw new Exception($"Empresa com id {dto.EmpresaId} não encontrada.");
@@ -61,6 +63,9 @@ namespace BarberFlow.API.Services
 
         public async Task<BloqueioHorario> AtualizarBloqueioHorario(long id, BloqueioHorarioUpdateDto dto)
         {
+            if (dto == null)
+                throw new Exception("Os ados não foram preenchidos.");
+
             var bloqueio = await _repositoryBloqueioHorario.ObterPorId(id);
             if (bloqueio == null)
             {

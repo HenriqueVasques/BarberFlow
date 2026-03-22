@@ -24,11 +24,6 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                if (dto == null)
-                {
-                    return BadRequest("Dados inválidos.");
-                }
-
                 var bloqueioHorario = await _bloqueioHorarioService.CriarBloqueioHorario(dto);
 
                 var response = MapearParaResponseDto(bloqueioHorario);
@@ -49,10 +44,6 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                if (dto == null)
-                {
-                    return BadRequest("Dados inválidos.");
-                }
                 var bloqueioHorario = await _bloqueioHorarioService.AtualizarBloqueioHorario(id, dto);
                 var response = MapearParaResponseDto(bloqueioHorario);
                 return Ok(new
