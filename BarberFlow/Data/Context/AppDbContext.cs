@@ -76,7 +76,8 @@ namespace BarberFlow.API.Data.Context
             modelBuilder.Entity<HorarioFuncionamentoEmpresa>()
                 .HasOne(hfe => hfe.Empresa)
                 .WithMany()
-                .HasForeignKey(hfe => hfe.EmpresaId);
+                .HasForeignKey(hfe => hfe.EmpresaId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<HorarioProfissional>()
                 .HasOne(hp => hp.Empresa)
