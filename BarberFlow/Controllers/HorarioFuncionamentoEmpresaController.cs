@@ -172,7 +172,7 @@ namespace BarberFlow.API.Controllers
         #endregion
 
         #region Private Methods
-        public HorarioFuncionamentoEmpresaResponseDto MapearParaResponseDto(HorarioFuncionamentoEmpresa horarioFuncionamentoEmpresa)
+        private static HorarioFuncionamentoEmpresaResponseDto MapearParaResponseDto(HorarioFuncionamentoEmpresa horarioFuncionamentoEmpresa)
         {
             return new HorarioFuncionamentoEmpresaResponseDto
             {
