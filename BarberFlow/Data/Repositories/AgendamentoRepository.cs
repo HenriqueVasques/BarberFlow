@@ -61,7 +61,8 @@ namespace BarberFlow.API.Data.Repositories
                 .Where(a => a.EmpresaId == empresaId &&
                             a.DataHoraInicio >= inicio &&
                             a.DataHoraInicio <= fim &&
-                            statusFiltro.Contains(a.Status));
+                            statusFiltro.Contains(a.Status)
+                );
 
             if (profissionalId.HasValue && profissionalId > 0)
             {
