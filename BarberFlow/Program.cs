@@ -23,6 +23,7 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IBloqueioHorarioRepository, BloqueioHorarioRepository>();
 builder.Services.AddScoped<IAgendamentoRepository, AgendamentoRepository>();
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
+builder.Services.AddScoped<IHorarioFuncionamentoEmpresaRepository, HorarioFuncionamentoEmpresaRepository>();
 
 // Serviços (Lógica de Negócio)
 builder.Services.AddScoped<EmpresaService>();
@@ -32,6 +33,7 @@ builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<BloqueioHorarioService>();
 builder.Services.AddScoped<AgendamentoService>();
 builder.Services.AddScoped<ClienteService>();
+builder.Services.AddScoped<HorarioFuncionamentoEmpresaService>();
 
 // 3. SERVIÇOS DO FRAMEWORK (ASP.NET)
 builder.Services.AddControllers()
