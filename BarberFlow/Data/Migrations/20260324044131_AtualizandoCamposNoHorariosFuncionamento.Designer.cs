@@ -3,6 +3,7 @@ using System;
 using BarberFlow.API.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BarberFlow.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260324044131_AtualizandoCamposNoHorariosFuncionamento")]
+    partial class AtualizandoCamposNoHorariosFuncionamento
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -224,15 +227,6 @@ namespace BarberFlow.API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime>("DataAtualizacao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<int>("DiaSemana")
                         .HasColumnType("integer");
 
@@ -242,14 +236,11 @@ namespace BarberFlow.API.Migrations
                     b.Property<bool>("EstaFechado")
                         .HasColumnType("boolean");
 
-                    b.Property<TimeSpan?>("HoraAbertura")
+                    b.Property<TimeSpan>("HoraAbertura")
                         .HasColumnType("interval");
 
-                    b.Property<TimeSpan?>("HoraFechamento")
+                    b.Property<TimeSpan>("HoraFechamento")
                         .HasColumnType("interval");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
