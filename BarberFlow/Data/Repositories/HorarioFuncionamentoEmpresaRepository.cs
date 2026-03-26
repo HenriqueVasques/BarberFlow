@@ -60,7 +60,7 @@ public class HorarioFuncionamentoEmpresaRepository : IHorarioFuncionamentoEmpres
 
     #endregion
 
-    #region Método Privado de Apoio (O Segredo da Refatoração)
+    #region Método Privado de Apoio
 
     // Este método centraliza a lógica de filtros para não repetir código em cada busca
     private IQueryable<HorarioFuncionamentoEmpresa> GerarQueryBase(bool apenasAtivos, bool incluirDeletados)

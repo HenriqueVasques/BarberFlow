@@ -21,7 +21,7 @@ namespace BarberFlow.API.Controllers
 
         // Aplica a trava de Admin para todo esse bloco
         [Authorize(Roles = "Admin")]
-        [HttpPost("admin/configurar/{empresaId}")]
+        [HttpPost("admin/criar/{empresaId}")]
         public async Task<IActionResult> CriarHorarioFuncionamentoEmpresa(long empresaId, [FromBody] HorarioFuncionamentoEmpresaCreateDto dto)
         {
             try
