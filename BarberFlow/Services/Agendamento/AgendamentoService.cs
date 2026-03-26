@@ -8,23 +8,20 @@ namespace BarberFlow.API.Services
     public class AgendamentoService
     {
         private readonly IAgendamentoRepository _agendamentoRepository;
-        private readonly IServicoRepository _servicoRepository;
-        private readonly IProfissionalRepository _profissionalRepository;
+        private readonly IProfissionalServicoRepository _profissionalServicoRepository;
         private readonly IClienteRepository _clienteRepository;
 
         public AgendamentoService(
             IAgendamentoRepository agendamentoRepository,
-            IServicoRepository servicoRepository,
-            IProfissionalRepository profissionalRepository,
+            IProfissionalServicoRepository profissionalservicoRepository,
             IClienteRepository clienteRepository)
         {
             _agendamentoRepository = agendamentoRepository;
-            _servicoRepository = servicoRepository;
-            _profissionalRepository = profissionalRepository;
+            _profissionalServicoRepository = profissionalservicoRepository;
             _clienteRepository = clienteRepository;
         }
 
-        #region Ações de Escrita (Regras de Negócio)
+        #region Ações de Escrita (Regras de Negócio) 
 
         // Orquestra a criação do agendamento: valida dados, calcula horários e verifica disponibilidade
         public async Task<Agendamento> AdicionarAgendamento(AgendamentoCreateDto dto)
@@ -32,30 +29,26 @@ namespace BarberFlow.API.Services
             if (dto == null)
                 throw new Exception("Os dados não foram preenchidos.");
 
-            var servico = await _servicoRepository.ObterPorId(dto.ServicoId)
-                ?? throw new Exception($"Serviço ID {dto.ServicoId} não encontrado.");
+            var profissionalServico = await _profissionalServicoRepository.ObterPorId(dto.ProfissionalServicoId)
+                ?? throw new Exception($"Serviço ID {dto.ProfissionalServicoId} não encontrado.");
 
             var cliente = await _clienteRepository.ObterPorId(dto.ClienteId)
                 ?? throw new Exception($"Cliente ID {dto.ClienteId} não encontrado.");
 
-            var profissional = await _profissionalRepository.ObterPorId(dto.ProfissionalId)
-                ?? throw new Exception("Profissional não encontrado.");
+            var dataFimCalculada = dto.DataHoraInicio.AddMinutes(profissionalServico.DuracaoPersonalizadaMinutos ?? profissionalServico.Servico.DuracaoMinutos);
 
-            var dataFimCalculada = dto.DataHoraInicio.AddMinutes(servico.DuracaoMinutos);
-
-            var ocupado = await _agendamentoRepository.EstaOcupado(dto.ProfissionalId, dto.DataHoraInicio, dataFimCalculada);
+            var ocupado = await _agendamentoRepository.EstaOcupado(profissionalServico.ProfissionalId, dto.DataHoraInicio, dataFimCalculada);
             if (ocupado)
             {
                 throw new Exception("O profissional já possui um agendamento ou bloqueio neste horário.");
-            }
+            }   
 
             var agendamento = new Agendamento
             {
                 EmpresaId = dto.EmpresaId,
-                ProfissionalId = dto.ProfissionalId,
                 ClienteId = dto.ClienteId,
-                ServicoId = dto.ServicoId,
-                PrecoNoMomento = servico.PrecoBase,
+                ProfissionalServicoId = dto.ProfissionalServicoId,
+                PrecoNoMomento = profissionalServico.PrecoPersonalizado ?? profissionalServico.Servico.PrecoBase,
                 DataHoraInicio = dto.DataHoraInicio,
                 DataHoraFim = dataFimCalculada,
                 Status = StatusAgendamento.Pendente,
@@ -117,13 +110,13 @@ namespace BarberFlow.API.Services
         #region Visão: Cliente
 
         // Consulta o repositório para buscar o próximo compromisso na agenda do cliente
-        public async Task<Agendamento?> ObterProximoAgendamentoCliente(long clienteId)
+        public async Task<AgendamentoDetalhesDto?> ObterProximoAgendamentoCliente(long clienteId)
         {
             return await _agendamentoRepository.ObterProximoAgendamentoCliente(clienteId);
         }
 
         // Obtém a lista histórica dos últimos atendimentos do cliente
-        public async Task<List<Agendamento>> ObterHistoricoCliente(long clienteId)
+        public async Task<List<AgendamentoDetalhesDto>> ObterHistoricoCliente(long clienteId)
         {
             if (clienteId <= 0)
                 throw new Exception("ID do cliente inválido.");
@@ -136,7 +129,7 @@ namespace BarberFlow.API.Services
         #region Visão: Profissional / Admin (Agenda e Relatórios)
 
         // Recupera a lista de agendamentos filtrada por período e status
-        public async Task<List<Agendamento>> ObterAgendaPorPeriodo(long? profissionalId, long empresaId, DateTime inicio, DateTime fim, List<StatusAgendamento> statusFiltro)
+        public async Task<List<AgendamentoDetalhesDto>> ObterAgendaPorPeriodo(long? profissionalId, long empresaId, DateTime inicio, DateTime fim, List<StatusAgendamento> statusFiltro)
         {
             if (inicio == default || inicio == DateTime.MinValue)
                 throw new Exception("A data inicial precisa ser preenchida");
