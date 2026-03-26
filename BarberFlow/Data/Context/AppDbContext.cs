@@ -36,15 +36,9 @@ namespace BarberFlow.API.Data.Context
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Agendamento>()
-                .HasOne(a => a.Profissional)
-                .WithMany(p => p.Agendamentos)
-                .HasForeignKey(a => a.ProfissionalId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Agendamento>()
-                .HasOne(a => a.Servico)
+                .HasOne(a => a.ProfissionalServico)
                 .WithMany()
-                .HasForeignKey(a => a.ServicoId)
+                .HasForeignKey(a => a.ProfissionalServicoId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // --- BLOQUEIO HORÁRIO ---

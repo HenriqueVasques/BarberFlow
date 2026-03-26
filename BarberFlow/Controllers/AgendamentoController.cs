@@ -118,8 +118,7 @@ namespace BarberFlow.API.Controllers
                         dados = ""
                     });
 
-                var response = MapearParaResponseDto(proximo);
-                return Ok(new { message = "Próximo agendamento recuperado!", dados = response });
+                 return Ok(new { message = "Próximo agendamento recuperado!", dados = proximo });
             }
             catch (Exception ex)
             {
@@ -134,12 +133,11 @@ namespace BarberFlow.API.Controllers
             try
             {
                 var agendamentos = await _agendamentoService.ObterHistoricoCliente(clienteId);
-                var response = agendamentos.Select(MapearParaResponseDto).ToList();
 
                 return Ok(new
                 {
                     message = "Histórico do cliente recuperado!",
-                    dados = response
+                    dados = agendamentos
                 });
             }
             catch (Exception ex)
@@ -154,20 +152,21 @@ namespace BarberFlow.API.Controllers
 
         // Lista a agenda de um profissional específico para um período determinado
         [HttpGet("professional/agenda")]
-        public async Task<IActionResult> ObterAgendaProfissional([FromQuery] long profissionalId, [FromQuery] long empresaId, [FromQuery] DateTime inicio, [FromQuery] DateTime fim, [FromQuery] List<StatusAgendamento> status)
+        public async Task<IActionResult> ObterAgendaProfissional([FromQuery] long profissionalId, [FromQuery] long empresaId, [FromQuery] DateTime inicio, [FromQuery] DateTime fim)
         {
             try
             {
-                if (status == null || !status.Any())
-                    status = new List<StatusAgendamento> { StatusAgendamento.Pendente, StatusAgendamento.Confirmado };
+                var statusAtivos = new List<StatusAgendamento> {
+                    StatusAgendamento.Pendente,
+                    StatusAgendamento.Confirmado
+                };
 
-                var agenda = await _agendamentoService.ObterAgendaPorPeriodo(profissionalId, empresaId, inicio, fim, status);
-                var response = agenda.Select(MapearParaResponseDto).ToList();
+                var agenda = await _agendamentoService.ObterAgendaPorPeriodo(profissionalId, empresaId, inicio, fim, statusAtivos);
 
                 return Ok(new
                 {
                     message = "Agenda do profissional obtida!",
-                    dados = response
+                    dados = agenda
                 });
             }
             catch (Exception ex)
@@ -201,20 +200,18 @@ namespace BarberFlow.API.Controllers
 
         // Gera relatório geral de agendamentos de toda a empresa (visão gerencial)
         [HttpGet("admin/{empresaId}/historico-geral")]
-        public async Task<IActionResult> HistoricoGeralAdmin(long empresaId, [FromQuery] DateTime inicio, [FromQuery] DateTime fim, [FromQuery] List<StatusAgendamento> status)
+        public async Task<IActionResult> HistoricoGeralAdmin(long empresaId, [FromQuery] DateTime inicio, [FromQuery] DateTime fim)
         {
             try
             {
-                if (status == null || !status.Any())
-                    status = new List<StatusAgendamento> { StatusAgendamento.Confirmado, StatusAgendamento.Finalizado };
+                var todosStatus = Enum.GetValues(typeof(StatusAgendamento)).Cast<StatusAgendamento>().ToList();
 
-                var agenda = await _agendamentoService.ObterAgendaPorPeriodo(null, empresaId, inicio, fim, status);
-                var response = agenda.Select(MapearParaResponseDto).ToList();
+                var agenda = await _agendamentoService.ObterAgendaPorPeriodo(null, empresaId, inicio, fim, todosStatus);
 
                 return Ok(new
                 {
                     message = "Relatório geral da empresa obtido!",
-                    dados = response
+                    dados = agenda
                 });
             }
             catch (Exception ex)
@@ -235,14 +232,13 @@ namespace BarberFlow.API.Controllers
             return new AgendamentoResponseDto
             {
                 Id = agendamento.Id,
-                NomeProfissional = agendamento.Profissional?.Usuario?.Nome ?? "N/A",
+                NomeProfissional = agendamento.ProfissionalServico?.Profissional?.Usuario?.Nome ?? "N/A",
                 NomeCliente = agendamento.Cliente?.Usuario?.Nome ?? "N/A",
-                NomeServico = agendamento.Servico?.Nome ?? "N/A",
+                NomeServico = agendamento.ProfissionalServico?.Servico?.Nome ?? "N/A",
                 NomeEmpresa = agendamento.Empresa?.Nome ?? "N/A",
                 EmpresaId = agendamento.EmpresaId,
-                ProfissionalId = agendamento.ProfissionalId,
                 ClienteId = agendamento.ClienteId,
-                ServicoId = agendamento.ServicoId,
+                ProfissionalServicoId = agendamento.ProfissionalServicoId,
                 PrecoNoMomento = agendamento.PrecoNoMomento,
                 DataHoraInicio = agendamento.DataHoraInicio,
                 DataHoraFim = agendamento.DataHoraFim,
