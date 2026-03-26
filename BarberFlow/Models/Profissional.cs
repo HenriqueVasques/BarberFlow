@@ -18,6 +18,14 @@ namespace BarberFlow.API.Models
         public Usuario Usuario { get; set; }
         public ICollection<ProfissionalServico> ProfissionalServicos { get; set; }
         public ICollection<Agendamento> Agendamentos { get; set; }
+        public ICollection<HorarioProfissional> HorarioProfissional { get; set; }
+
+        public Profissional()
+        {
+            ProfissionalServicos = new List<ProfissionalServico>();
+            Agendamentos = new List<Agendamento>();
+            HorarioProfissional = new List<HorarioProfissional>();
+        }
 
         public Profissional(long empresaId, long usuarioId, decimal percentualComissao)
         {
@@ -28,6 +36,10 @@ namespace BarberFlow.API.Models
             IsDeleted = false;
             DataCriacao = DateTime.UtcNow;
             DataAtualizacao = DateTime.UtcNow;
+
+            ProfissionalServicos = new List<ProfissionalServico>();
+            Agendamentos = new List<Agendamento>();
+            HorarioProfissional = new List<HorarioProfissional>();
         }
     }
 }
