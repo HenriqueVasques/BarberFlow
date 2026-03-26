@@ -1,4 +1,5 @@
-﻿using BarberFlow.API.Enums;
+﻿using BarberFlow.API.DTOs.Agendamento;
+using BarberFlow.API.Enums;
 using BarberFlow.API.Models;
 
 namespace BarberFlow.API.Interfaces
@@ -12,12 +13,12 @@ namespace BarberFlow.API.Interfaces
         #endregion
 
         #region Visão: Cliente
-        Task<Agendamento?> ObterProximoAgendamentoCliente(long clienteId);
-        Task<List<Agendamento>> ObterUltimosPorCliente(long clienteId, int quantidade);
+        Task<AgendamentoDetalhesDto?> ObterProximoAgendamentoCliente(long clienteId);
+        Task<List<AgendamentoDetalhesDto>> ObterUltimosPorCliente(long clienteId, int quantidade);
         #endregion
 
         #region Visão: Profissional e Admin
-        Task<List<Agendamento>> ObterAgendaPorPeriodo(long? profissionalId, long empresaId, DateTime inicio, DateTime fim, List<StatusAgendamento> statusFiltro);
+        Task<List<AgendamentoDetalhesDto>> ObterAgendaPorPeriodo(long? profissionalId, long empresaId, DateTime inicio, DateTime fim, List<StatusAgendamento> statusFiltro);
         Task<decimal> ObterFaturamentoPorDia(long empresaId, DateTime data);
         Task<int> ContarAgendamentoPorDia(long empresaId, DateTime data);
         #endregion
