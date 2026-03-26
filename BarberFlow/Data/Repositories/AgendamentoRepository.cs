@@ -1,10 +1,11 @@
 ﻿using BarberFlow.API.Data.Context;
+using BarberFlow.API.DTOs.Agendamento;
 using BarberFlow.API.Enums;
 using BarberFlow.API.Interfaces;
 using BarberFlow.API.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace BarberFlow.API.Data.Repositories
+namespace BarberFlow.API.Data.Repositories 
 {
     public class AgendamentoRepository : IAgendamentoRepository
     {
@@ -43,33 +44,49 @@ namespace BarberFlow.API.Data.Repositories
         public async Task<Agendamento?> ObterPorId(long id)
         {
             return await _appDbContext.Agendamentos
+                .IgnoreQueryFilters()
                 .Include(a => a.Empresa)
-                .Include(a => a.Servico)
-                .Include(a => a.Profissional).ThenInclude(p => p.Usuario)
+                .Include(a => a.ProfissionalServico).ThenInclude(p => p.Servico)
+                .Include(a => a.ProfissionalServico).ThenInclude(p => p.Profissional).ThenInclude(p => p.Usuario)
                 .Include(a => a.Cliente).ThenInclude(c => c.Usuario)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(a => a.Id == id);
         }
 
-        // Busca agenda filtrada por período (Pode ser de um profissional específico ou da empresa toda)
-        public async Task<List<Agendamento>> ObterAgendaPorPeriodo(long? profissionalId, long empresaId, DateTime inicio, DateTime fim, List<StatusAgendamento> statusFiltro)
+        // Busca agenda filtrada por período (Pode ser de um profissional específico ou da empresa toda)]
+        public async Task<List<AgendamentoDetalhesDto>> ObterAgendaPorPeriodo(long? profissionalId, long empresaId, DateTime inicio, DateTime fim, List<StatusAgendamento> statusFiltro)
         {
             var query = _appDbContext.Agendamentos
+                .IgnoreQueryFilters()
                 .AsNoTracking()
-                .Include(a => a.Servico)
-                .Include(a => a.Profissional).ThenInclude(p => p.Usuario)
-                .Include(a => a.Cliente).ThenInclude(c => c.Usuario)
                 .Where(a => a.EmpresaId == empresaId &&
                             a.DataHoraInicio >= inicio &&
                             a.DataHoraInicio <= fim &&
-                            statusFiltro.Contains(a.Status)
-                );
+                            statusFiltro.Contains(a.Status));
 
             if (profissionalId.HasValue && profissionalId > 0)
             {
-                query = query.Where(a => a.ProfissionalId == profissionalId);
+                query = query.Where(a => a.ProfissionalServico.ProfissionalId == profissionalId);
             }
 
-            return await query.OrderBy(a => a.DataHoraInicio).ToListAsync();
+            return await query
+                .OrderBy(a => a.DataHoraInicio)
+                .Select(a => new AgendamentoDetalhesDto
+                {
+                    Id = a.Id,
+                    ClienteId = a.ClienteId,
+                    ProfissionalId = a.ProfissionalServico.ProfissionalId,
+                    ServicoId = a.ProfissionalServico.ServicoId,
+                    DataHoraInicio = a.DataHoraInicio,
+                    DataHoraFim = a.DataHoraFim,
+                    Status = a.Status,
+                    PrecoNoMomento = a.PrecoNoMomento,
+                    NomeEmpresa = a.Empresa.Nome,
+                    NomeCliente = a.Cliente.Usuario.Nome,
+                    NomeProfissional = a.ProfissionalServico.Profissional.Usuario.Nome,
+                    NomeServico = a.ProfissionalServico.Servico.Nome
+                })
+                .ToListAsync();
         }
 
         #endregion
@@ -83,6 +100,7 @@ namespace BarberFlow.API.Data.Repositories
             var fimDia = data.Date.AddDays(1).AddTicks(-1);
 
             return await _appDbContext.Agendamentos
+                .IgnoreQueryFilters()
                 .AsNoTracking()
                 .Where(a => a.EmpresaId == empresaId &&
                             a.DataHoraInicio >= inicioDia &&
@@ -98,6 +116,7 @@ namespace BarberFlow.API.Data.Repositories
             var fimDia = data.Date.AddDays(1).AddTicks(-1);
 
             return await _appDbContext.Agendamentos
+                .IgnoreQueryFilters()
                 .AsNoTracking()
                 .Where(a => a.EmpresaId == empresaId &&
                             a.DataHoraInicio >= inicioDia &&
@@ -111,29 +130,57 @@ namespace BarberFlow.API.Data.Repositories
         #region Consultas: Cliente
 
         // Localiza o compromisso mais próximo que o cliente ainda irá realizar
-        public async Task<Agendamento?> ObterProximoAgendamentoCliente(long clienteId)
+        public async Task<AgendamentoDetalhesDto?> ObterProximoAgendamentoCliente(long clienteId)
         {
             return await _appDbContext.Agendamentos
+                .IgnoreQueryFilters()
                 .AsNoTracking()
-                .Include(a => a.Servico)
-                .Include(a => a.Profissional).ThenInclude(p => p.Usuario)
                 .Where(a => a.ClienteId == clienteId &&
                             a.DataHoraInicio >= DateTime.UtcNow &&
                             (a.Status == StatusAgendamento.Confirmado || a.Status == StatusAgendamento.Pendente))
                 .OrderBy(a => a.DataHoraInicio)
+                .Select(a => new AgendamentoDetalhesDto
+                {
+                    Id = a.Id,
+                    ClienteId = a.ClienteId,
+                    ProfissionalId = a.ProfissionalServico.ProfissionalId,
+                    ServicoId = a.ProfissionalServico.ServicoId,
+                    DataHoraInicio = a.DataHoraInicio,
+                    DataHoraFim = a.DataHoraFim,
+                    Status = a.Status,
+                    PrecoNoMomento = a.PrecoNoMomento,
+                    NomeEmpresa = a.Empresa.Nome,
+                    NomeCliente = a.Cliente.Usuario.Nome,
+                    NomeProfissional = a.ProfissionalServico.Profissional.Usuario.Nome,
+                    NomeServico = a.ProfissionalServico.Servico.Nome
+                })
                 .FirstOrDefaultAsync();
         }
 
         // Traz os últimos registros do cliente (Histórico de visitas)
-        public async Task<List<Agendamento>> ObterUltimosPorCliente(long clienteId, int quantidade)
+        public async Task<List<AgendamentoDetalhesDto>> ObterUltimosPorCliente(long clienteId, int quantidade)
         {
             return await _appDbContext.Agendamentos
+                .IgnoreQueryFilters()
                 .AsNoTracking()
-                .Include(a => a.Servico)
-                .Include(a => a.Profissional).ThenInclude(p => p.Usuario)
                 .Where(a => a.ClienteId == clienteId)
                 .OrderByDescending(a => a.DataHoraInicio)
                 .Take(quantidade)
+                .Select(a => new AgendamentoDetalhesDto
+                {
+                    Id = a.Id,
+                    ClienteId = a.ClienteId,
+                    ProfissionalId = a.ProfissionalServico.ProfissionalId,
+                    ServicoId = a.ProfissionalServico.ServicoId,
+                    DataHoraInicio = a.DataHoraInicio,
+                    DataHoraFim = a.DataHoraFim,
+                    Status = a.Status,
+                    PrecoNoMomento = a.PrecoNoMomento,
+                    NomeEmpresa = a.Empresa.Nome,
+                    NomeCliente = a.Cliente.Usuario.Nome,
+                    NomeProfissional = a.ProfissionalServico.Profissional.Usuario.Nome,
+                    NomeServico = a.ProfissionalServico.Servico.Nome
+                })
                 .ToListAsync();
         }
 
@@ -162,7 +209,7 @@ namespace BarberFlow.API.Data.Repositories
         public async Task<bool> TemConflitoAgendamento(long profissionalId, DateTime inicio, DateTime fim, long? agendamentoIdParaIgnorar = null)
         {
             return await _appDbContext.Agendamentos
-                .AnyAsync(a => a.ProfissionalId == profissionalId &&
+                .AnyAsync(a => a.ProfissionalServico.ProfissionalId == profissionalId &&
                                (agendamentoIdParaIgnorar == null || a.Id != agendamentoIdParaIgnorar) &&
                                a.Status != StatusAgendamento.Cancelado &&
                                inicio < a.DataHoraFim && fim > a.DataHoraInicio
