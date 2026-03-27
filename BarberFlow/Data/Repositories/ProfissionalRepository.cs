@@ -38,7 +38,7 @@ namespace BarberFlow.API.Data.Repositories
                 .Where(p => p.EmpresaId == empresaId && !p.IsDeleted && p.Ativo)
                 .Include(p => p.Usuario)
                 .Include(p => p.Empresa)
-                .Include(p => p.HorarioProfissional)
+                .Include(p => p.HorariosProfissionais)
                 .Include(p => p.ProfissionalServicos)
                 .AsNoTracking()
                 .ToListAsync();
@@ -49,7 +49,7 @@ namespace BarberFlow.API.Data.Repositories
             return await _appDbContext.Profissionais
                 .Include(p => p.Usuario)
                 .Include(p => p.Empresa)
-                .Include(p => p.HorarioProfissional)
+                .Include(p => p.HorariosProfissionais)
                 .Include(p => p.ProfissionalServicos)
                 .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted && p.Ativo);
         }
