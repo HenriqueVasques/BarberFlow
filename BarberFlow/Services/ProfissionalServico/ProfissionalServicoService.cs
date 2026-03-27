@@ -1,6 +1,7 @@
 ﻿using BarberFlow.API.Data.Repositories;
 using BarberFlow.API.DTOs;
 using BarberFlow.API.Interfaces;
+using BarberFlow.API.Models;
 
 namespace BarberFlow.API.Services
 {
@@ -22,10 +23,10 @@ namespace BarberFlow.API.Services
             if (dto == null)
                 throw new Exception("Os dados não foram preenchidos.");
 
-            var profissional = _profissionalRepository.ObterPorId(dto.ProfissionalId)
+            var profissional = await _profissionalRepository.ObterPorId(dto.ProfissionalId)
                 ?? throw new Exception("Profissional não encontrado.");
 
-            var servico = _servicoRepository.ObterPorId(dto.ServicoId)
+            var servico = await _servicoRepository.ObterPorId(dto.ServicoId)
                 ?? throw new Exception("Serviço não encontrado.");
 
             var profissionalServico = new ProfissionalServico
@@ -41,7 +42,9 @@ namespace BarberFlow.API.Services
             };
 
             await _profissionalServicoRepository.Adicionar(profissionalServico);
-            return profissionalServico;
+
+            return await _profissionalServicoRepository.ObterPorId(profissionalServico.Id)
+               ?? throw new Exception("Erro crítico ao recuperar o serviço do profissional após a criação.");
         }
 
         public async Task<ProfissionalServico> AtualizarProfissionalServico(long id, ProfissionalServicoUpdateDto dto)
