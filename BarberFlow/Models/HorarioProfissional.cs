@@ -1,4 +1,5 @@
 ﻿using BarberFlow.API.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
 public class HorarioProfissional
 {
@@ -19,5 +20,6 @@ public class HorarioProfissional
 
     // Navigation properties
     public Empresa Empresa { get; set; }
+    [ForeignKey("ProfissionalId")]
     public Profissional Profissional { get; set; }
 }
