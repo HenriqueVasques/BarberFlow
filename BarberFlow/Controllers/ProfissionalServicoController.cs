@@ -17,8 +17,8 @@ namespace BarberFlow.API.Controllers
             _profissionalServicoService = profissionalServicoService;
         }
 
-        [Authorize(Roles = "Admin")]
-        [HttpPost("admin/criar/{empresaId}")]
+        //[Authorize(Roles = "Admin")]
+        [HttpPost("admin/criar/")]
         public async Task<IActionResult> CriarProfissionalServico(ProfissionalServicoCreateDto dto)
         {
             try
@@ -37,7 +37,7 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPut("admin/atualizar/{id}")]
         public async Task<IActionResult> AtualizarProfissionalServico(long id, ProfissionalServicoUpdateDto dto)
         {
@@ -57,7 +57,7 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpDelete("admin/remover/{id}")]
         public async Task<IActionResult> DeletarProfissionalServico(long id)
         {
@@ -78,7 +78,7 @@ namespace BarberFlow.API.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpGet("admin/obter-pelo-id/{id}")]
         public async Task<IActionResult> ObterPorIdAdmin(long id)
         {
@@ -98,7 +98,7 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpGet("admin/obter-pelo-profissional-id/{profissionalId}")]
         public async Task<IActionResult> ObterPorProfissionalIdAdmin(long profissionalId)
         {
@@ -129,7 +129,7 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Cliente")]
+        //[Authorize(Roles = "Cliente")]
         [HttpGet("cliente/obter-pelo-id/{id}")]
         public async Task<IActionResult> ObterPorIdCliente(long id)
         {
@@ -149,7 +149,7 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        [Authorize(Roles = "Cliente")]
+        //[Authorize(Roles = "Cliente")]
         [HttpGet("cliente/obter-pelo-profissional-id/{profissionalId}")]
         public async Task<IActionResult> ObterPorProfissionalIdCliente(long profissionalId)
         {
