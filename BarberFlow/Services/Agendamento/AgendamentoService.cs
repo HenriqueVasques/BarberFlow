@@ -140,6 +140,9 @@ namespace BarberFlow.API.Services
             if (inicio >= fim)
                 throw new Exception("A data final precisa ser maior que a inicial");
 
+            if ((fim - inicio).TotalDays > 365)
+                throw new Exception("O período máximo de consulta é de 1 ano.");
+
             return await _agendamentoRepository.ObterAgendaPorPeriodo(profissionalId, empresaId, inicio, fim, statusFiltro);
         }
 
