@@ -11,5 +11,5 @@
             Task<Empresa?> ObterPorId(long id);
             Task<bool> ExisteCnpj(string cnpj);
             Task<Empresa?> ObterPorSlug(string slug);              
-    }
+        }
     }
