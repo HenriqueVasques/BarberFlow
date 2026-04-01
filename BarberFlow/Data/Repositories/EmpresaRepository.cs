@@ -40,6 +40,7 @@ using BarberFlow.API.Interfaces;
             public async Task<Empresa?> ObterPorId(long id)
             {
                 return await _appDbContext.Empresas
+                .Include(e => e.HorariosFuncionamentoEmpresa)
                 .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted && e.Ativo);
             }
 
@@ -49,6 +50,6 @@ using BarberFlow.API.Interfaces;
             {
                 return await _appDbContext.Empresas.AsNoTracking().FirstOrDefaultAsync(e => e.Slug == slug.ToLower() && !e.IsDeleted && e.Ativo); 
             }
-
         }
+        
     }
