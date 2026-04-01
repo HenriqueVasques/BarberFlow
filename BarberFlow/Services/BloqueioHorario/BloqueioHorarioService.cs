@@ -35,13 +35,11 @@ namespace BarberFlow.API.Services
             var profissional = await _repositoryProfissional.ObterPorId(dto.ProfissionalId)
                 ?? throw new Exception($"Profissional com id {dto.ProfissionalId} não encontrado.");
 
-            var conflitoAgendamento = await _repositoryAgendamento.TemConflitoAgendamento(profissional.Id, dto.DataHoraInicio, dto.DataHoraFim);
-            if (conflitoAgendamento)
-                throw new Exception("O profissional possui agendamento(s) conflitante(s) com o período de bloqueio.");
-
-            var conflitoBloqueio = await _repositoryAgendamento.TemConflitoBloqueio(profissional.Id, dto.DataHoraInicio, dto.DataHoraFim);
-            if (conflitoBloqueio)
-                throw new Exception("O profissional possui bloqueio(s) conflitante(s) com o período de bloqueio.");
+            var ocupado = await _repositoryAgendamento.EstaOcupado(profissional.Id, dto.DataHoraInicio, dto.DataHoraFim);
+            if (ocupado)
+            {
+                throw new Exception("O profissional já possui um agendamento ou bloqueio neste horário.");
+            }
 
             if (dto.DataHoraFim <= dto.DataHoraInicio)
                 throw new Exception("A data de término do bloqueio deve ser posterior à data de início.");
@@ -72,13 +70,11 @@ namespace BarberFlow.API.Services
                 throw new Exception($"Bloqueio de horário com id {id} não encontrado.");
             }
 
-            var conflitoAgendamento = await _repositoryAgendamento.TemConflitoAgendamento(bloqueio.ProfissionalId, dto.DataHoraInicio, dto.DataHoraFim);
-            if (conflitoAgendamento)
-                throw new Exception("O profissional possui agendamento(s) conflitante(s) com o período de bloqueio.");
-
-            var conflitoBloqueio = await _repositoryAgendamento.TemConflitoBloqueio(bloqueio.ProfissionalId, dto.DataHoraInicio, dto.DataHoraFim, bloqueioIdParaIgnorar:id);
-            if (conflitoBloqueio)
-                throw new Exception("O profissional possui bloqueio(s) conflitante(s) com o período de bloqueio.");
+            var ocupado = await _repositoryAgendamento.EstaOcupado(bloqueio.ProfissionalId, dto.DataHoraInicio, dto.DataHoraFim, bloqueioIdParaIgnorar: id);
+            if (ocupado)
+            {
+                throw new Exception("O profissional já possui um agendamento ou bloqueio neste horário.");
+            }
 
             if (dto.DataHoraFim <= dto.DataHoraInicio)
                 throw new Exception("A data de término do bloqueio deve ser posterior à data de início.");
