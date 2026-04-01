@@ -5,7 +5,6 @@ namespace BarberFlow.API.Models
 {
     public class Usuario
     {
-        private string senha;
         #region Properties
         public long Id { get; set; }
         public long EmpresaId { get; set; }
