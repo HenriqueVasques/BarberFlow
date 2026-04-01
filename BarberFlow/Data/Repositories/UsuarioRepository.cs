@@ -56,7 +56,6 @@ namespace BarberFlow.API.Data.Repositories
         {
             return await _appDbContext.Usuarios
                 .Where(u => u.EmpresaId == empresaId && !u.IsDeleted && u.Ativo)
-                .Include(u => u.Empresa)
                 .AsNoTracking()
                 .ToListAsync();
         }
