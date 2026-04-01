@@ -12,8 +12,11 @@ public class HorarioProfissional
     public TimeOnly HoraFim { get; set; }
 
 
-    public TimeOnly? HoraInicioAlmoco { get; set; }
-    public TimeOnly? HoraFimAlmoco { get; set; }
+    public TimeOnly HoraInicioAlmoco { get; set; }
+    public TimeOnly HoraFimAlmoco { get; set; }
+
+    public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
+    public DateTime DataAtualizacao { get; set; } = DateTime.UtcNow;
 
     public bool Ativo { get; set; } = true;
     public bool IsDeleted { get; set; } = false;
