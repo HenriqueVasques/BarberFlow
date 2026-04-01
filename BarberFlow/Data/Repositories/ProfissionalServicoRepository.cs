@@ -46,8 +46,7 @@ namespace BarberFlow.API.Data.Repositories
                 .ToListAsync();                   
         }
 
-        #region Método Privado de Apoio
-
+        #region Método Privado de Apoio         
         // Este método centraliza a lógica de filtros para não repetir código em cada busca
         private IQueryable<ProfissionalServico> GerarQueryBase(bool apenasAtivos, bool incluirDeletados)
         {
@@ -64,7 +63,6 @@ namespace BarberFlow.API.Data.Repositories
 
             return query;
         }
-
         #endregion
     }
 }
