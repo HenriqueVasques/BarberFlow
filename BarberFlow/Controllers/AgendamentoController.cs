@@ -224,11 +224,8 @@ namespace BarberFlow.API.Controllers
 
         #region Métodos Auxiliares (Private)
 
-        // Converte a entidade de banco para o DTO de resposta, protegendo dados sensíveis
         private static AgendamentoResponseDto MapearParaResponseDto(Agendamento agendamento)
         {
-            if (agendamento == null) return null;
-
             return new AgendamentoResponseDto
             {
                 Id = agendamento.Id,
