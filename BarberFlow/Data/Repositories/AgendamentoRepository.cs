@@ -191,8 +191,11 @@ namespace BarberFlow.API.Data.Repositories
         // Verifica se o profissional está livre (Checa tanto agendamentos quanto bloqueios manuais)
         public async Task<bool> EstaOcupado(long profissionalId, DateTime inicio, DateTime fim, long? agendamentoIdParaIgnorar = null, long? bloqueioIdParaIgnorar = null)
         {
-            return await TemConflitoAgendamento(profissionalId, inicio, fim, agendamentoIdParaIgnorar) ||
-                   await TemConflitoBloqueio(profissionalId, inicio, fim, bloqueioIdParaIgnorar);
+            var temConflito = await TemConflitoAgendamento(profissionalId, inicio, fim, agendamentoIdParaIgnorar) ||
+                              await TemConflitoBloqueio(profissionalId, inicio, fim, bloqueioIdParaIgnorar) ||
+                              await EstaForaDoHorarioTrabalho(profissionalId, inicio, fim);
+
+            return temConflito;
         }
 
         // Valida sobreposição com bloqueios de horário (Ex: Almoço, Folga)
@@ -202,7 +205,8 @@ namespace BarberFlow.API.Data.Repositories
                 .AnyAsync(b => b.ProfissionalId == profissionalId &&
                                (bloqueioIdParaIgnorar == null || b.Id != bloqueioIdParaIgnorar) &&
                                !b.IsDeleted &&
-                               inicio < b.DataHoraFim && fim > b.DataHoraInicio);
+                               inicio < b.DataHoraFim && fim > b.DataHoraInicio
+                );
         }
 
         // Valida sobreposição com outros agendamentos já marcados
@@ -214,6 +218,25 @@ namespace BarberFlow.API.Data.Repositories
                                a.Status != StatusAgendamento.Cancelado &&
                                inicio < a.DataHoraFim && fim > a.DataHoraInicio
                 );
+        }
+
+        public async Task<bool> EstaForaDoHorarioTrabalho(long profissionalId, DateTime inicio, DateTime fim)
+        {
+            var horaInicioAgendamento = TimeOnly.FromDateTime(inicio);
+            var horaFimAgendamento = TimeOnly.FromDateTime(fim);
+
+            // Verificamos se EXISTE um horário que CUBRA o agendamento
+            var possuiHorarioCompativel = await _appDbContext.HorarioProfissionais
+                .AnyAsync(hp => hp.ProfissionalId == profissionalId &&
+                                hp.DiaSemana == inicio.DayOfWeek &&
+                                hp.Ativo && !hp.IsDeleted &&
+                                hp.HoraInicio <= horaInicioAgendamento &&
+                                hp.HoraFim >= horaFimAgendamento &&
+                                !(horaInicioAgendamento < hp.HoraFimAlmoco && horaFimAgendamento > hp.HoraInicioAlmoco)
+                );
+
+            // Se possuiHorarioCompativel for false, retorna true (tem conflito/está fora)
+            return !possuiHorarioCompativel;
         }
 
         #endregion

@@ -27,6 +27,7 @@ namespace BarberFlow.API.Interfaces
         Task<bool> EstaOcupado(long profissionalId, DateTime inicio, DateTime fim, long? agendamentoIdParaIgnorar = null, long? bloqueioIdParaIgnorar = null);
         Task<bool> TemConflitoAgendamento(long profissionalId, DateTime inicio, DateTime fim, long? agendamentoIdParaIgnorar = null);
         Task<bool> TemConflitoBloqueio(long profissionalId, DateTime inicio, DateTime fim, long? bloqueioIdParaIgnorar = null);
+        Task<bool> EstaForaDoHorarioTrabalho(long profissionalId, DateTime inicio, DateTime fim);
         #endregion
     }
 }

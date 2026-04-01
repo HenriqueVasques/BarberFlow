@@ -38,7 +38,7 @@ namespace BarberFlow.API.Services
             var ocupado = await _repositoryAgendamento.EstaOcupado(profissional.Id, dto.DataHoraInicio, dto.DataHoraFim);
             if (ocupado)
             {
-                throw new Exception("O profissional já possui um agendamento ou bloqueio neste horário.");
+                throw new Exception("O profissional já possui um agendamento, bloqueio ou ainda, não trabalha neste horário.");
             }
 
             if (dto.DataHoraFim <= dto.DataHoraInicio)
@@ -73,7 +73,7 @@ namespace BarberFlow.API.Services
             var ocupado = await _repositoryAgendamento.EstaOcupado(bloqueio.ProfissionalId, dto.DataHoraInicio, dto.DataHoraFim, bloqueioIdParaIgnorar: id);
             if (ocupado)
             {
-                throw new Exception("O profissional já possui um agendamento ou bloqueio neste horário.");
+                throw new Exception("O profissional já possui um agendamento, bloqueio ou ainda, não trabalha neste horário.");
             }
 
             if (dto.DataHoraFim <= dto.DataHoraInicio)
