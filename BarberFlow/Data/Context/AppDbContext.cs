@@ -9,7 +9,7 @@ namespace BarberFlow.API.Data.Context
         public AppDbContext(DbContextOptions dbContextOptions) : base(dbContextOptions) { }
 
         public DbSet<Agendamento> Agendamentos { get; set; }
-        public DbSet<BloqueioHorario> Bloqueio_Horarios { get; set; }
+        public DbSet<BloqueioHorario> BloqueioHorarios { get; set; }
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Empresa> Empresas { get; set; }
         public DbSet<HorarioFuncionamentoEmpresa> HorarioFuncionamentoEmpresas { get; set; }

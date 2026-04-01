@@ -16,25 +16,25 @@ namespace BarberFlow.API.Data.Repositories
 
         public async Task Adicionar(BloqueioHorario bloqueio)
         {
-           await _appDbContext.Bloqueio_Horarios.AddAsync(bloqueio);
+           await _appDbContext.BloqueioHorarios.AddAsync(bloqueio);
            await _appDbContext.SaveChangesAsync();
         }
 
         public async Task Atualizar(BloqueioHorario bloqueio)
         {
-            _appDbContext.Bloqueio_Horarios.Update(bloqueio);
+            _appDbContext.BloqueioHorarios.Update(bloqueio);
             await _appDbContext.SaveChangesAsync();
         }
 
         public async Task Deletar(BloqueioHorario bloqueio)
         {
-            _appDbContext.Bloqueio_Horarios.Update(bloqueio);
+            _appDbContext.BloqueioHorarios.Update(bloqueio);
             await _appDbContext.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<BloqueioHorario>> ObterPorEmpresaId(long empresaId)
         {
-            return await _appDbContext.Bloqueio_Horarios
+            return await _appDbContext.BloqueioHorarios
                 .Where(b=> b.EmpresaId == empresaId && !b.IsDeleted)
                 .Include(b => b.Empresa)
                 .Include(b => b.Profissional).ThenInclude(b => b.Usuario)
@@ -45,7 +45,7 @@ namespace BarberFlow.API.Data.Repositories
 
         public async Task<BloqueioHorario?> ObterPorId(long id)
         {
-            return await _appDbContext.Bloqueio_Horarios
+            return await _appDbContext.BloqueioHorarios
                 .Include(b => b.Profissional)
                 .ThenInclude(p => p.Usuario)
                 .FirstOrDefaultAsync(b => b.Id == id && !b.IsDeleted);
@@ -53,7 +53,7 @@ namespace BarberFlow.API.Data.Repositories
 
         public async Task<IEnumerable<BloqueioHorario>> ObterPorProfissionalId(long profissionalId)
         {
-            return await _appDbContext.Bloqueio_Horarios
+            return await _appDbContext.BloqueioHorarios
                 .Where(b => b.ProfissionalId == profissionalId && !b.IsDeleted)
                 .Include(b => b.Empresa)
                 .Include(b => b.Profissional).ThenInclude(b => b.Usuario)

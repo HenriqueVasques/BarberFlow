@@ -201,7 +201,7 @@ namespace BarberFlow.API.Data.Repositories
         // Valida sobreposição com bloqueios de horário (Ex: Almoço, Folga)
         public async Task<bool> TemConflitoBloqueio(long profissionalId, DateTime inicio, DateTime fim, long? bloqueioIdParaIgnorar = null)
         {
-            return await _appDbContext.Bloqueio_Horarios
+            return await _appDbContext.BloqueioHorarios
                 .AnyAsync(b => b.ProfissionalId == profissionalId &&
                                (bloqueioIdParaIgnorar == null || b.Id != bloqueioIdParaIgnorar) &&
                                !b.IsDeleted &&
