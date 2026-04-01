@@ -122,6 +122,13 @@ namespace BarberFlow.API.Data.Context
                 .HasForeignKey(u => u.EmpresaId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // ---  HORARIO FUNCIONAMENTO EMPRESA  ---
+            modelBuilder.Entity<HorarioFuncionamentoEmpresa>()
+                .HasOne(hfe => hfe.Empresa)
+                .WithMany(e => e.HorariosFuncionamentoEmpresa)
+                .HasForeignKey(hfe => hfe.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // --- ÍNDICES ÚNICOS ---
 
             // Impede duplicar o mesmo serviço para o mesmo profissional
