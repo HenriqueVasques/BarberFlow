@@ -19,8 +19,10 @@
             public string CNPJ { get; set; }
             public DateTime DataCriacao { get; set; }
             public DateTime DataAtualizacao { get; set; }
+            //nav prop
             public ICollection<Usuario> Usuarios { get; set; }
             public ICollection<Servico> Servicos { get; set; }
+            public ICollection<HorarioFuncionamentoEmpresa> HorariosFuncionamentoEmpresa { get; set; }
             #endregion
 
             #region Constructors
