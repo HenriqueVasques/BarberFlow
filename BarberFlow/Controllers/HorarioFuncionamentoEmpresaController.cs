@@ -20,7 +20,7 @@ namespace BarberFlow.API.Controllers
         #region Rotas: Admin (Painel de Gestão)
 
         // Aplica a trava de Admin para todo esse bloco
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost("admin/criar/{empresaId}")]
         public async Task<IActionResult> CriarHorarioFuncionamentoEmpresa(long empresaId, [FromBody] HorarioFuncionamentoEmpresaCreateDto dto)
         {
@@ -42,7 +42,7 @@ namespace BarberFlow.API.Controllers
             }         
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPut("admin/atualizar/{id}")]
         public async Task<IActionResult> AtualizarHorarioFuncionamentoEmpresa(long id, [FromBody] HorarioFuncionamentoEmpresaUpadteDto dto)
         {
@@ -64,7 +64,7 @@ namespace BarberFlow.API.Controllers
             }         
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpDelete("admin/remover/{id}")]
         public async Task<IActionResult> DeletarHorarioFuncionamentoEmpresa(long id)
         {
@@ -85,7 +85,7 @@ namespace BarberFlow.API.Controllers
             }         
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpGet("admin/lista-completa/{empresaId}")]
         public async Task<IActionResult> ObterTodosPorEmpresaParaAdmin(long empresaId)
         {
@@ -115,7 +115,7 @@ namespace BarberFlow.API.Controllers
             }
         }   
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpGet("admin/obter-pelo-id/{id}")]
         public async Task<IActionResult> ObterPorIdAdmin(long id)
         {
