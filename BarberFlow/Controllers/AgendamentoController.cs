@@ -46,10 +46,9 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var agendamento = await _agendamentoService.Cancelar(id);
-                var response = MapearParaResponseDto(agendamento);
+                await _agendamentoService.Cancelar(id);
 
-                return Ok(new { message = "Agendamento cancelado com sucesso!", dados = response });
+                return Ok(new { message = "Agendamento cancelado com sucesso!" });
             }
             catch (Exception ex)
             {
@@ -63,10 +62,9 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var agendamento = await _agendamentoService.Finalizar(id);
-                var response = MapearParaResponseDto(agendamento);
+                await _agendamentoService.Finalizar(id);
 
-                return Ok(new { message = "Agendamento finalizado com sucesso!", dados = response });
+                return Ok(new { message = "Agendamento finalizado com sucesso!" });
             }
             catch (Exception ex)
             {
@@ -128,11 +126,11 @@ namespace BarberFlow.API.Controllers
 
         // Retorna o histórico de atendimentos realizados pelo cliente
         [HttpGet("cliente/{clienteId}/historico")]
-        public async Task<IActionResult> ObterHistoricoCliente(long clienteId)
+        public async Task<IActionResult> ObterUltimosAgendamentosPorCliente(long clienteId)
         {
             try
             {
-                var agendamentos = await _agendamentoService.ObterHistoricoCliente(clienteId);
+                var agendamentos = await _agendamentoService.ObterUltimosAgendamentosPorCliente(clienteId);
 
                 return Ok(new
                 {
@@ -152,7 +150,7 @@ namespace BarberFlow.API.Controllers
 
         // Lista a agenda de um profissional específico para um período determinado
         [HttpGet("professional/agenda")]
-        public async Task<IActionResult> ObterAgendaProfissional([FromQuery] long profissionalId, [FromQuery] long empresaId, [FromQuery] DateTime inicio, [FromQuery] DateTime fim)
+        public async Task<IActionResult> ObterAgendaProfissional([FromQuery] long profissionalId, [FromQuery] long empresaId, [FromQuery] DateOnly inicio, [FromQuery] DateOnly fim)
         {
             try
             {
@@ -181,7 +179,7 @@ namespace BarberFlow.API.Controllers
 
         // Consolida faturamento e volume de atendimentos de um dia específico
         [HttpGet("admin/{empresaId}/faturamento-diario")]
-        public async Task<IActionResult> ObterResumoPorDia(long empresaId, DateTime data)
+        public async Task<IActionResult> ObterResumoPorDia(long empresaId, DateOnly data)
         {
             try
             {
@@ -200,7 +198,7 @@ namespace BarberFlow.API.Controllers
 
         // Gera relatório geral de agendamentos de toda a empresa (visão gerencial)
         [HttpGet("admin/{empresaId}/historico-geral")]
-        public async Task<IActionResult> HistoricoGeralAdmin(long empresaId, [FromQuery] DateTime inicio, [FromQuery] DateTime fim)
+        public async Task<IActionResult> HistoricoGeralAdmin(long empresaId, [FromQuery] DateOnly inicio, [FromQuery] DateOnly fim)
         {
             try
             {
@@ -229,10 +227,6 @@ namespace BarberFlow.API.Controllers
             return new AgendamentoResponseDto
             {
                 Id = agendamento.Id,
-                NomeProfissional = agendamento.ProfissionalServico?.Profissional?.Usuario?.Nome ?? "N/A",
-                NomeCliente = agendamento.Cliente?.Usuario?.Nome ?? "N/A",
-                NomeServico = agendamento.ProfissionalServico?.Servico?.Nome ?? "N/A",
-                NomeEmpresa = agendamento.Empresa?.Nome ?? "N/A",
                 EmpresaId = agendamento.EmpresaId,
                 ClienteId = agendamento.ClienteId,
                 ProfissionalServicoId = agendamento.ProfissionalServicoId,
