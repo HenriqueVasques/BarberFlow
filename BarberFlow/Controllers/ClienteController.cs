@@ -1,7 +1,5 @@
 ﻿using BarberFlow.API.DTOs.Cliente;
-using BarberFlow.API.Models;
 using BarberFlow.API.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BarberFlow.API.Controllers
@@ -17,18 +15,16 @@ namespace BarberFlow.API.Controllers
             _clienteService = clienteService;
         }
 
+        #region Operações de Escrita (Ações de Comando)
+
+        // Solicita a criação de um novo cliente no sistema
         [HttpPost]
         public async Task<IActionResult> CriarCliente([FromBody] ClienteCreateDto dto)
         {
             try
             {
                 var cliente = await _clienteService.CriarCliente(dto);
-                var response = MapearParaResponseDto(cliente);
-                return StatusCode(201, new
-                {
-                    message = "Cliente criado com sucesso!",
-                    dados = response
-                });
+                return StatusCode(201, new { message = "Cliente criado com sucesso!", dados = cliente });
             }
             catch (Exception ex)
             {
@@ -36,18 +32,14 @@ namespace BarberFlow.API.Controllers
             }
         }
 
+        // Altera os dados cadastrais de um cliente existente
         [HttpPut("{id}")]
         public async Task<IActionResult> AtualizarCliente(long id, [FromBody] ClienteUpdateDto dto)
         {
             try
             {
-                var cliente = await _clienteService.AtualizarCliente(id, dto);
-                var response = MapearParaResponseDto(cliente);
-                return Ok(new
-                {
-                    message = "Cliente atualizado com sucesso!",
-                    dados = response
-                });
+                await _clienteService.AtualizarCliente(id, dto);
+                return Ok(new { message = "Cliente atualizado com sucesso!" });
             }
             catch (Exception ex)
             {
@@ -55,18 +47,14 @@ namespace BarberFlow.API.Controllers
             }
         }
 
+        // Realiza a exclusão lógica do cliente do sistema
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletarCliente(long id)
         {
             try
             {
-                var cliente = await _clienteService.DeletarCliente(id);
-                var response = MapearParaResponseDto(cliente);
-                return Ok(new
-                {
-                    message = "Cliente deletado com sucesso!",
-                    dados = response
-                });
+                await _clienteService.DeletarCliente(id);
+                return Ok(new { message = "Cliente deletado com sucesso!" });
             }
             catch (Exception ex)
             {
@@ -74,73 +62,70 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        [HttpGet("{empresaId}Clientes-Por-Empresa")]
-        public async Task<IActionResult> ObterClientesPorEmpresa(long empresaId)
+        #endregion
+
+        #region Operações de Leitura (Consultas)
+
+        // Recupera a lista de clientes ativos de uma empresa específica com paginação
+        [HttpGet("empresa/{empresaId}/clientes")]
+        public async Task<IActionResult> ObterClientesPorEmpresa(long empresaId, [FromQuery] int pagina = 1)
         {
             try
             {
-                var clientes = await _clienteService.ObterClientesPorEmpresa(empresaId);
-                var response = clientes.Select(c => new ClienteResponseDto
-                {
-                    Id = c.Id,
-                    Nome = c.Usuario.Nome,
-                    Email = c.Usuario.Email,
-                    Telefone = c.Telefone,
-                    Whatsapp = c.Whatsapp,
-                    EmpresaId = c.EmpresaId,
-                    UsuarioId = c.UsuarioId,
-                    DataCriacao = c.DataCriacao,
-                    DataAtualizacao = c.DataAtualizacao,
-                    IsDeleted = c.IsDeleted,
-                    Ativo = c.Ativo
-                });
-                return Ok(new
-                {
-                    message = "Clientes obtidos com sucesso!",
-                    dados = response
-                });
+                var clientes = await _clienteService.ObterClientesPorEmpresa(empresaId, incluirDeletados: false, pagina);
+                return Ok(new { message = "Clientes obtidos com sucesso!", dados = clientes });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { error = ex.Message });
             }
         }
 
-        [HttpGet("{id}Clientes-Por-Id")]
+        // Recupera o histórico de todos os clientes da empresa, incluindo os deletados (Audit)
+        [HttpGet("empresa/{empresaId}/historico")]
+        public async Task<IActionResult> ObterHistoricoClientesPorEmpresa(long empresaId, [FromQuery] int pagina = 1)
+        {
+            try
+            {
+                var clientes = await _clienteService.ObterClientesPorEmpresa(empresaId, incluirDeletados: true, pagina);
+                return Ok(new { message = "Histórico obtido com sucesso!", dados = clientes });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        // Busca os detalhes de um cliente específico pelo ID
+        [HttpGet("{id}")]
         public async Task<IActionResult> ObterClientePorId(long id)
         {
             try
             {
-                var cliente = await _clienteService.ObterClientePorId(id);
-                var response = MapearParaResponseDto(cliente);
-                return Ok(new
-                {
-                    message = "Cliente obtido com sucesso!",
-                    dados = response
-                });
+                var cliente = await _clienteService.ObterClientePorId(id, incluirDeletados: false);
+                return Ok(new { message = "Cliente obtido com sucesso!", dados = cliente });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { error = ex.Message });
             }
         }
 
-        private static ClienteResponseDto MapearParaResponseDto(Cliente cliente)
+        // Busca os detalhes de um cliente pelo ID, permitindo visualizar registros deletados
+        [HttpGet("{id}/historico")]
+        public async Task<IActionResult> ObterClientePorIdHistorico(long id)
         {
-            return new ClienteResponseDto
+            try
             {
-                Id = cliente.Id,
-                Nome = cliente.Usuario?.Nome ?? "N/A",
-                Email = cliente.Usuario?.Email ?? "N/A",
-                Telefone = cliente.Telefone,
-                Whatsapp = cliente.Whatsapp,
-                EmpresaId = cliente.EmpresaId,
-                UsuarioId = cliente.UsuarioId,
-                DataCriacao = cliente.DataCriacao,
-                DataAtualizacao = cliente.DataAtualizacao,
-                IsDeleted = cliente.IsDeleted,
-                Ativo = cliente.Ativo
-            };
+                var cliente = await _clienteService.ObterClientePorId(id, incluirDeletados: true);
+                return Ok(new { message = "Cliente histórico obtido com sucesso!", dados = cliente });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
+
+        #endregion
     }
 }
