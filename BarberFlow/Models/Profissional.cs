@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace BarberFlow.API.Models
+﻿namespace BarberFlow.API.Models
 {
     public class Profissional
     {
@@ -8,10 +6,10 @@ namespace BarberFlow.API.Models
         public long EmpresaId { get; set; }
         public long UsuarioId { get; set; }
         public decimal PercentualComissao { get; set; }
-        public bool Ativo { get; set; }
-        public bool IsDeleted { get; set; }
-        public DateTime DataCriacao { get; set; }
-        public DateTime DataAtualizacao { get; set; }
+        public bool Ativo { get; set; } = true;
+        public bool IsDeleted { get; set; } = false;
+        public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
+        public DateTime DataAtualizacao { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
         public Empresa Empresa { get; set; }

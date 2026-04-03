@@ -10,9 +10,9 @@ namespace BarberFlow.API.Models
         public DateTime DataHoraInicio { get; set; }
         public DateTime DataHoraFim { get; set; }
         public string Motivo { get; set; }
-        public DateTime DataCriacao { get; set; }
-        public DateTime DataAtualizacao { get; set; }
-        public bool IsDeleted { get; set; }
+        public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
+        public DateTime DataAtualizacao { get; set; } = DateTime.UtcNow;
+        public bool IsDeleted { get; set; } = false;
 
         //navegation properties
         public Empresa Empresa { get; set; }
