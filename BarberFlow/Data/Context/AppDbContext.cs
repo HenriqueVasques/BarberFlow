@@ -117,6 +117,11 @@ namespace BarberFlow.API.Data.Context
 
             // --- USUARIO ---
             modelBuilder.Entity<Usuario>()
+                .HasIndex(u => u.Nome)
+                .HasDatabaseName("IX_Usuario_Nome");
+        
+
+            modelBuilder.Entity<Usuario>()
                 .HasOne(u => u.Empresa)
                 .WithMany(e => e.Usuarios)
                 .HasForeignKey(u => u.EmpresaId)
