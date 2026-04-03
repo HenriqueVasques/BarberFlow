@@ -63,7 +63,7 @@ namespace BarberFlow.API.Services
         }
 
         // Valida e processa o cancelamento de um agendamento ativo
-        public async Task<Agendamento> Cancelar(long id)
+        public async Task Cancelar(long id)
         {
             var agendamento = await _agendamentoRepository.ObterPorId(id)
                 ?? throw new Exception($"Agendamento ID {id} não encontrado.");
@@ -75,11 +75,10 @@ namespace BarberFlow.API.Services
             agendamento.DataAtualizacao = DateTime.UtcNow;
 
             await _agendamentoRepository.Atualizar(agendamento);
-            return agendamento;
         }
 
         // Conclui o atendimento e atualiza o registro no banco
-        public async Task<Agendamento> Finalizar(long id)
+        public async Task Finalizar(long id)
         {
             var agendamento = await _agendamentoRepository.ObterPorId(id)
                 ?? throw new Exception($"Agendamento ID {id} não encontrado.");
@@ -91,7 +90,6 @@ namespace BarberFlow.API.Services
             agendamento.DataAtualizacao = DateTime.UtcNow;
 
             await _agendamentoRepository.Atualizar(agendamento);
-            return agendamento;
         }
 
         #endregion
@@ -110,18 +108,18 @@ namespace BarberFlow.API.Services
         #region Visão: Cliente
 
         // Consulta o repositório para buscar o próximo compromisso na agenda do cliente
-        public async Task<AgendamentoDetalhesDto?> ObterProximoAgendamentoCliente(long clienteId)
+        public async Task<AgendamentoResponseDto?> ObterProximoAgendamentoCliente(long clienteId)
         {
             return await _agendamentoRepository.ObterProximoAgendamentoCliente(clienteId);
         }
 
         // Obtém a lista histórica dos últimos atendimentos do cliente
-        public async Task<List<AgendamentoDetalhesDto>> ObterHistoricoCliente(long clienteId)
+        public async Task<List<AgendamentoResponseDto>> ObterUltimosAgendamentosPorCliente(long clienteId)
         {
             if (clienteId <= 0)
                 throw new Exception("ID do cliente inválido.");
 
-            return await _agendamentoRepository.ObterUltimosPorCliente(clienteId, 10);
+            return await _agendamentoRepository.ObterUltimosAgendamentosPorCliente(clienteId, 10);
         }
 
         #endregion
@@ -129,30 +127,32 @@ namespace BarberFlow.API.Services
         #region Visão: Profissional / Admin (Agenda e Relatórios)
 
         // Recupera a lista de agendamentos filtrada por período e status
-        public async Task<List<AgendamentoDetalhesDto>> ObterAgendaPorPeriodo(long? profissionalId, long empresaId, DateTime inicio, DateTime fim, List<StatusAgendamento> statusFiltro)
+        public async Task<List<AgendamentoResponseDto>> ObterAgendaPorPeriodo(long? profissionalId, long empresaId, DateOnly inicio, DateOnly fim, List<StatusAgendamento> statusFiltro)
         {
-            if (inicio == default || inicio == DateTime.MinValue)
-                throw new Exception("A data inicial precisa ser preenchida");
+            if (inicio == default)
+                throw new Exception("A data inicial precisa ser preenchida.");
 
-            if (fim == default || fim == DateTime.MinValue)
-                throw new Exception("A data final precisa ser preenchida");
+            if (fim == default)
+                throw new Exception("A data final precisa ser preenchida.");
 
-            if (inicio >= fim)
+            if (inicio > fim)
                 throw new Exception("A data final precisa ser maior que a inicial");
 
-            if ((fim - inicio).TotalDays > 365)
+            if ((fim.DayNumber - inicio.DayNumber) > 365)
                 throw new Exception("O período máximo de consulta é de 1 ano.");
 
             return await _agendamentoRepository.ObterAgendaPorPeriodo(profissionalId, empresaId, inicio, fim, statusFiltro);
         }
 
         // Consolida os dados financeiros e de volume para o resumo diário do dashboard
-        public async Task<DashboardResumoDto> ObterResumoPorDia(long empresaId, DateTime data)
+        public async Task<DashboardResumoDto> ObterResumoPorDia(long empresaId, DateOnly data)
         {
-            if (data == default || data == DateTime.MinValue)
-                throw new Exception("A data precisa ser preenchida");
-            if (data > DateTime.UtcNow)
-                throw new Exception("A data não pode ser maior que o dia de hoje");
+            if (data == default)
+                throw new Exception("A data precisa ser preenchida.");
+
+            var hoje = DateOnly.FromDateTime(DateTime.Today);
+            if (data > hoje)
+                throw new Exception("A data não pode ser maior que o dia de hoje.");
 
             var totalFaturamento = await _agendamentoRepository.ObterFaturamentoPorDia(empresaId, data);
             var quantidadeAtendimentos = await _agendamentoRepository.ContarAgendamentoPorDia(empresaId, data);
