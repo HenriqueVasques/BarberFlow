@@ -12,13 +12,15 @@ namespace BarberFlow.API.Services
         private readonly IProfissionalRepository _profissionalRepository;
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IEmpresaRepository _empresaRepository;
+        private readonly IAgendamentoRepository _agendamentoRepository;
         private readonly AppDbContext _appDbContext;
 
-        public ProfissionalService(IProfissionalRepository profissionalRepository,IUsuarioRepository usuarioRepository,IEmpresaRepository empresaRepository,AppDbContext appDbContext)
+        public ProfissionalService(IProfissionalRepository profissionalRepository,IUsuarioRepository usuarioRepository,IEmpresaRepository empresaRepository, IAgendamentoRepository agendamentoRepository , AppDbContext appDbContext)
         {
             _profissionalRepository = profissionalRepository;
             _usuarioRepository = usuarioRepository;
             _empresaRepository = empresaRepository;
+            _agendamentoRepository = agendamentoRepository;
             _appDbContext = appDbContext;
         }
 
@@ -47,6 +49,8 @@ namespace BarberFlow.API.Services
                 var usuario = new Usuario(
                     dto.Nome,
                     dto.Email,
+                    dto.Telefone,
+                    dto.Whatsapp,
                     senhaHash,
                     dto.EmpresaId,
                     PerfilUsuario.Profissional
@@ -90,6 +94,8 @@ namespace BarberFlow.API.Services
             }
 
             if (!string.IsNullOrWhiteSpace(dto.Nome)) profissional.Usuario.Nome = dto.Nome;
+            if (!string.IsNullOrWhiteSpace(dto.Telefone)) profissional.Usuario.Telefone = dto.Telefone;
+            if (!string.IsNullOrWhiteSpace(dto.Whatsapp)) profissional.Usuario.Whatsapp = dto.Whatsapp;
             profissional.Usuario.DataAtualizacao = DateTime.UtcNow;
             profissional.PercentualComissao = dto.PercentualComissao;
             profissional.DataAtualizacao = DateTime.UtcNow;
@@ -101,17 +107,41 @@ namespace BarberFlow.API.Services
 
         public async Task<Profissional?> DeletarProfissional(long id)
         {
+
             var profissional = await _profissionalRepository.ObterPorId(id);
             if (profissional == null)
                 throw new Exception($"Profissional com id {id} não encontrado.");
+
+            var hoje = DateOnly.FromDateTime(DateTime.UtcNow);
+            var futuroProximo = hoje.AddYears(2);
+
+            var statusAtivos = new List<StatusAgendamento>
+            {
+                StatusAgendamento.Pendente,
+                StatusAgendamento.Confirmado
+            };
+
+            var agendamentosFuturos = await _agendamentoRepository.ObterAgendaPorPeriodo(profissional.Id, profissional.EmpresaId, hoje, futuroProximo, statusAtivos);
+
+            if (agendamentosFuturos != null && agendamentosFuturos.Any())
+            {
+                throw new Exception($"Não é possível deletar o profissional {profissional.Usuario.Nome}. " +
+                                    $"Existem {agendamentosFuturos.Count} agendamentos pendentes ou confirmados na agenda dele");
+            }
 
             profissional.IsDeleted = true;
             profissional.Ativo = false;
             profissional.DataAtualizacao = DateTime.UtcNow;
 
-            profissional.Usuario.IsDeleted = true;
-            profissional.Usuario.Ativo = false;
-            profissional.Usuario.DataAtualizacao = DateTime.UtcNow;
+            if (profissional.Usuario != null)
+            {
+                profissional.Usuario.Telefone = "000000000";
+                profissional.Usuario.Whatsapp = "000000000";
+                profissional.Usuario.Nome = "Usuário Excluído";
+                profissional.Usuario.Email = $"excluido_{profissional.Id}@barberflow.com.br";
+                profissional.Usuario.SenhaHash = "";
+                profissional.Usuario.DataAtualizacao = DateTime.UtcNow;
+            }
 
             await _profissionalRepository.Deletar(profissional);
 
