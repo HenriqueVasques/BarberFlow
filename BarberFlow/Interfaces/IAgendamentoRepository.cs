@@ -13,14 +13,14 @@ namespace BarberFlow.API.Interfaces
         #endregion
 
         #region Visão: Cliente
-        Task<AgendamentoDetalhesDto?> ObterProximoAgendamentoCliente(long clienteId);
-        Task<List<AgendamentoDetalhesDto>> ObterUltimosPorCliente(long clienteId, int quantidade);
+        Task<AgendamentoResponseDto?> ObterProximoAgendamentoCliente(long clienteId);
+        Task<List<AgendamentoResponseDto>> ObterUltimosAgendamentosPorCliente(long clienteId, int quantidade);
         #endregion
 
         #region Visão: Profissional e Admin
-        Task<List<AgendamentoDetalhesDto>> ObterAgendaPorPeriodo(long? profissionalId, long empresaId, DateTime inicio, DateTime fim, List<StatusAgendamento> statusFiltro);
-        Task<decimal> ObterFaturamentoPorDia(long empresaId, DateTime data);
-        Task<int> ContarAgendamentoPorDia(long empresaId, DateTime data);
+        Task<List<AgendamentoResponseDto>> ObterAgendaPorPeriodo(long? profissionalId, long empresaId, DateOnly inicio, DateOnly fim, List<StatusAgendamento> statusFiltro, int pagina = 1);
+        Task<decimal> ObterFaturamentoPorDia(long empresaId, DateOnly data);
+        Task<int> ContarAgendamentoPorDia(long empresaId, DateOnly data);
         #endregion
 
         #region Validações e Regras de Conflito
