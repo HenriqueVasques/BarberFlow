@@ -136,7 +136,7 @@ namespace BarberFlow.API.Services
                 throw new Exception("A data final precisa ser preenchida.");
 
             if (inicio > fim)
-                throw new Exception("A data final precisa ser maior que a inicial");
+                throw new Exception("A data final precisa ser maior que a inicial.");
 
             if ((fim.DayNumber - inicio.DayNumber) > 365)
                 throw new Exception("O período máximo de consulta é de 1 ano.");
