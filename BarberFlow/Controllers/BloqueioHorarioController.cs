@@ -1,9 +1,5 @@
-﻿using BarberFlow.API.Data.Context;
-using BarberFlow.API.DTOs.Agendamento;
-using BarberFlow.API.DTOs.BloqueioHorario;
-using BarberFlow.API.Models;
+﻿using BarberFlow.API.DTOs.BloqueioHorario;
 using BarberFlow.API.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BarberFlow.API.Controllers
@@ -19,6 +15,9 @@ namespace BarberFlow.API.Controllers
             _bloqueioHorarioService = bloqueioHorarioService;
         }
 
+        #region Operações de Escrita (Ações de Comando)
+
+        // Solicita a criação de um novo bloqueio de horário (ex: folgas, almoço, manutenção)
         [HttpPost]
         public async Task<IActionResult> CriarBloqueioHorario([FromBody] BloqueioHorarioCreateDto dto)
         {
@@ -26,11 +25,10 @@ namespace BarberFlow.API.Controllers
             {
                 var bloqueioHorario = await _bloqueioHorarioService.CriarBloqueioHorario(dto);
 
-                var response = MapearParaResponseDto(bloqueioHorario);
-                return StatusCode(201, new
+                return CreatedAtAction(nameof(ObterPorEmpresaId), new { empresaId = dto.EmpresaId }, new
                 {
                     message = "Bloqueio de horário criado com sucesso!",
-                    dados = response
+                    dados = bloqueioHorario
                 });
             }
             catch (Exception ex)
@@ -39,26 +37,23 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        [HttpPut]
+        // Altera informações de um bloqueio existente, validando novos conflitos de agenda
+        [HttpPut("{id}")]
         public async Task<IActionResult> AtualizarBloqueioHorario(long id, [FromBody] BloqueioHorarioUpdateDto dto)
         {
             try
             {
-                var bloqueioHorario = await _bloqueioHorarioService.AtualizarBloqueioHorario(id, dto);
-                var response = MapearParaResponseDto(bloqueioHorario);
-                return Ok(new
-                {
-                    message = "Bloqueio de horário atualizado com sucesso!",
-                    dados = response
-                });
+                await _bloqueioHorarioService.AtualizarBloqueioHorario(id, dto);
+                return Ok(new { message = "Bloqueio de horário atualizado com sucesso!" });
             }
             catch (Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
             }
-
         }
-        [HttpDelete]
+
+        // Realiza a exclusão lógica do bloqueio, liberando o horário na agenda do profissional
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeletarBloqueioHorario(long id)
         {
             try
@@ -70,87 +65,96 @@ namespace BarberFlow.API.Controllers
             {
                 return BadRequest(new { error = ex.Message });
             }
-
         }
 
+        #endregion
+
+        #region Visão: Admin (Gestão da Empresa)
+
+        // Recupera os bloqueios ativos de todos os profissionais de uma empresa
         [HttpGet("{empresaId}/por-empresa")]
-        public async Task<IActionResult> ObterPorEmpresaId(long empresaId)
+        public async Task<IActionResult> ObterPorEmpresaId(long empresaId, [FromQuery] DateOnly inicio, [FromQuery] DateOnly fim, [FromQuery] int pagina = 1)
         {
             try
             {
-                var bloqueioHorario = await _bloqueioHorarioService.ObterPorEmpresaId(empresaId);
-                var response = bloqueioHorario.Select(b => new BloqueioHorarioResponseDto
-                {
-                    Id = b.Id,
-                    NomeProfissional = b.Profissional?.Usuario?.Nome ?? "N/A",
-                    NomeEmpresa = b.Empresa?.Nome ?? "N/A",
-                    EmpresaId = b.EmpresaId,
-                    ProfissionalId = b.ProfissionalId,
-                    DataHoraInicio = b.DataHoraInicio,
-                    DataHoraFim = b.DataHoraFim,
-                    DataCriacao = b.DataCriacao,
-                    DataAtualizacao = b.DataAtualizacao,
-                    Motivo = b.Motivo
-                });
+                var bloqueioHorario = await _bloqueioHorarioService.ObterPorEmpresaId(empresaId, inicio, fim, pagina, incluirDeletados: false);
+
                 return Ok(new
                 {
-                    message = "Bloqueio de horário obtido com sucesso!",
-                    dados = response
+                    message = "Bloqueios ativos da empresa obtidos com sucesso!",
+                    dados = bloqueioHorario
                 });
             }
             catch (Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
             }
-
         }
+
+        // Recupera o histórico completo (incluindo removidos) para auditoria e relatórios
+        [HttpGet("{empresaId}/historico-por-empresa")]
+        public async Task<IActionResult> ObterHistoricoPorEmpresaId(long empresaId, [FromQuery] DateOnly inicio, [FromQuery] DateOnly fim, [FromQuery] int pagina = 1)
+        {
+            try
+            {
+                var bloqueioHorario = await _bloqueioHorarioService.ObterPorEmpresaId(empresaId, inicio, fim, pagina, incluirDeletados: true);
+
+                return Ok(new
+                {
+                    message = "Histórico de bloqueios da empresa obtido com sucesso!",
+                    dados = bloqueioHorario
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        #endregion
+
+        #region Visão: Profissional (Agenda Pessoal)
+
+        // Lista os bloqueios ativos na agenda de um profissional específico
         [HttpGet("{profissionalId}/por-profissional")]
-        public async Task<IActionResult> ObterPorProfissionalId(long profissionalId)
+        public async Task<IActionResult> ObterPorProfissionalId(long profissionalId, [FromQuery] DateOnly inicio, [FromQuery] DateOnly fim, [FromQuery] int pagina = 1)
         {
             try
             {
-                var bloqueioHorario = await _bloqueioHorarioService.ObterPorProfissionalId(profissionalId);
-                var response = bloqueioHorario.Select(b => new BloqueioHorarioResponseDto
-                {
-                    Id = b.Id,
-                    NomeProfissional = b.Profissional?.Usuario?.Nome ?? "N/A",
-                    NomeEmpresa = b.Empresa?.Nome ?? "N/A",
-                    EmpresaId = b.EmpresaId,
-                    ProfissionalId = b.ProfissionalId,
-                    DataHoraInicio = b.DataHoraInicio,
-                    DataHoraFim = b.DataHoraFim,
-                    DataCriacao = b.DataCriacao,
-                    DataAtualizacao = b.DataAtualizacao,
-                    Motivo = b.Motivo
-                });
+                var bloqueioHorario = await _bloqueioHorarioService.ObterPorProfissionalId(profissionalId, inicio, fim, pagina, incluirDeletados: false);
+
                 return Ok(new
                 {
-                    message = "Bloqueio de horário obtido com sucesso!",
-                    dados = response
+                    message = "Bloqueios ativos do profissional obtidos com sucesso!",
+                    dados = bloqueioHorario
                 });
             }
             catch (Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
             }
-
         }
 
-        private static BloqueioHorarioResponseDto MapearParaResponseDto(BloqueioHorario bloqueio)
+        // Lista o histórico de bloqueios (ativos e deletados) de um profissional específico
+        [HttpGet("{profissionalId}/historico-por-profissional")]
+        public async Task<IActionResult> ObterHistoricoPorProfissionalId(long profissionalId, [FromQuery] DateOnly inicio, [FromQuery] DateOnly fim, [FromQuery] int pagina = 1)
         {
-            return new BloqueioHorarioResponseDto
+            try
             {
-                Id = bloqueio.Id,
-                NomeProfissional = bloqueio.Profissional?.Usuario?.Nome ?? "N/A",
-                NomeEmpresa = bloqueio.Empresa?.Nome ?? "N/A",
-                EmpresaId = bloqueio.EmpresaId,
-                ProfissionalId = bloqueio.ProfissionalId,
-                DataHoraInicio = bloqueio.DataHoraInicio,
-                DataHoraFim = bloqueio.DataHoraFim,
-                DataCriacao = bloqueio.DataCriacao,
-                DataAtualizacao = bloqueio.DataAtualizacao,
-                Motivo = bloqueio.Motivo
-            };
+                var bloqueioHorario = await _bloqueioHorarioService.ObterPorProfissionalId(profissionalId, inicio, fim, pagina, incluirDeletados: true);
+
+                return Ok(new
+                {
+                    message = "Histórico de bloqueios do profissional obtido com sucesso!",
+                    dados = bloqueioHorario
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
+
+        #endregion
     }
 }
