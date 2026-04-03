@@ -24,7 +24,7 @@ namespace BarberFlow.API.Services
         #region Ações de Escrita (Regras de Negócio) 
 
         // Orquestra a criação do agendamento: valida dados, calcula horários e verifica disponibilidade
-        public async Task<Agendamento> AdicionarAgendamento(AgendamentoCreateDto dto)
+        public async Task<AgendamentoResponseDto> AdicionarAgendamento(AgendamentoCreateDto dto)
         {
             if (dto == null)
                 throw new Exception("Os dados não foram preenchidos.");
@@ -58,8 +58,10 @@ namespace BarberFlow.API.Services
 
             await _agendamentoRepository.Adicionar(agendamento);
 
-            return await _agendamentoRepository.ObterPorId(agendamento.Id)
+            var agendamentoRecuperado = await _agendamentoRepository.ObterPorId(agendamento.Id)
                 ?? throw new Exception("Erro crítico ao recuperar o agendamento após a criação.");
+
+            return MapearParaResponseDto(agendamentoRecuperado);
         }
 
         // Valida e processa o cancelamento de um agendamento ativo
@@ -97,10 +99,12 @@ namespace BarberFlow.API.Services
         #region Visão: Geral
 
         // Recupera um agendamento específico via repositório
-        public async Task<Agendamento> ObterPorId(long id)
+        public async Task<AgendamentoResponseDto> ObterPorId(long id)
         {
-            return await _agendamentoRepository.ObterPorId(id)
+            var agendamento =  await _agendamentoRepository.ObterPorId(id)
                 ?? throw new Exception($"Agendamento ID {id} não encontrado.");
+
+            return MapearParaResponseDto(agendamento);
         }
 
         #endregion
@@ -162,6 +166,27 @@ namespace BarberFlow.API.Services
                 Data = data,
                 FaturamentoTotal = totalFaturamento,
                 QuantidadeAtendimentos = quantidadeAtendimentos
+            };
+        }
+
+        #endregion
+
+        #region Métodos Auxiliares (Private)
+
+        private static AgendamentoResponseDto MapearParaResponseDto(Agendamento agendamento)
+        {
+            return new AgendamentoResponseDto
+            {
+                Id = agendamento.Id,
+                EmpresaId = agendamento.EmpresaId,
+                ClienteId = agendamento.ClienteId,
+                ProfissionalServicoId = agendamento.ProfissionalServicoId,
+                PrecoNoMomento = agendamento.PrecoNoMomento,
+                DataHoraInicio = agendamento.DataHoraInicio,
+                DataHoraFim = agendamento.DataHoraFim,
+                Status = agendamento.Status,
+                DataCriacao = agendamento.DataCriacao,
+                DataAtualizacao = agendamento.DataAtualizacao
             };
         }
 

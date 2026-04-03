@@ -26,12 +26,11 @@ namespace BarberFlow.API.Controllers
             try
             {
                 var agendamento = await _agendamentoService.AdicionarAgendamento(dto);
-                var response = MapearParaResponseDto(agendamento);
 
                 return CreatedAtAction(nameof(ObterPorId), new { id = agendamento.Id }, new
                 {
                     message = "Agendamento criado com sucesso!",
-                    dados = response
+                    dados = agendamento
                 });
             }
             catch (Exception ex)
@@ -83,12 +82,11 @@ namespace BarberFlow.API.Controllers
             try
             {
                 var agendamento = await _agendamentoService.ObterPorId(id);
-                var response = MapearParaResponseDto(agendamento);
 
                 return Ok(new
                 {
                     message = "Agendamento obtido com sucesso!",
-                    dados = response
+                    dados = agendamento
                 });
             }
             catch (Exception ex)
@@ -220,25 +218,5 @@ namespace BarberFlow.API.Controllers
 
         #endregion
 
-        #region Métodos Auxiliares (Private)
-
-        private static AgendamentoResponseDto MapearParaResponseDto(Agendamento agendamento)
-        {
-            return new AgendamentoResponseDto
-            {
-                Id = agendamento.Id,
-                EmpresaId = agendamento.EmpresaId,
-                ClienteId = agendamento.ClienteId,
-                ProfissionalServicoId = agendamento.ProfissionalServicoId,
-                PrecoNoMomento = agendamento.PrecoNoMomento,
-                DataHoraInicio = agendamento.DataHoraInicio,
-                DataHoraFim = agendamento.DataHoraFim,
-                Status = agendamento.Status,
-                DataCriacao = agendamento.DataCriacao,
-                DataAtualizacao = agendamento.DataAtualizacao
-            };
-        }
-
-        #endregion
     }
 }
