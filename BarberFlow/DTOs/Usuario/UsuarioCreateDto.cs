@@ -19,5 +19,7 @@ namespace BarberFlow.API.DTOs.Usuario
 
         [Required(ErrorMessage = "A empresa deve ser informada.")]
         public long EmpresaId { get; set; }
+        public string Telefone { get; set; }
+        public string Whatsapp { get; set; }
     }
 }
