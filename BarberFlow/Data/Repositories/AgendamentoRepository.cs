@@ -41,7 +41,8 @@ namespace BarberFlow.API.Data.Repositories
         #region Consultas: Visão Geral
 
         // Busca completa de um agendamento por ID com todos os relacionamentos
-        public async Task<Agendamento?> ObterPorId(long id)
+        public async Task<Agendamento?> ObterPorId(long id) //to do remover inclde e usar DTO para resposta, com select,
+                                                            //deixar dinamico os filtros de ativo e deletado também
         {
             return await _appDbContext.Agendamentos
                 .IgnoreQueryFilters()
@@ -238,7 +239,7 @@ namespace BarberFlow.API.Data.Repositories
             var horaInicioAgendamento = TimeOnly.FromDateTime(inicio);
             var horaFimAgendamento = TimeOnly.FromDateTime(fim);
 
-            // Verificamos se EXISTE um horário que CUBRA o agendamento
+            // Verificamos se EXISTE um horário que CUBRA o agendamento 
             var possuiHorarioCompativel = await _appDbContext.HorarioProfissionais
                 .AnyAsync(hp => hp.ProfissionalId == profissionalId &&
                                 hp.DiaSemana == inicio.DayOfWeek &&
