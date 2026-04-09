@@ -4,7 +4,7 @@ namespace BarberFlow.API.Models
 {
     public class Agendamento
     {
-        #region Propriedades de Persistência (Banco de Dados)
+        #region Propriedades de Persistência
         public long Id { get; set; }
         public long EmpresaId { get; set; }
         public long ClienteId { get; set; }
