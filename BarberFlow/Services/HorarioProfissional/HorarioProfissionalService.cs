@@ -28,16 +28,16 @@ namespace BarberFlow.API.Services
             var profissional = await _profissionalRepository.ObterPorId(dto.ProfissionalId)
              ?? throw new Exception($"Profiossional ID {dto.ProfissionalId} não encontrado.");
 
-            var empresa = await _empresaRepository.ObterPorId(dto.EmpresaId) 
+            var empresaComHorario = await _empresaRepository.ObterPorIdComHorarioEmpresa(dto.EmpresaId) 
                 ?? throw new Exception($"Empresa ID {dto.EmpresaId} não encontrado.");
 
-            if(profissional.EmpresaId != empresa.Id)
+            if(profissional.EmpresaId != empresaComHorario.Id)
                 throw new Exception($"O Profissional com ID {dto.ProfissionalId} não pertence a empresa com Id:{dto.EmpresaId}.");
 
             if (profissional.HorariosProfissionais.Any(hp => hp.DiaSemana == dto.DiaSemana && !hp.IsDeleted && hp.Ativo))
                 throw new Exception("Já existe um horário cadastrado para este profissional neste dia.");
 
-            var horarioFuncionamentoEmpresa = empresa.HorariosFuncionamentoEmpresa
+            var horarioFuncionamentoEmpresa = empresaComHorario.HorariosFuncionamentoEmpresa
                 .FirstOrDefault(hfe => hfe.DiaSemana == dto.DiaSemana && !hfe.IsDeleted && hfe.Ativo);
 
             if (horarioFuncionamentoEmpresa == null)
@@ -88,10 +88,10 @@ namespace BarberFlow.API.Services
             if (jaExisteOutro)
                 throw new Exception($"O profissional já possui um horário cadastrado para {dto.DiaSemana}.");
 
-            var empresa = await _empresaRepository.ObterPorId(horarioProfissional.EmpresaId)
+            var empresaComHorario = await _empresaRepository.ObterPorIdComHorarioEmpresa(horarioProfissional.EmpresaId)
                 ?? throw new Exception($"Empresa ID {horarioProfissional.EmpresaId} não encontrado.");
 
-            var horarioFuncionamentoEmpresa = empresa.HorariosFuncionamentoEmpresa
+            var horarioFuncionamentoEmpresa = empresaComHorario.HorariosFuncionamentoEmpresa
                 .FirstOrDefault(hfe => hfe.DiaSemana == dto.DiaSemana && !hfe.IsDeleted && hfe.Ativo);
 
             if (horarioFuncionamentoEmpresa == null)
