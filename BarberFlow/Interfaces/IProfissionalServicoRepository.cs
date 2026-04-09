@@ -1,4 +1,6 @@
-﻿namespace BarberFlow.API.Interfaces
+﻿using BarberFlow.API.Models;
+
+namespace BarberFlow.API.Interfaces
 {
     public interface IProfissionalServicoRepository
     {

@@ -1,7 +1,6 @@
 ﻿using BarberFlow.API.DTOs;
+using BarberFlow.API.Models;
 using BarberFlow.API.Services;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BarberFlow.API.Controllers
