@@ -1,7 +1,5 @@
 ﻿using BarberFlow.API.DTOs.Empresa;
-using BarberFlow.API.Models;
 using BarberFlow.API.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BarberFlow.API.Controllers
@@ -10,59 +8,38 @@ namespace BarberFlow.API.Controllers
     [ApiController]
     public class EmpresaController : ControllerBase
     {
-        #region Readonly Fields
         private readonly EmpresaService _empresaService;
-        #endregion
 
-        #region Constructor
         public EmpresaController(EmpresaService empresaService)
         {
             _empresaService = empresaService;
         }
-        #endregion
 
-        #region Endpoints
+        #region Operações de Escrita (Ações de Comando)
+
+        // Cria uma nova empresa/barbearia no sistema
         [HttpPost]
         public async Task<IActionResult> CriarEmpresa([FromBody] EmpresaCreateDto dto)
         {
             try
             {
                 var empresa = await _empresaService.CriarEmpresa(dto);
-
-                var response = MapearParaResponseDto(empresa);
-                return StatusCode(201, new
-                {
-                    message = "Empresa criada com sucesso!",
-                    dados = response
-                });
+                return StatusCode(201, new { message = "Empresa criada com sucesso!", dados = empresa });
             }
             catch (Exception ex)
             {
-
                 return BadRequest(new { error = ex.Message });
             }
         }
 
+        // Atualiza os dados principais da empresa
         [HttpPut("{id}")]
-        public async Task<IActionResult> AtualizarEmpresa([FromBody] EmpresaUpdateDto dto, long id)
+        public async Task<IActionResult> AtualizarEmpresa(long id, [FromBody] EmpresaUpdateDto dto)
         {
             try
             {
-                var empresa = await _empresaService.AtualizarEmpresa(id, dto);
-
-                if (empresa == null)
-                {
-                    return NotFound(new { message = $"Empresa com id '{id}' não encontrada." });
-                }
-
-                var response = MapearParaResponseDto(empresa);
-
-                return Ok(new
-                {
-                    message = "Empresa atualizada com sucesso!",
-                    dados = response
-                });
-
+                await _empresaService.AtualizarEmpresa(id, dto);
+                return Ok(new { message = "Empresa atualizada com sucesso!" });
             }
             catch (Exception ex)
             {
@@ -70,75 +47,55 @@ namespace BarberFlow.API.Controllers
             }
         }
 
+        // Realiza a exclusão lógica da empresa
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletarEmpresa(long id)
         {
             try
             {
-                var empresa = await _empresaService.Deletar(id);
-
-                if (empresa == null)
-                {
-                    return NotFound(new { message = $"Empresa com id '{id}' não encontrada." });
-                }
-
-                var response = MapearParaResponseDto(empresa);
-                return Ok(new
-                {
-                    message = "Empresa removida com sucesso!",
-                    dados = response
-                });
+                await _empresaService.Deletar(id);
+                return Ok(new { message = "Empresa removida com sucesso!" });
             }
             catch (Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
             }
-
         }
 
-        [HttpGet("{slug}")]
-        public async Task<IActionResult> ObterEmpresaPorSlug([FromRoute] string slug)
-        {
+        #endregion
 
+        #region Operações de Leitura (Consultas)
+
+        // Busca uma empresa pelo Slug (usado no link público de agendamento)
+        [HttpGet("slug/{slug}")]
+        public async Task<IActionResult> ObterEmpresaPorSlug(string slug)
+        {
             try
             {
                 var empresa = await _empresaService.ObterEmpresaPorSlug(slug);
-
-                if (empresa == null)
-                {
-                    return NotFound(new { message = $"Empresa com slug '{slug}' não encontrada." });
-                }
-
-                var response = MapearParaResponseDto(empresa);
-
-                return Ok(new
-                {
-                    message = "Empresa encontrada com sucesso!",
-                    dados = response
-                });
+                return Ok(new { message = "Empresa encontrada com sucesso!", dados = empresa });
             }
             catch (Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
             }
         }
-        #endregion
 
-        #region Private Methods
-        private EmpresaResponseDto MapearParaResponseDto(Empresa empresa)
+        // Busca uma empresa pelo ID (usado na administração)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> ObterPorId(long id)
         {
-            return new EmpresaResponseDto
+            try
             {
-                Id = empresa.Id,
-                Nome = empresa.Nome,
-                Slug = empresa.Slug,
-                CNPJ = empresa.CNPJ,
-                DataAtualizacao = empresa.DataAtualizacao,
-                DataCriacao = empresa.DataCriacao,
-                IsDeleted = empresa.IsDeleted,
-                Ativo = empresa.Ativo
-            };
+                var empresa = await _empresaService.ObterPorId(id);
+                return Ok(new { message = "Empresa encontrada com sucesso!", dados = empresa });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
+
         #endregion
     }
 }
