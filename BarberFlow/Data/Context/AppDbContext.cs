@@ -134,6 +134,23 @@ namespace BarberFlow.API.Data.Context
                 .HasForeignKey(hfe => hfe.EmpresaId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // --- EMPRESA ---
+            modelBuilder.Entity<Empresa>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Nome)
+                      .IsRequired()
+                      .HasMaxLength(150);
+
+                entity.Property(e => e.CNPJ)
+                      .IsRequired()
+                      .HasMaxLength(14);
+
+                entity.HasIndex(e => e.Slug).IsUnique();
+                entity.HasIndex(e => e.CNPJ).IsUnique();
+            });
+
             // --- ÍNDICES ÚNICOS ---
 
             // Impede duplicar o mesmo serviço para o mesmo profissional

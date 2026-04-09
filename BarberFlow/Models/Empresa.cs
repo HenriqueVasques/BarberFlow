@@ -1,40 +1,29 @@
-﻿    using BarberFlow.API.Helpers;
-    using Microsoft.EntityFrameworkCore;
-    using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
-    namespace BarberFlow.API.Models 
+namespace BarberFlow.API.Models
+{
+    public class Empresa
     {
-        [Index(nameof(Slug), IsUnique = true)]
-        [Index(nameof(CNPJ), IsUnique = true)]
-        public class Empresa
-        {
-            #region Properties
-            public long Id { get; set; }
-            [Required, MaxLength(150)]
-            public string Nome { get; set; }
-            [Required, MaxLength(150)]
-            public bool Ativo { get; set; } = true; 
-            public bool IsDeleted { get; set; } = false;
-            public string Slug { get; set; }
-            public string CNPJ { get; set; }
-            public DateTime DataCriacao { get; set; }
-            public DateTime DataAtualizacao { get; set; }
-            //nav prop
-            public ICollection<Usuario> Usuarios { get; set; }
-            public ICollection<Servico> Servicos { get; set; }
-            public ICollection<HorarioFuncionamentoEmpresa> HorariosFuncionamentoEmpresa { get; set; }
-            #endregion
+        #region Propriedades de Persistência
+        public long Id { get; set; }
+        public string Nome { get; set; }
+        public string Slug { get; set; }
+        public string CNPJ { get; set; }
+        public bool Ativo { get; set; } = true;
+        public bool IsDeleted { get; set; } = false;
+        public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
+        public DateTime DataAtualizacao { get; set; } = DateTime.UtcNow;
+        #endregion
 
-            #region Constructors
-            public Empresa(string nome, string cnpj)
-            {
-                Nome = nome;
-                CNPJ = cnpj;
-                DataCriacao = DateTime.UtcNow;
-                DataAtualizacao = DateTime.UtcNow;
-            }
+        #region Propriedades de Navegação
+        public virtual ICollection<Usuario> Usuarios { get; set; }
+        public virtual ICollection<Servico> Servicos { get; set; }
+        public virtual ICollection<HorarioFuncionamentoEmpresa> HorariosFuncionamentoEmpresa { get; set; }
+        #endregion
 
-            protected Empresa() {}
-            #endregion
-        }
+        #region Construtores
+        public Empresa() { }
+        #endregion
     }
+}
