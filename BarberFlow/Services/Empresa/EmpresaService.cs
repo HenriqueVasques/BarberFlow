@@ -7,63 +7,51 @@ namespace BarberFlow.API.Services
 {
     public class EmpresaService
     {
-        #region Readonly Fields
-        private readonly IEmpresaRepository _repository;
-        #endregion
+        private readonly IEmpresaRepository _empresaRepository;
 
-        #region Constructor
-        public EmpresaService(IEmpresaRepository repository)
+        public EmpresaService(IEmpresaRepository empresaRepository)
         {
-            _repository = repository;
+            _empresaRepository = empresaRepository;
         }
-        #endregion
 
-        #region Private Methods
-        private async Task<string> GerarSlugUnico(string nome)
-        {
-            var slugBase = StringHelper.ToSlug(nome);
-            var slugFinal = slugBase;
-            int contador = 1;
+        #region Operações de Escrita (Ações de Comando)
 
-            while (await _repository.ExisteSlug(slugFinal))
-            {
-                slugFinal = $"{slugBase}-{contador++}";
-            }
-
-            return slugFinal;
-        }
-        #endregion
-
-        #region Public Methods
-        public async Task<Empresa> CriarEmpresa(EmpresaCreateDto dto)
+        // Realiza a validação de CNPJ, gera um slug único com base no nome e cadastra a nova empresa
+        public async Task<EmpresaResponseDto> CriarEmpresa(EmpresaCreateDto dto)
         {
             if (dto == null)
-                throw new Exception("Os ados não foram preenchidos.");
+                throw new Exception("Os dados não foram preenchidos.");
 
-            if (await _repository.ExisteCnpj(dto.CNPJ))
+            if (await _empresaRepository.ExisteCnpj(dto.CNPJ))
                 throw new Exception("Já existe uma empresa cadastrada com este CNPJ.");
 
-            var empresa = new Empresa(dto.Nome, dto.CNPJ);
+            var empresa = new Empresa () 
+            {
+               Nome = dto.Nome,
+               CNPJ = dto.CNPJ
+            };
+
             empresa.Slug = await GerarSlugUnico(dto.Nome);
 
-            await _repository.Adicionar(empresa);
-            return empresa;
+            await _empresaRepository.Adicionar(empresa);
+
+            return MapearParaResponseDto(empresa);
         }
 
-        public async Task<Empresa?> AtualizarEmpresa(long id, EmpresaUpdateDto dto)
+        // Atualiza os dados cadastrais da empresa e regenera o slug único caso o nome seja alterado
+        public async Task AtualizarEmpresa(long id, EmpresaUpdateDto dto)
         {
             if (dto == null)
-                throw new Exception("Os ados não foram preenchidos.");
+                throw new Exception("Os dados não foram preenchidos.");
 
-            var empresa = await _repository.ObterPorId(id);
+            var empresa = await _empresaRepository.ObterPorId(id);
 
-            if (empresa == null) 
+            if (empresa == null)
                 throw new Exception($"Empresa com id {id} não encontrada.");
-
 
             if (empresa.CNPJ != dto.CNPJ)
             {
-                if (await _repository.ExisteCnpj(dto.CNPJ))
+                if (await _empresaRepository.ExisteCnpj(dto.CNPJ))
                     throw new Exception("O novo CNPJ informado já está em uso por outra empresa.");
 
                 empresa.CNPJ = dto.CNPJ;
@@ -77,28 +65,77 @@ namespace BarberFlow.API.Services
 
             empresa.DataAtualizacao = DateTime.UtcNow;
 
-            await _repository.Atualizar(empresa);
-            return empresa;
+            await _empresaRepository.Atualizar(empresa);
         }
 
-        public async Task <Empresa?> Deletar(long id)
+        // Realiza a exclusão lógica da empresa e desativa o seu acesso ao sistema
+        public async Task Deletar(long id)
         {
-            var empresa = await _repository.ObterPorId(id);
-            if ( empresa == null)
+            var empresa = await _empresaRepository.ObterPorId(id);
+            if (empresa == null)
                 throw new Exception($"Empresa com id {id} não encontrada.");
 
             empresa.IsDeleted = true;
             empresa.Ativo = false;
+            empresa.DataAtualizacao = DateTime.UtcNow;
 
-            await _repository.Deletar(empresa);
-            return empresa;
-
+            await _empresaRepository.Deletar(empresa);
         }
 
-        public async Task<Empresa?> ObterEmpresaPorSlug(string slug)
+        #endregion
+
+        #region Operações de Leitura (Consultas)
+
+        // Busca uma empresa ativa através do seu Slug único para exibição pública ou administrativa
+        public async Task<EmpresaResponseDto?> ObterEmpresaPorSlug(string slug)
         {
-            return await _repository.ObterPorSlug(slug);
+            return await _empresaRepository.ObterPorSlug(slug);
         }
+
+        // Busca os detalhes de uma empresa através do seu ID técnico
+        public async Task<EmpresaResponseDto?> ObterPorId(long id)
+        {
+            var empresa = await _empresaRepository.ObterPorId(id);
+
+            if (empresa == null)
+                throw new Exception($"Empresa com id {id} não encontrada.");
+
+            return MapearParaResponseDto(empresa);
+        }
+
+        #endregion
+
+        #region Métodos Privados e Mapeamentos
+
+        // Gera uma URL amigável (slug) e garante sua unicidade adicionando sufixos numéricos se necessário
+        private async Task<string> GerarSlugUnico(string nome)
+        {
+            var slugBase = StringHelper.ToSlug(nome);
+            var slugFinal = slugBase;
+            int contador = 1;
+
+            while (await _empresaRepository.ExisteSlug(slugFinal))
+            {
+                slugFinal = $"{slugBase}-{contador++}";
+            }
+
+            return slugFinal;
+        }
+
+        // Converte a entidade de domínio Empresa para o DTO de resposta do sistema
+        private static EmpresaResponseDto MapearParaResponseDto(Empresa empresa)
+        {
+            return new EmpresaResponseDto
+            {
+                Id = empresa.Id,
+                Nome = empresa.Nome,
+                CNPJ = empresa.CNPJ,
+                Slug = empresa.Slug,
+                DataCriacao = empresa.DataCriacao,
+                DataAtualizacao = empresa.DataAtualizacao
+            };
+        }
+
         #endregion
     }
 }
