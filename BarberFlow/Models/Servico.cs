@@ -1,31 +1,40 @@
-﻿    using System.Numerics;
-
-    namespace BarberFlow.API.Models
+﻿namespace BarberFlow.API.Models
+{
+    public class Servico
     {
-        public class Servico
+        #region Propriedades de Persistência
+        public long Id { get; set; }
+        public long EmpresaId { get; set; }
+        public string Nome { get; set; }
+        public int DuracaoMinutos { get; set; }
+        public decimal PrecoBase { get; set; }
+        public bool Ativo { get; set; } = true;
+        #endregion
+
+        #region Auditoria e Controle
+        public bool IsDeleted { get; set; } = false;
+        public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
+        public DateTime DataAtualizacao { get; set; } = DateTime.UtcNow;
+        #endregion
+
+        #region Propriedades de Navegação (Relacionamentos)
+        public virtual Empresa Empresa { get; set; }
+        #endregion
+
+        #region Construtores
+        public Servico() { }
+
+        public Servico(string nome, int duracaoMinutos, decimal precoBase, long empresaId)
         {
-            public long Id { get; set; }
-            public long EmpresaId { get; set; }
-            public string Nome { get; set; }
-            public int DuracaoMinutos { get; set; }
-            public Decimal PrecoBase { get; set; }
-            public bool Ativo { get; set; } = true;
-            public bool IsDeleted { get; set; } = false;
-            public DateTime DataCriacao { get; set; }
-            public DateTime DataAtualizacao { get; set; }
-
-            //navegation properties
-            public Empresa Empresa { get; set; }
-
-            public Servico(string nome, int duracaoMinutos, Decimal precoBase, long empresaId)
-            {
-                EmpresaId = empresaId;
-                Nome = nome;
-                DuracaoMinutos = duracaoMinutos;
-                PrecoBase = precoBase;
-                DataCriacao = DateTime.UtcNow;
-                DataAtualizacao = DateTime.UtcNow;
-                Ativo = true;
-            }
+            EmpresaId = empresaId;
+            Nome = nome;
+            DuracaoMinutos = duracaoMinutos;
+            PrecoBase = precoBase;
+            DataCriacao = DateTime.UtcNow;
+            DataAtualizacao = DateTime.UtcNow;
+            Ativo = true;
+            IsDeleted = false;
         }
+        #endregion
     }
+}

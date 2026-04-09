@@ -2,22 +2,29 @@
 {
     public class Profissional
     {
+        #region Propriedades de Persistência
         public long Id { get; set; }
         public long EmpresaId { get; set; }
         public long UsuarioId { get; set; }
         public decimal PercentualComissao { get; set; }
         public bool Ativo { get; set; } = true;
+        #endregion
+
+        #region Auditoria e Controle
         public bool IsDeleted { get; set; } = false;
         public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
         public DateTime DataAtualizacao { get; set; } = DateTime.UtcNow;
+        #endregion
 
-        // Navigation properties
-        public Empresa Empresa { get; set; }
-        public Usuario Usuario { get; set; }
-        public ICollection<ProfissionalServico> ProfissionalServicos { get; set; }
-        public ICollection<Agendamento> Agendamentos { get; set; }
-        public ICollection<HorarioProfissional> HorariosProfissionais { get; set; }
+        #region Propriedades de Navegação (Relacionamentos)
+        public virtual Empresa Empresa { get; set; }
+        public virtual Usuario Usuario { get; set; }
+        public virtual ICollection<ProfissionalServico> ProfissionalServicos { get; set; }
+        public virtual ICollection<Agendamento> Agendamentos { get; set; }
+        public virtual ICollection<HorarioProfissional> HorariosProfissionais { get; set; }
+        #endregion
 
+        #region Construtores
         public Profissional()
         {
             ProfissionalServicos = new List<ProfissionalServico>();
@@ -39,5 +46,6 @@
             Agendamentos = new List<Agendamento>();
             HorariosProfissionais = new List<HorarioProfissional>();
         }
+        #endregion
     }
 }

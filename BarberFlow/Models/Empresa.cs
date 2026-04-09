@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
-
-namespace BarberFlow.API.Models
+﻿namespace BarberFlow.API.Models
 {
     public class Empresa
     {
