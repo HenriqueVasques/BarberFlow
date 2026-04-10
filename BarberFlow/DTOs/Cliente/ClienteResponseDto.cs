@@ -17,7 +17,6 @@
 
         #region Status e Auditoria
         public bool Ativo { get; set; }
-        public bool IsDeleted { get; set; }
         public DateTime DataCriacao { get; set; }
         public DateTime DataAtualizacao { get; set; }
         #endregion

@@ -12,7 +12,6 @@
         public TimeOnly HoraInicioAlmoco { get; set; }
         public TimeOnly HoraFimAlmoco { get; set; }
         public bool Ativo { get; set; }
-        public bool IsDeleted { get; set; }
 
         public List<DayOfWeek> DiasJaCadastrados { get; set; }
         public List<RegraHorarioEmpresaDto> RegrasFuncionamento { get; set; }

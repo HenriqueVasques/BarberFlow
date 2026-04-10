@@ -17,8 +17,7 @@
         #region Período e Auditoria
         public DateTime DataHoraInicio { get; set; }
         public DateTime DataHoraFim { get; set; }
-        public DateTime DataCriacao { get; set; }
-        public DateTime DataAtualizacao { get; set; }
+        public bool Ativo { get; set; }
         #endregion
     }
 }

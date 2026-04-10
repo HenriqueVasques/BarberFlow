@@ -11,7 +11,6 @@
         public decimal? PrecoPersonalizado { get; set; }
         public int? DuracaoPersonalizadaMinutos { get; set; }
 
-        public bool Ativo { get; set; } = true;
-        public bool IsDeleted { get; set; } = false;
+        public bool Ativo { get; set; }
     }
 }

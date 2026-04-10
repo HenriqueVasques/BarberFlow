@@ -11,7 +11,6 @@
 
         #region Status e Controle
         public bool Ativo { get; set; }
-        public bool IsDeleted { get; set; }
         #endregion
 
         #region Datas de Auditoria
