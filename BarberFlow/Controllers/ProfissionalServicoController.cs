@@ -114,7 +114,6 @@ namespace BarberFlow.API.Controllers
                     PrecoPersonalizado = ps.PrecoPersonalizado,
                     DuracaoPersonalizadaMinutos = ps.DuracaoPersonalizadaMinutos,
                     Ativo = ps.Ativo,
-                    IsDeleted = ps.IsDeleted
                 });
                 return StatusCode(201, new
                 {
@@ -165,7 +164,6 @@ namespace BarberFlow.API.Controllers
                     PrecoPersonalizado = ps.PrecoPersonalizado,
                     DuracaoPersonalizadaMinutos = ps.DuracaoPersonalizadaMinutos,
                     Ativo = ps.Ativo,
-                    IsDeleted = ps.IsDeleted
                 });
                 return StatusCode(201, new
                 {
@@ -192,7 +190,6 @@ namespace BarberFlow.API.Controllers
                 PrecoPersonalizado = profissionalServico.PrecoPersonalizado,
                 DuracaoPersonalizadaMinutos = profissionalServico.DuracaoPersonalizadaMinutos,
                 Ativo = profissionalServico.Ativo,
-                IsDeleted = profissionalServico.IsDeleted
             };
         }
     }

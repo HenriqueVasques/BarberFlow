@@ -75,8 +75,6 @@ namespace BarberFlow.API.Data.Repositories
                     NomeEmpresa = b.Empresa.Nome,
                     DataHoraInicio = b.DataHoraInicio,
                     DataHoraFim = b.DataHoraFim,
-                    DataCriacao = b.DataCriacao,
-                    DataAtualizacao = b.DataAtualizacao,
                     Motivo = b.Motivo
                 })
                 .ToListAsync();
@@ -103,8 +101,6 @@ namespace BarberFlow.API.Data.Repositories
                     NomeEmpresa = b.Empresa.Nome,
                     DataHoraInicio = b.DataHoraInicio,
                     DataHoraFim = b.DataHoraFim,
-                    DataCriacao = b.DataCriacao,
-                    DataAtualizacao = b.DataAtualizacao,
                     Motivo = b.Motivo
                 })
                 .ToListAsync();

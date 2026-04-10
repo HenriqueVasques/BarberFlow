@@ -103,8 +103,6 @@ namespace BarberFlow.API.Controllers
                     UsuarioId = profissional.UsuarioId,
                     PercentualComissao = profissional.PercentualComissao,
                     DataCriacao = profissional.DataCriacao,
-                    DataAtualizacao = profissional.DataAtualizacao,
-                    IsDeleted = profissional.IsDeleted,
                     Ativo = profissional.Ativo
                 }).ToList();
                 return Ok(new
@@ -154,8 +152,6 @@ namespace BarberFlow.API.Controllers
                 UsuarioId = profissional.UsuarioId,
                 PercentualComissao = profissional.PercentualComissao,
                 DataCriacao = profissional.DataCriacao,
-                DataAtualizacao = profissional.DataAtualizacao,
-                IsDeleted = profissional.IsDeleted,
                 Ativo = profissional.Ativo
             };
         }

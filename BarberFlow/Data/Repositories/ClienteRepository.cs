@@ -82,7 +82,6 @@ namespace BarberFlow.API.Data.Repositories
                     UsuarioId = c.UsuarioId,
                     DataCriacao = c.DataCriacao,
                     DataAtualizacao = c.DataAtualizacao,
-                    IsDeleted = c.IsDeleted,
                     Ativo = c.Ativo
                 })
                 .ToListAsync();

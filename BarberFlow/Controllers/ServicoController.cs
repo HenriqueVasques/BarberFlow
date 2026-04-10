@@ -100,7 +100,6 @@ namespace BarberFlow.API.Controllers
                     DuracaoMinutos = s.DuracaoMinutos,
                     PrecoBase = s.PrecoBase,
                     DataCriacao = s.DataCriacao,
-                    IsDeleted = s.IsDeleted,
                     Ativo = s.Ativo
                 });
                 return Ok(new
@@ -126,8 +125,6 @@ namespace BarberFlow.API.Controllers
                 DuracaoMinutos = servico.DuracaoMinutos,
                 PrecoBase = servico.PrecoBase,
                 DataCriacao = servico.DataCriacao,
-                DataAtualizacao = servico.DataAtualizacao,
-                IsDeleted = servico.IsDeleted,
                 Ativo = servico.Ativo
             };
         }

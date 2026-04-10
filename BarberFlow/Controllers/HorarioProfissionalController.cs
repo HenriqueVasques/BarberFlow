@@ -122,8 +122,7 @@ namespace BarberFlow.API.Controllers
                 HoraFim = horarioProfissional.HoraFim,
                 HoraInicioAlmoco = horarioProfissional.HoraInicioAlmoco,
                 HoraFimAlmoco = horarioProfissional.HoraFimAlmoco,
-                Ativo = horarioProfissional.Ativo,
-                IsDeleted = horarioProfissional.IsDeleted
+                Ativo = horarioProfissional.Ativo
             };
         }
     }

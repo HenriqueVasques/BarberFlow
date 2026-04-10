@@ -2,6 +2,7 @@ using BarberFlow.API.Configuration;
 using BarberFlow.API.Data.Context;
 using BarberFlow.API.Data.Repositories;
 using BarberFlow.API.Interfaces;
+using BarberFlow.API.Repositories;
 using BarberFlow.API.Services;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -23,7 +24,7 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IBloqueioHorarioRepository, BloqueioHorarioRepository>();
 builder.Services.AddScoped<IAgendamentoRepository, AgendamentoRepository>();
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
-builder.Services.AddScoped<IHorarioFuncionamentoEmpresaRepository, HorarioFuncionamentoEmpresaRepository>();
+builder.Services.AddScoped<IHorarioFuncionamentoEmpresaRepository, HorarioFuncionamentoEmpresaRepository>(); 
 builder.Services.AddScoped<IProfissionalServicoRepository, ProfissionalServicoRepository>();
 builder.Services.AddScoped<IHorarioProfissionalRepository, HorarioProfissionalRepository>();
 

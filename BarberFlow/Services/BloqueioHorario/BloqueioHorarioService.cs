@@ -70,8 +70,6 @@ namespace BarberFlow.API.Services
                 ProfissionalId = bloqueioHorario.ProfissionalId,
                 DataHoraInicio = bloqueioHorario.DataHoraInicio,
                 DataHoraFim = bloqueioHorario.DataHoraFim,
-                DataCriacao = bloqueioHorario.DataCriacao,
-                DataAtualizacao = bloqueioHorario.DataAtualizacao,
                 Motivo = bloqueioHorario.Motivo
             };
         }

@@ -80,7 +80,6 @@ namespace BarberFlow.API.Services
                     UsuarioId = cliente.UsuarioId,
                     DataCriacao = cliente.DataCriacao,
                     DataAtualizacao = cliente.DataAtualizacao,
-                    IsDeleted = cliente.IsDeleted,
                     Ativo = cliente.Ativo,
                 };
             }
@@ -175,7 +174,6 @@ namespace BarberFlow.API.Services
                 UsuarioId = cliente.UsuarioId,
                 DataCriacao = cliente.DataCriacao,
                 DataAtualizacao = cliente.DataAtualizacao,
-                IsDeleted = cliente.IsDeleted,
                 Ativo = cliente.Ativo
             };
         }
