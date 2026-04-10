@@ -1,82 +1,103 @@
 ﻿using BarberFlow.API.Data.Context;
+using BarberFlow.API.DTOs;
 using BarberFlow.API.Interfaces;
 using BarberFlow.API.Models;
 using Microsoft.EntityFrameworkCore;
 
-public class HorarioFuncionamentoEmpresaRepository : IHorarioFuncionamentoEmpresaRepository
+namespace BarberFlow.API.Repositories
 {
-    private readonly AppDbContext _appDbContext;
-
-    public HorarioFuncionamentoEmpresaRepository(AppDbContext appDbContext)
+    public class HorarioFuncionamentoEmpresaRepository : IHorarioFuncionamentoEmpresaRepository
     {
-        _appDbContext = appDbContext;
+        private readonly AppDbContext _appDbContext;
+
+        public HorarioFuncionamentoEmpresaRepository(AppDbContext appDbContext)
+        {
+            _appDbContext = appDbContext;
+        }
+
+        #region Comandos
+
+        // Adiciona um novo horário de funcionamento ao banco
+        public async Task Adicionar(HorarioFuncionamentoEmpresa horarioFuncionamentoEmpresa)
+        {
+            await _appDbContext.HorarioFuncionamentoEmpresas.AddAsync(horarioFuncionamentoEmpresa);
+            await _appDbContext.SaveChangesAsync();
+        }
+
+        // Atualiza os dados de um horário existente
+        public async Task Atualizar(HorarioFuncionamentoEmpresa horarioFuncionamentoEmpresa)
+        {
+            _appDbContext.HorarioFuncionamentoEmpresas.Update(horarioFuncionamentoEmpresa);
+            await _appDbContext.SaveChangesAsync();
+        }
+
+        // Realiza o soft delete ou atualização de status do horário
+        public async Task Deletar(HorarioFuncionamentoEmpresa horarioFuncionamentoEmpresa)
+        {
+            _appDbContext.HorarioFuncionamentoEmpresas.Update(horarioFuncionamentoEmpresa);
+            await _appDbContext.SaveChangesAsync();
+        }
+
+        #endregion
+
+        #region Consultas com Filtros Dinâmicos
+
+        // Busca a entidade completa por ID para manipulação (rastreada pelo EF)
+        public async Task<HorarioFuncionamentoEmpresa?> ObterPorId(long id, bool apenasAtivos = true, bool incluirDeletados = false)
+        {
+            return await _appDbContext.HorarioFuncionamentoEmpresas
+                .Where(hfe => hfe.Id == id &&
+                             (incluirDeletados || !hfe.IsDeleted) &&
+                             (!apenasAtivos || hfe.Ativo)
+                )
+                .FirstOrDefaultAsync();
+        }
+
+        // Busca o horário de um dia específico projetando diretamente para o DTO
+        public async Task<HorarioFuncionamentoEmpresaResponseDto?> ObterPorDia(long empresaId, DayOfWeek diaDaSemana, bool apenasAtivos = true, bool incluirDeletados = false)
+        {
+            return await _appDbContext.HorarioFuncionamentoEmpresas
+                .AsNoTracking()
+                .Where(hfe => hfe.EmpresaId == empresaId &&
+                               hfe.DiaSemana == diaDaSemana &&
+                              (incluirDeletados || !hfe.IsDeleted) &&
+                              (!apenasAtivos || hfe.Ativo)
+                )
+                .Select(hfe => new HorarioFuncionamentoEmpresaResponseDto
+                {
+                    Id = hfe.Id,
+                    EmpresaId = hfe.EmpresaId,
+                    DiaSemana = hfe.DiaSemana,
+                    HoraAbertura = hfe.HoraAbertura,
+                    HoraFechamento = hfe.HoraFechamento,
+                    Ativo = hfe.Ativo,
+                    EstaFechado = hfe.EstaFechado
+                })
+                .FirstOrDefaultAsync();
+        }
+
+        // Lista todos os horários da empresa projetando para DTO de forma performática
+        public async Task<List<HorarioFuncionamentoEmpresaResponseDto>> ObterTodosPorEmpresa(long empresaId, bool apenasAtivos = true, bool incluirDeletados = false)
+        {
+            return await _appDbContext.HorarioFuncionamentoEmpresas
+                .AsNoTracking()
+                .Where(hfe => hfe.EmpresaId == empresaId &&
+                             (incluirDeletados || !hfe.IsDeleted) &&
+                             (!apenasAtivos || hfe.Ativo)
+                )
+                .Select(hfe => new HorarioFuncionamentoEmpresaResponseDto
+                {
+                    Id = hfe.Id,
+                    EmpresaId = hfe.EmpresaId,
+                    DiaSemana = hfe.DiaSemana,
+                    HoraAbertura = hfe.HoraAbertura,
+                    HoraFechamento = hfe.HoraFechamento,
+                    Ativo = hfe.Ativo,
+                    EstaFechado = hfe.EstaFechado
+                })
+                .ToListAsync();
+        }
+
+        #endregion
     }
-
-    #region Comandos
-    public async Task Adicionar(HorarioFuncionamentoEmpresa horarioFuncionamentoEmpresa)
-    {
-        await _appDbContext.HorarioFuncionamentoEmpresas.AddAsync(horarioFuncionamentoEmpresa);
-        await _appDbContext.SaveChangesAsync();
-    }
-
-    public async Task Atualizar(HorarioFuncionamentoEmpresa horarioFuncionamentoEmpresa)
-    {
-        _appDbContext.HorarioFuncionamentoEmpresas.Update(horarioFuncionamentoEmpresa);
-        await _appDbContext.SaveChangesAsync();
-    }
-
-    public async Task Deletar(HorarioFuncionamentoEmpresa horarioFuncionamentoEmpresa)
-    {
-        _appDbContext.HorarioFuncionamentoEmpresas.Update(horarioFuncionamentoEmpresa);
-        await _appDbContext.SaveChangesAsync();
-    }
-    #endregion
-
-    #region Consultas com Filtros Dinâmicos
-
-    public async Task<HorarioFuncionamentoEmpresa?> ObterPorId(long id, bool apenasAtivos = true, bool incluirDeletados = false)
-    {
-        var query = GerarQueryBase(apenasAtivos, incluirDeletados);
-
-        return await query.FirstOrDefaultAsync(hre => hre.Id == id);
-    }
-
-    public async Task<HorarioFuncionamentoEmpresa?> ObterPorDia(long empresaId, DayOfWeek diaDaSemana, bool apenasAtivos = true, bool incluirDeletados = false)
-    {
-        var query = GerarQueryBase(apenasAtivos, incluirDeletados);
-
-        return await query.FirstOrDefaultAsync(hre => hre.EmpresaId == empresaId && hre.DiaSemana == diaDaSemana);
-    }
-
-    public async Task<List<HorarioFuncionamentoEmpresa>> ObterTodosPorEmpresa(long empresaId, bool apenasAtivos = true, bool incluirDeletados = false)
-    {
-        var query = GerarQueryBase(apenasAtivos, incluirDeletados);
-
-        return await query
-            .Where(hre => hre.EmpresaId == empresaId)
-            .OrderBy(hre => hre.DiaSemana)
-            .ToListAsync();
-    }
-
-    #endregion
-
-    #region Método Privado de Apoio
-
-    // Este método centraliza a lógica de filtros para não repetir código em cada busca
-    private IQueryable<HorarioFuncionamentoEmpresa> GerarQueryBase(bool apenasAtivos, bool incluirDeletados)
-    {
-        IQueryable<HorarioFuncionamentoEmpresa> query = _appDbContext.HorarioFuncionamentoEmpresas
-            .Include(hre => hre.Empresa)
-            .AsNoTracking();
-
-        if (!incluirDeletados)
-            query = query.Where(hre => !hre.IsDeleted);
-
-        if (apenasAtivos)
-            query = query.Where(hre => hre.Ativo);
-
-        return query;
-    }
-
-    #endregion
 }

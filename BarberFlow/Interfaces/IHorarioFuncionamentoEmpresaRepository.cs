@@ -1,4 +1,5 @@
-﻿using BarberFlow.API.Models;
+﻿using BarberFlow.API.DTOs;
+using BarberFlow.API.Models;
 
 namespace BarberFlow.API.Interfaces
 {
@@ -12,8 +13,8 @@ namespace BarberFlow.API.Interfaces
 
         #region Consultas Dinâmicas
         Task<HorarioFuncionamentoEmpresa?> ObterPorId(long id, bool apenasAtivos = true, bool incluirDeletados = false);
-        Task<List<HorarioFuncionamentoEmpresa>> ObterTodosPorEmpresa(long empresaId, bool apenasAtivos = true, bool incluirDeletados = false);
-        Task<HorarioFuncionamentoEmpresa?> ObterPorDia(long empresaId, DayOfWeek diaDaSemana, bool apenasAtivos = true, bool incluirDeletados = false);
+        Task<List<HorarioFuncionamentoEmpresaResponseDto>> ObterTodosPorEmpresa(long empresaId, bool apenasAtivos = true, bool incluirDeletados = false);
+        Task<HorarioFuncionamentoEmpresaResponseDto?> ObterPorDia(long empresaId, DayOfWeek diaDaSemana, bool apenasAtivos = true, bool incluirDeletados = false);
         #endregion
     }
 }

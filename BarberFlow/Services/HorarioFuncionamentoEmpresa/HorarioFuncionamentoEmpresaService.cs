@@ -19,8 +19,8 @@ namespace BarberFlow.API.Services
 
         #region Ações de Escrita (Admin)
 
-        // Cria uma nova configuração de horário validando a existência da empresa e coerência das horas
-        public async Task<HorarioFuncionamentoEmpresa> CriarHorarioFuncionamentoEmpresa(HorarioFuncionamentoEmpresaCreateDto dto, long empresaId)
+        // Cria uma nova configuração de horário validando a empresa e a coerência do intervalo de horas
+        public async Task<HorarioFuncionamentoEmpresaResponseDto> CriarHorarioFuncionamentoEmpresa(HorarioFuncionamentoEmpresaCreateDto dto, long empresaId)
         {
             if (dto == null)
                 throw new Exception("Os dados não foram preenchidos.");
@@ -28,8 +28,7 @@ namespace BarberFlow.API.Services
             var empresa = await _empresaRepository.ObterPorId(empresaId)
                 ?? throw new Exception($"Empresa com id {empresaId} não encontrada.");
 
-            // Validação: Abertura deve ser antes do fechamento
-            if (dto.HoraAbertura >= dto.HoraFechamento && !dto.EstaFechado)
+            if (!dto.EstaFechado && dto.HoraAbertura >= dto.HoraFechamento)
                 throw new Exception("A hora de abertura precisa ser menor que a hora de fechamento.");
 
             var horarioFuncionamentoEmpresa = new HorarioFuncionamentoEmpresa
@@ -40,15 +39,25 @@ namespace BarberFlow.API.Services
                 HoraFechamento = dto.HoraFechamento,
                 EstaFechado = dto.EstaFechado,
                 DataCriacao = DateTime.UtcNow,
-                DataAtualizacao = DateTime.UtcNow,
+                DataAtualizacao = DateTime.UtcNow
             };
 
             await _horarioFuncionamentoEmpresaRepository.Adicionar(horarioFuncionamentoEmpresa);
-            return horarioFuncionamentoEmpresa;
+
+            return new HorarioFuncionamentoEmpresaResponseDto
+            {
+                Id = horarioFuncionamentoEmpresa.Id,
+                EmpresaId = horarioFuncionamentoEmpresa.EmpresaId,
+                DiaSemana = horarioFuncionamentoEmpresa.DiaSemana,
+                HoraAbertura = horarioFuncionamentoEmpresa.HoraAbertura,
+                HoraFechamento = horarioFuncionamentoEmpresa.HoraFechamento,
+                Ativo = horarioFuncionamentoEmpresa.Ativo,
+                EstaFechado = horarioFuncionamentoEmpresa.EstaFechado
+            };
         }
 
-        // Atualiza horários existentes permitindo nulidade nos campos não alterados
-        public async Task<HorarioFuncionamentoEmpresa> AtualizarHorarioFuncionamentoEmpresa(HorarioFuncionamentoEmpresaUpadteDto dto, long id)
+        // Atualiza horários existentes tratando campos nulos como manutenção do valor atual
+        public async Task AtualizarHorarioFuncionamentoEmpresa(HorarioFuncionamentoEmpresaUpadteDto dto, long id)
         {
             if (dto == null)
                 throw new Exception("Os dados não foram preenchidos.");
@@ -56,7 +65,10 @@ namespace BarberFlow.API.Services
             var horario = await _horarioFuncionamentoEmpresaRepository.ObterPorId(id, apenasAtivos: false)
                 ?? throw new Exception($"Horário com id {id} não encontrado.");
 
-            if (dto.HoraAbertura >= dto.HoraFechamento && !dto.EstaFechado)
+            var aberturaFinal = dto.HoraAbertura ?? horario.HoraAbertura;
+            var fechamentoFinal = dto.HoraFechamento ?? horario.HoraFechamento;
+
+            if (!dto.EstaFechado && aberturaFinal >= fechamentoFinal)
                 throw new Exception("A hora de abertura precisa ser menor que a hora de fechamento.");
 
             horario.DiaSemana = dto.DiaSemana;
@@ -66,49 +78,41 @@ namespace BarberFlow.API.Services
             horario.DataAtualizacao = DateTime.UtcNow;
 
             await _horarioFuncionamentoEmpresaRepository.Atualizar(horario);
-            return horario;
         }
 
-        // Realiza o descarte lógico (Soft Delete) da configuração
-        public async Task<HorarioFuncionamentoEmpresa> DeletarHorarioFuncionamentoEmpresa(long id)
+        // Realiza o descarte lógico (Soft Delete) inativando a configuração no sistema
+        public async Task DeletarHorarioFuncionamentoEmpresa(long id)
         {
             var horario = await _horarioFuncionamentoEmpresaRepository.ObterPorId(id, apenasAtivos: false)
                 ?? throw new Exception($"Horário com id {id} não encontrado.");
 
+            horario.IsDeleted = true;
+            horario.Ativo = false;
+            horario.DataAtualizacao = DateTime.UtcNow;
+
             await _horarioFuncionamentoEmpresaRepository.Deletar(horario);
-            return horario;
         }
 
         #endregion
 
-        #region Visão: Cliente (App)
-
-        // Retorna apenas horários ativos e não deletados para o processo de agendamento
-        public async Task<List<HorarioFuncionamentoEmpresa>> ObterTodosPorEmpresaCliente(long empresaId)
-        {
-            return await _horarioFuncionamentoEmpresaRepository.ObterTodosPorEmpresa(empresaId, apenasAtivos: true);
-        }
+        #region Consultas e Visões
 
         // Busca configuração de um dia específico para validar disponibilidade no App
-        public async Task<HorarioFuncionamentoEmpresa?> ObterPorDiaParaCliente(long empresaId, DayOfWeek diaDaSemana)
+        public async Task<HorarioFuncionamentoEmpresaResponseDto?> ObterPorDia(long empresaId, DayOfWeek diaDaSemana, bool apenasAtivos = true, bool incluirDeletados = false)
         {
-            return await _horarioFuncionamentoEmpresaRepository.ObterPorDia(empresaId, diaDaSemana, apenasAtivos: true);
+            return await _horarioFuncionamentoEmpresaRepository.ObterPorDia(empresaId, diaDaSemana, apenasAtivos, incluirDeletados);
         }
 
-        #endregion
-
-        #region Visão: Admin (Painel de Controle)
-
-        // Retorna todos os horários (incluindo inativos) para gestão no dashboard
-        public async Task<List<HorarioFuncionamentoEmpresa>> ObterTodosPorEmpresaParaAdmin(long empresaId)
+        // Retorna todos os horários de uma empresa projetados para ResponseDto
+        public async Task<List<HorarioFuncionamentoEmpresaResponseDto>> ObterPorEmpresa(long empresaId, bool apenasAtivos = true, bool incluirDeletados = false)
         {
-            return await _horarioFuncionamentoEmpresaRepository.ObterTodosPorEmpresa(empresaId, apenasAtivos: false);
+            return await _horarioFuncionamentoEmpresaRepository.ObterTodosPorEmpresa(empresaId, apenasAtivos, incluirDeletados);
         }
 
-        // Recupera um horário específico pelo ID para edição no painel administrativo
-        public async Task<HorarioFuncionamentoEmpresa> ObterPorIdAdmin(long id)
+        // Recupera a model completa por ID para operações internas ou edição
+        public async Task<HorarioFuncionamentoEmpresa> ObterPorId(long id, bool apenasAtivos = true, bool incluirDeletados = false)
         {
-            return await _horarioFuncionamentoEmpresaRepository.ObterPorId(id, apenasAtivos: false)
+            return await _horarioFuncionamentoEmpresaRepository.ObterPorId(id, apenasAtivos, incluirDeletados)
                 ?? throw new Exception($"Configuração de horário com id {id} não encontrada.");
         }
 

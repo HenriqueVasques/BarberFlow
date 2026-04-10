@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using BarberFlow.API.DTOs;
 using BarberFlow.API.Services;
-using BarberFlow.API.Models;
 
 namespace BarberFlow.API.Controllers
 {
@@ -17,151 +15,95 @@ namespace BarberFlow.API.Controllers
             _horarioFuncionamentoEmpresaService = horarioFuncionamentoEmpresaService;
         }
 
-        #region Rotas: Admin (Painel de Gestão)
+        #region Comandos: Admin (Escrita)
 
-        // Aplica a trava de Admin para todo esse bloco
-        //[Authorize(Roles = "Admin")]
+        // Cria uma nova configuração de horário para uma empresa específica
         [HttpPost("admin/criar/{empresaId}")]
         public async Task<IActionResult> CriarHorarioFuncionamentoEmpresa(long empresaId, [FromBody] HorarioFuncionamentoEmpresaCreateDto dto)
         {
             try
             {
                 var horarioFuncionamentoEmpresa = await _horarioFuncionamentoEmpresaService.CriarHorarioFuncionamentoEmpresa(dto, empresaId);
-
-
-                var response = MapearParaResponseDto(horarioFuncionamentoEmpresa);
-                return StatusCode(201, new
-                {
-                    message = "Horario Funcionamento da Empresa criado com sucesso!",
-                    dados = response
-                });
+                return StatusCode(201, new { message = "Horário de funcionamento criado com sucesso!", dados = horarioFuncionamentoEmpresa });
             }
             catch (Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
-            }         
+            }
         }
 
-        //[Authorize(Roles = "Admin")]
+        // Atualiza os dados de um horário de funcionamento existente
         [HttpPut("admin/atualizar/{id}")]
         public async Task<IActionResult> AtualizarHorarioFuncionamentoEmpresa(long id, [FromBody] HorarioFuncionamentoEmpresaUpadteDto dto)
         {
             try
             {
-                var horarioFuncionamentoEmpresa = await _horarioFuncionamentoEmpresaService.AtualizarHorarioFuncionamentoEmpresa(dto, id);
-
-                var response = MapearParaResponseDto(horarioFuncionamentoEmpresa);
-                return StatusCode(200, new
-                {
-                    message = "Horario Funcionamento da Empresa atualizado com sucesso!",
-                    dados = response
-                });
+                await _horarioFuncionamentoEmpresaService.AtualizarHorarioFuncionamentoEmpresa(dto, id);
+                return Ok(new { message = "Horário de funcionamento atualizado com sucesso!" });
             }
             catch (Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
-
-            }         
+            }
         }
 
-        //[Authorize(Roles = "Admin")]
+        // Remove (soft delete) uma configuração de horário do sistema
         [HttpDelete("admin/remover/{id}")]
         public async Task<IActionResult> DeletarHorarioFuncionamentoEmpresa(long id)
         {
             try
             {
-                var horarioFuncionamentoEmpresa = await _horarioFuncionamentoEmpresaService.DeletarHorarioFuncionamentoEmpresa(id);
-
-                var response = MapearParaResponseDto(horarioFuncionamentoEmpresa);
-                return StatusCode(200, new
-                {
-                    message = "Horario Funcionamento da Empresa deletado com sucesso!",
-                    dados = response
-                });
-            }   
-            catch (Exception ex)
-            {
-                return BadRequest(new { error = ex.Message});
-            }         
-        }
-
-        //[Authorize(Roles = "Admin")]
-        [HttpGet("admin/lista-completa/{empresaId}")]
-        public async Task<IActionResult> ObterTodosPorEmpresaParaAdmin(long empresaId)
-        {
-            try
-            {
-                // Aqui o service chama o repo com apenasAtivos: false
-                var horarioFuncionamentoEmpresa = await _horarioFuncionamentoEmpresaService.ObterTodosPorEmpresaParaAdmin(empresaId);
-
-                var response = horarioFuncionamentoEmpresa.Select(horarioFuncionamentoEmpresa => new HorarioFuncionamentoEmpresaResponseDto
-                {
-                    Id = horarioFuncionamentoEmpresa.Id,
-                    NomeEmpresa = horarioFuncionamentoEmpresa.Empresa?.Nome ?? "N/A",
-                    DiaSemana = horarioFuncionamentoEmpresa.DiaSemana,
-                    EstaFechado = horarioFuncionamentoEmpresa.EstaFechado,
-                    HoraAbertura = horarioFuncionamentoEmpresa.HoraAbertura,
-                    HoraFechamento = horarioFuncionamentoEmpresa.HoraFechamento,
-                });
-                return StatusCode(200, new
-                {
-                    message = "Horario Funcionamento da Empresa Recuperado com sucesso!",
-                    dados = response
-                });
+                await _horarioFuncionamentoEmpresaService.DeletarHorarioFuncionamentoEmpresa(id);
+                return Ok(new { message = "Horário de funcionamento removido com sucesso!" });
             }
             catch (Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
             }
-        }   
+        }
 
-        //[Authorize(Roles = "Admin")]
+        #endregion
+
+        #region Consultas: Painel Administrativo (Leitura)
+
+        // Lista todos os horários ativos de uma empresa específica
+        [HttpGet("admin/por-empresa/{empresaId}")]
+        public async Task<IActionResult> ObterPorEmpresa(long empresaId)
+        {
+            try
+            {
+                var dados = await _horarioFuncionamentoEmpresaService.ObterPorEmpresa(empresaId, apenasAtivos: true, incluirDeletados: false);
+                return Ok(new { message = "Dados recuperados com sucesso!", dados });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        // Retorna o histórico completo (incluindo inativos e deletados) de uma empresa
+        [HttpGet("admin/historico/{empresaId}")]
+        public async Task<IActionResult> ObterHistoricoPorEmpresa(long empresaId)
+        {
+            try
+            {
+                var dados = await _horarioFuncionamentoEmpresaService.ObterPorEmpresa(empresaId, apenasAtivos: false, incluirDeletados: true);
+                return Ok(new { message = "Histórico recuperado com sucesso!", dados });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        // Obtém detalhes de um horário específico pelo ID
         [HttpGet("admin/obter-pelo-id/{id}")]
-        public async Task<IActionResult> ObterPorIdAdmin(long id)
+        public async Task<IActionResult> ObterPorId(long id)
         {
             try
             {
-                // Aqui o service chama o repo com apenasAtivos: false
-                var horarioFuncionamentoEmpresa = await _horarioFuncionamentoEmpresaService.ObterPorIdAdmin(id);
-
-                var response = MapearParaResponseDto(horarioFuncionamentoEmpresa);
-                return StatusCode(200, new
-                {
-                    message = "Horario Funcionamento da Empresa Recuperado com sucesso!",
-                    dados = response
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
-        }
-        #endregion
-
-        #region Rotas: Cliente (App)
-
-        [HttpGet("empresa/{empresaId}")]
-        // Qualquer usuário logado pode ver os horários disponíveis para agendar
-        public async Task<IActionResult> ObterTodosPorEmpresaCliente(long empresaId)
-        {
-            try
-            {
-                var horarioFuncionamentoEmpresa = await _horarioFuncionamentoEmpresaService.ObterTodosPorEmpresaCliente(empresaId);
-
-                var response = horarioFuncionamentoEmpresa.Select(horarioFuncionamentoEmpresa => new HorarioFuncionamentoEmpresaResponseDto
-                {
-                    Id = horarioFuncionamentoEmpresa.Id,
-                    NomeEmpresa = horarioFuncionamentoEmpresa.Empresa?.Nome ?? "N/A",
-                    DiaSemana = horarioFuncionamentoEmpresa.DiaSemana,
-                    EstaFechado = horarioFuncionamentoEmpresa.EstaFechado,
-                    HoraAbertura = horarioFuncionamentoEmpresa.HoraAbertura,
-                    HoraFechamento = horarioFuncionamentoEmpresa.HoraFechamento,
-                });
-                return StatusCode(200, new
-                {
-                    message = "Horario Funcionamento da Empresa criado com sucesso!",
-                    dados = response
-                });
+                var dados = await _horarioFuncionamentoEmpresaService.ObterPorId(id, apenasAtivos: true, incluirDeletados: false);
+                return Ok(new { message = "Horário recuperado com sucesso!", dados });
             }
             catch (Exception ex)
             {
@@ -169,21 +111,36 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        #endregion
-
-        #region Private Methods
-        private static HorarioFuncionamentoEmpresaResponseDto MapearParaResponseDto(HorarioFuncionamentoEmpresa horarioFuncionamentoEmpresa)
+        // Obtém o histórico de um horário específico (mesmo se deletado)
+        [HttpGet("admin/obter-pelo-id-historico/{id}")]
+        public async Task<IActionResult> ObterPorIdHistorico(long id)
         {
-            return new HorarioFuncionamentoEmpresaResponseDto
+            try
             {
-                Id = horarioFuncionamentoEmpresa.Id,
-                NomeEmpresa = horarioFuncionamentoEmpresa.Empresa?.Nome ?? "N/A",
-                DiaSemana = horarioFuncionamentoEmpresa.DiaSemana,
-                EstaFechado = horarioFuncionamentoEmpresa.EstaFechado,
-                HoraAbertura = horarioFuncionamentoEmpresa.HoraAbertura,
-                HoraFechamento = horarioFuncionamentoEmpresa.HoraFechamento,
-            };
+                var dados = await _horarioFuncionamentoEmpresaService.ObterPorId(id, apenasAtivos: false, incluirDeletados: true);
+                return Ok(new { message = "Dados históricos recuperados com sucesso!", dados });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
+
+        // Busca o horário ativo de um dia da semana para uma empresa
+        [HttpGet("admin/obter-por-dia/{empresaId}")]
+        public async Task<IActionResult> ObterPorDia(long empresaId, [FromQuery] DayOfWeek diaDaSemana)
+        {
+            try
+            {
+                var dados = await _horarioFuncionamentoEmpresaService.ObterPorDia(empresaId, diaDaSemana, apenasAtivos: true, incluirDeletados: false);
+                return Ok(new { message = "Horário do dia recuperado com sucesso!", dados });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
         #endregion
     }
 }
