@@ -25,7 +25,7 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var agendamento = await _agendamentoService.AdicionarAgendamento(dto);
+                var agendamento = await _agendamentoService.CriarAgendamento(dto);
 
                 return CreatedAtAction(nameof(ObterPorId), new { id = agendamento.Id }, new
                 {

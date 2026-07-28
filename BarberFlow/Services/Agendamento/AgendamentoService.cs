@@ -24,7 +24,7 @@ namespace BarberFlow.API.Services
         #region Ações de Escrita (Regras de Negócio) 
 
         // Orquestra a criação do agendamento: valida dados, calcula horários e verifica disponibilidade
-        public async Task<AgendamentoResponseDto> AdicionarAgendamento(AgendamentoCreateDto dto)
+        public async Task<AgendamentoResponseDto> CriarAgendamento(AgendamentoCreateDto dto)
         {
             if (dto == null)
                 throw new Exception("Os dados não foram preenchidos.");

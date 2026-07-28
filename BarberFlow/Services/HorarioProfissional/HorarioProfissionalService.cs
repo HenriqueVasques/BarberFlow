@@ -23,7 +23,7 @@ namespace BarberFlow.API.Services
         #region Ações de Escrita (Admin)
 
         // Cadastra o horário do profissional validando contra as regras da empresa e disponibilidade do dia
-        public async Task<HorarioProfissionalResponseDto> AdicionarHorarioProfissional(HorarioProfissionalCreateDto dto)
+        public async Task<HorarioProfissionalResponseDto> CriarHorarioProfissional(HorarioProfissionalCreateDto dto)
         {
             if (dto == null)
                 throw new Exception("Os dados não foram preenchidos.");

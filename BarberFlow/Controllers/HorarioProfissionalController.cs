@@ -22,7 +22,7 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var horarioProfissional = await _horarioProfissionalService.AdicionarHorarioProfissional(dto);
+                var horarioProfissional = await _horarioProfissionalService.CriarHorarioProfissional(dto);
                 return StatusCode(201, new { message = "Horário do Profissional criado com sucesso!", dados = horarioProfissional });
             }
             catch (Exception ex)
