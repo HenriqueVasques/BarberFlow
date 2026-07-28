@@ -1,15 +1,23 @@
-﻿using BarberFlow.API.Data.Repositories;
+﻿using BarberFlow.API.DTOs;
 using BarberFlow.API.Models;
 
 namespace BarberFlow.API.Interfaces
 {
     public interface IHorarioProfissionalRepository
     {
+        #region Persistência e Comandos
+
         Task Adicionar(HorarioProfissional horarioPofissional);
         Task Atualizar(HorarioProfissional horarioPofissional);
         Task Deletar(HorarioProfissional horarioPofissional);
 
+        #endregion
+
+        #region Consultas Dinâmicas 
+
         Task<HorarioProfissional?> ObterPorId(long id, bool apenasAtivos = true, bool incluirDeletados = false);
-        Task<List<HorarioProfissional>> ObterPorProfissionalId(long profissionalId, bool apenasAtivos = true, bool incluirDeletados = false);
+        Task<List<HorarioProfissionalResponseDto>> ObterPorProfissionalId(long profissionalId, bool apenasAtivos = true, bool incluirDeletados = false);
+
+        #endregion
     }
 }
