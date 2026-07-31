@@ -1,5 +1,4 @@
 ﻿using BarberFlow.API.DTOs.Profissional;
-using BarberFlow.API.Models;
 using BarberFlow.API.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,23 +15,19 @@ namespace BarberFlow.API.Controllers
             _profissionalService = profissionalService;
         }
 
+        #region Comandos: Escrita (Admin / Gestão)
+
+        // Cadastra um novo profissional vinculado a uma empresa
         [HttpPost]
         public async Task<IActionResult> CriarProfissional([FromBody] ProfissionalCreateDto dto)
         {
             try
             {
                 var profissional = await _profissionalService.CriarProfissional(dto);
-
-                if (profissional == null)
-                {
-                    return BadRequest("Não foi possível criar o profissional.");
-                }
-
-                var response = MapearParaResponseDto(profissional);
-                return StatusCode(201, new
-                {
-                    message = "Profissional criado com sucesso!",
-                    dados = response
+                return StatusCode(201, new 
+                { 
+                    message = "Profissional criado com sucesso!", 
+                    dados = profissional 
                 });
             }
             catch (Exception ex)
@@ -41,22 +36,14 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        [HttpPut]
+        // Atualiza os dados cadastrais do profissional pelo ID
+        [HttpPut("{id}")]
         public async Task<IActionResult> AtualizarProfissional(long id, [FromBody] ProfissionalUpdateDto dto)
         {
             try
             {
-                var profissional = await _profissionalService.AtualizarProfissional(id, dto);
-                if (profissional == null)
-                {
-                    return NotFound("Profissional não encontrado.");
-                }
-                var response = MapearParaResponseDto(profissional);
-                return Ok(new
-                {
-                    message = "Profissional atualizado com sucesso!",
-                    dados = response
-                });
+                await _profissionalService.AtualizarProfissional(id, dto);
+                return Ok(new { message = "Profissional atualizado com sucesso!" });
             }
             catch (Exception ex)
             {
@@ -64,21 +51,14 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        [HttpDelete]
+        // Soft Delete (desativação) do profissional
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeletarProfissional(long id)
         {
             try
             {
-                var profissional = await _profissionalService.DeletarProfissional(id);
-                if (profissional == null)
-                    return NotFound("Profissional não encontrado.");
-
-                var response = MapearParaResponseDto(profissional);
-                return Ok(new
-                {
-                    message = "Profissional deletado com sucesso!",
-                    dados = response
-                });
+                await _profissionalService.DeletarProfissional(id);
+                return Ok(new { message = "Profissional deletado com sucesso!" });
             }
             catch (Exception ex)
             {
@@ -86,52 +66,21 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        [HttpGet("Profissionais-Por-Empresa")]
-        public async Task<IActionResult> ObterProfissionaisPorEmpresa(long empresaId)
-        {
-            try
-            {
-                var profissionais = await _profissionalService.ObterProfissionaisPorEmpresa(empresaId);
+        #endregion
 
-                var response = profissionais.Select(profissional => new ProfissionalResponseDto
-                {
-                    Id = profissional.Id,
-                    Nome = profissional.Usuario.Nome,
-                    NomeEmpresa = profissional.Empresa.Nome,
-                    Email = profissional.Usuario.Email,
-                    EmpresaId = profissional.EmpresaId,
-                    UsuarioId = profissional.UsuarioId,
-                    PercentualComissao = profissional.PercentualComissao,
-                    DataCriacao = profissional.DataCriacao,
-                    Ativo = profissional.Ativo
-                }).ToList();
-                return Ok(new
-                {
-                    message = "Profissionais obtidos com sucesso!",
-                    dados = response
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
-        }
+        #region Consultas: Leitura
 
-        [HttpGet("Profissional-Por-Id")]
+        // Obtém o perfil completo de um profissional pelo seu ID
+        [HttpGet("{id}")]
         public async Task<IActionResult> ObterProfissionalPorId(long id)
         {
             try
             {
                 var profissional = await _profissionalService.ObterPorId(id);
-                if (profissional == null)
-                {
-                    return NotFound("Profissional não encontrado.");
-                }
-                var response = MapearParaResponseDto(profissional);
-                return Ok(new
-                {
-                    message = "Profissional obtido com sucesso!",
-                    dados = response
+                return Ok(new 
+                { 
+                    message = "Profissional obtido com sucesso!", 
+                    dados = profissional 
                 });
             }
             catch (Exception ex)
@@ -140,20 +89,25 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        private static ProfissionalResponseDto MapearParaResponseDto(Profissional profissional)
+        // Lista todos os profissionais ativos pertencentes a uma empresa específica
+        [HttpGet("empresa/{empresaId}")]
+        public async Task<IActionResult> ObterProfissionaisPorEmpresa(long empresaId)
         {
-            return new ProfissionalResponseDto
+            try
             {
-                Id = profissional.Id,
-                Nome = profissional.Usuario?.Nome ?? "N/A",
-                NomeEmpresa = profissional.Empresa?.Nome ?? "N/A",
-                Email = profissional.Usuario?.Email ?? "N/A",
-                EmpresaId = profissional.EmpresaId,
-                UsuarioId = profissional.UsuarioId,
-                PercentualComissao = profissional.PercentualComissao,
-                DataCriacao = profissional.DataCriacao,
-                Ativo = profissional.Ativo
-            };
+                var profissionais = await _profissionalService.ObterProfissionaisPorEmpresa(empresaId);
+                return Ok(new 
+                { 
+                    message = "Profissionais obtidos com sucesso!", 
+                    dados = profissionais 
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
+
+        #endregion
     }
 }
