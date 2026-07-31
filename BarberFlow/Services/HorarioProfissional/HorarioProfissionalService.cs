@@ -1,4 +1,5 @@
 ﻿using BarberFlow.API.DTOs;
+using BarberFlow.API.DTOs.HorarioProfissional;
 using BarberFlow.API.Interfaces;
 using BarberFlow.API.Models;
 
