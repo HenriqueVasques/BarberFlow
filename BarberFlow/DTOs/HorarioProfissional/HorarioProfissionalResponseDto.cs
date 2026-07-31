@@ -1,4 +1,4 @@
-﻿namespace BarberFlow.API.DTOs
+﻿namespace BarberFlow.API.DTOs.HorarioProfissional
 {
     public class HorarioProfissionalResponseDto
     {

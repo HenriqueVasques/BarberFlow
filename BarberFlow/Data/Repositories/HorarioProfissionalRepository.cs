@@ -1,5 +1,5 @@
 ﻿using BarberFlow.API.Data.Context;
-using BarberFlow.API.DTOs;
+using BarberFlow.API.DTOs.HorarioProfissional;
 using BarberFlow.API.Interfaces;
 using BarberFlow.API.Models;
 using Microsoft.EntityFrameworkCore;
@@ -79,7 +79,6 @@ namespace BarberFlow.API.Data.Repositories
                 })
                 .ToListAsync();
         }
-
         #endregion
     }
 }
