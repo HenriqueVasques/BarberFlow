@@ -24,11 +24,7 @@ namespace BarberFlow.API.Controllers
             try
             {
                 var profissional = await _profissionalService.CriarProfissional(dto);
-                return StatusCode(201, new 
-                { 
-                    message = "Profissional criado com sucesso!", 
-                    dados = profissional 
-                });
+                return StatusCode(201, new { message = "Profissional criado com sucesso!", dados = profissional });
             }
             catch (Exception ex)
             {
