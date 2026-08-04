@@ -1,5 +1,4 @@
-﻿using BarberFlow.API.DTOs;
-using BarberFlow.API.Models;
+﻿using BarberFlow.API.DTOs.ProfissionalServico;
 using BarberFlow.API.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,19 +15,16 @@ namespace BarberFlow.API.Controllers
             _profissionalServicoService = profissionalServicoService;
         }
 
+        #region Endpoints Administrativos (Admin)
+
         //[Authorize(Roles = "Admin")]
-        [HttpPost("admin/criar/")]
-        public async Task<IActionResult> CriarProfissionalServico(ProfissionalServicoCreateDto dto)
+        [HttpPost("admin/criar")]
+        public async Task<IActionResult> CriarProfissionalServico([FromBody] ProfissionalServicoCreateDto dto)
         {
             try
             {
                 var profissionalServico = await _profissionalServicoService.CriarProfissionalServico(dto);
-                var response = MapearParaResponseDto(profissionalServico);
-                return StatusCode(201, new
-                {
-                    message = "Serviço do Profissional criado com sucesso!",
-                    dados = response
-                });
+                return StatusCode(201, new { message = "Serviço do Profissional criado com sucesso!", dados = profissionalServico });
             }
             catch (Exception ex)
             {
@@ -38,17 +34,12 @@ namespace BarberFlow.API.Controllers
 
         //[Authorize(Roles = "Admin")]
         [HttpPut("admin/atualizar/{id}")]
-        public async Task<IActionResult> AtualizarProfissionalServico(long id, ProfissionalServicoUpdateDto dto)
+        public async Task<IActionResult> AtualizarProfissionalServico(long id, [FromBody] ProfissionalServicoUpdateDto dto)
         {
             try
             {
-                var profissionalServico = await _profissionalServicoService.AtualizarProfissionalServico(id, dto);
-                var response = MapearParaResponseDto(profissionalServico);
-                return StatusCode(201, new
-                {
-                    message = "Serviço do Profissional atualizado com sucesso!",
-                    dados = response
-                });
+                await _profissionalServicoService.AtualizarProfissionalServico(id, dto);
+                return Ok(new { message = "Serviço do Profissional atualizado com sucesso!" });
             }
             catch (Exception ex)
             {
@@ -62,20 +53,14 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var profissionalServico = await _profissionalServicoService.DeletarProfissionalServico(id);
-                var response = MapearParaResponseDto(profissionalServico);
-                return StatusCode(201, new
-                {
-                    message = "Serviço do Profissional deletado com sucesso!",
-                    dados = response
-                });
+                await _profissionalServicoService.DeletarProfissionalServico(id);
+                return Ok(new { message = "Serviço do Profissional deletado com sucesso!" });
             }
             catch (Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
             }
         }
-
 
         //[Authorize(Roles = "Admin")]
         [HttpGet("admin/obter-pelo-id/{id}")]
@@ -84,12 +69,7 @@ namespace BarberFlow.API.Controllers
             try
             {
                 var profissionalServico = await _profissionalServicoService.ObterPorIdAdmin(id);
-                var response = MapearParaResponseDto(profissionalServico);
-                return StatusCode(201, new
-                {
-                    message = "Serviço do Profissional recuperado com sucesso!",
-                    dados = response
-                });
+                return Ok(new { message = "Serviço do Profissional recuperado com sucesso!", dados = profissionalServico });
             }
             catch (Exception ex)
             {
@@ -103,29 +83,18 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var profissionalServico = await _profissionalServicoService.ObterPorProfissionalIdAdmin(profissionalId);
-                var response = profissionalServico.Select(ps => new ProfissionalServicoResponseDto
-                {
-                    Id = ps.Id,
-                    ProfissionalId = ps.ProfissionalId,
-                    ServicoId = ps.ServicoId,
-                    NomeProfisional = ps.Profissional.Usuario.Nome,
-                    NomeServico = ps.Servico.Nome,
-                    PrecoPersonalizado = ps.PrecoPersonalizado,
-                    DuracaoPersonalizadaMinutos = ps.DuracaoPersonalizadaMinutos,
-                    Ativo = ps.Ativo,
-                });
-                return StatusCode(201, new
-                {
-                    message = "Serviços do Profissional recuperado com sucesso!",
-                    dados = response
-                });
+                var serviços = await _profissionalServicoService.ObterPorProfissionalIdAdmin(profissionalId);
+                return Ok(new { message = "Serviços do Profissional recuperados com sucesso!", dados = serviços });
             }
             catch (Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
             }
         }
+
+        #endregion
+
+        #region Endpoints Públicos / Cliente
 
         //[Authorize(Roles = "Cliente")]
         [HttpGet("cliente/obter-pelo-id/{id}")]
@@ -134,12 +103,7 @@ namespace BarberFlow.API.Controllers
             try
             {
                 var profissionalServico = await _profissionalServicoService.ObterPorIdCliente(id);
-                var response = MapearParaResponseDto(profissionalServico);
-                return StatusCode(201, new
-                {
-                    message = "Serviço do Profissional recuperado com sucesso!",
-                    dados = response
-                });
+                return Ok(new { message = "Serviço do Profissional recuperado com sucesso!", dados = profissionalServico });
             }
             catch (Exception ex)
             {
@@ -153,23 +117,8 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var profissionalServico = await _profissionalServicoService.ObterPorProfissionalIdCliente(profissionalId);
-                var response = profissionalServico.Select(ps => new ProfissionalServicoResponseDto
-                {
-                    Id = ps.Id,
-                    ProfissionalId = ps.ProfissionalId,
-                    ServicoId = ps.ServicoId,
-                    NomeProfisional = ps.Profissional.Usuario.Nome,
-                    NomeServico = ps.Servico.Nome,
-                    PrecoPersonalizado = ps.PrecoPersonalizado,
-                    DuracaoPersonalizadaMinutos = ps.DuracaoPersonalizadaMinutos,
-                    Ativo = ps.Ativo,
-                });
-                return StatusCode(201, new
-                {
-                    message = "Serviços do Profissional recuperado com sucesso!",
-                    dados = response
-                });
+                var serviços = await _profissionalServicoService.ObterPorProfissionalIdCliente(profissionalId);
+                return Ok(new { message = "Serviços do Profissional recuperados com sucesso!", dados = serviços });
             }
             catch (Exception ex)
             {
@@ -177,20 +126,6 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-
-        private static ProfissionalServicoResponseDto MapearParaResponseDto(ProfissionalServico profissionalServico)
-        {
-            return new ProfissionalServicoResponseDto
-            {
-                Id = profissionalServico.Id,
-                ProfissionalId = profissionalServico.ProfissionalId,
-                ServicoId = profissionalServico.ServicoId,
-                NomeProfisional = profissionalServico.Profissional?.Usuario?.Nome ?? "N/A",
-                NomeServico = profissionalServico.Servico?.Nome ?? "N/A",
-                PrecoPersonalizado = profissionalServico.PrecoPersonalizado,
-                DuracaoPersonalizadaMinutos = profissionalServico.DuracaoPersonalizadaMinutos,
-                Ativo = profissionalServico.Ativo,
-            };
-        }
+        #endregion
     }
 }

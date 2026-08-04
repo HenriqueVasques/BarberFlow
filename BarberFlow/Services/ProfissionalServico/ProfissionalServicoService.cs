@@ -1,5 +1,4 @@
-﻿using BarberFlow.API.Data.Repositories;
-using BarberFlow.API.DTOs;
+﻿using BarberFlow.API.DTOs.ProfissionalServico;
 using BarberFlow.API.Interfaces;
 using BarberFlow.API.Models;
 
@@ -18,7 +17,7 @@ namespace BarberFlow.API.Services
             _servicoRepository = servicoRepository;
         }
 
-        public async Task<ProfissionalServico> CriarProfissionalServico(ProfissionalServicoCreateDto dto)
+        public async Task<ProfissionalServicoResponseDto> CriarProfissionalServico(ProfissionalServicoCreateDto dto)
         {
             if (dto == null)
                 throw new Exception("Os dados não foram preenchidos.");
@@ -42,12 +41,10 @@ namespace BarberFlow.API.Services
             };
 
             await _profissionalServicoRepository.Adicionar(profissionalServico);
-
-            return await _profissionalServicoRepository.ObterPorId(profissionalServico.Id)
-               ?? throw new Exception("Erro crítico ao recuperar o serviço do profissional após a criação.");
+            return MapToResponseDto(profissionalServico);      
         }
 
-        public async Task<ProfissionalServico> AtualizarProfissionalServico(long id, ProfissionalServicoUpdateDto dto)
+        public async Task AtualizarProfissionalServico(long id, ProfissionalServicoUpdateDto dto)
         {
             if (dto == null)
                 throw new Exception("Os dados não foram preenchidos.");
@@ -64,10 +61,9 @@ namespace BarberFlow.API.Services
             profissionalServico.DataAtualizacao = DateTime.Now;
 
             await _profissionalServicoRepository.Atualizar(profissionalServico);
-            return profissionalServico;
         }
 
-        public async Task<ProfissionalServico> DeletarProfissionalServico(long id)
+        public async Task DeletarProfissionalServico(long id)
         {
             var profissionalServico = await _profissionalServicoRepository.ObterPorId(id)
                 ?? throw new Exception("Serviço do Profissional não encontrado.");
@@ -77,32 +73,51 @@ namespace BarberFlow.API.Services
             profissionalServico.Ativo = false;
 
             await _profissionalServicoRepository.Deletar(profissionalServico);
-            return profissionalServico;
         }
 
-        public async Task<ProfissionalServico> ObterPorIdAdmin(long id)
+        public async Task<ProfissionalServicoResponseDto> ObterPorIdAdmin(long id)
         {
-            return await _profissionalServicoRepository.ObterPorId(id, apenasAtivos: false)
-                ?? throw new Exception("Esse Serviço não foi encontrado.");
+            var profissionalServico = await _profissionalServicoRepository.ObterPorId(id) 
+                ?? throw new Exception("Serviço do Profissional não encontrado.");
+            return MapToResponseDto(profissionalServico);
         }
 
-        public async Task<ProfissionalServico> ObterPorIdCliente(long id)
+        public async Task<ProfissionalServicoResponseDto> ObterPorIdCliente(long id)
         {
-            return await _profissionalServicoRepository.ObterPorId(id, apenasAtivos: true)
-                ?? throw new Exception("Esse Serviço não foi encontrado.");
+            var profissionalServico = await _profissionalServicoRepository.ObterPorId(id)
+                ?? throw new Exception("Serviço do Profissional não encontrado.");
+            return MapToResponseDto(profissionalServico);
         }
 
-        public async Task<List<ProfissionalServico>> ObterPorProfissionalIdAdmin(long profissionalId)
+        public async Task<List<ProfissionalServicoResponseDto>> ObterPorProfissionalIdAdmin(long profissionalId)
         {
             return await _profissionalServicoRepository.ObterPorProfissionalId(profissionalId, apenasAtivos: false)
                 ?? throw new Exception("Nenhum Serviço desse Profissional foi encontrado.");
         }
 
-        public async Task<List<ProfissionalServico>> ObterPorProfissionalIdCliente(long profissionalId)
+        public async Task<List<ProfissionalServicoResponseDto>> ObterPorProfissionalIdCliente(long profissionalId)
         {
             return await _profissionalServicoRepository.ObterPorProfissionalId(profissionalId, apenasAtivos: true)
                 ?? throw new Exception("Nenhum Serviço desse Profissional foi encontrado.");
         }
 
+        #region Métodos Auxiliares Privados
+        private ProfissionalServicoResponseDto MapToResponseDto(ProfissionalServico profissionalServico, string? nome = null, string? nomeEmpresa = null, string? email = null)
+        {
+            return new ProfissionalServicoResponseDto
+            {
+                Id = profissionalServico.Id,
+                ProfissionalId = profissionalServico.ProfissionalId,
+                ServicoId = profissionalServico.ServicoId,
+                NomeServico = nome ?? profissionalServico.Servico.Nome,
+                NomeProfissional = nome ?? profissionalServico.Profissional.Usuario.Nome,
+                PrecoPersonalizado = profissionalServico.PrecoPersonalizado,
+                DuracaoPersonalizadaMinutos = profissionalServico.DuracaoPersonalizadaMinutos,
+                DataCriacao = profissionalServico.DataCriacao,
+                DataAtualizacao = profissionalServico.DataAtualizacao,
+                Ativo = profissionalServico.Ativo
+            };
+        }
+        #endregion
     }
 }
