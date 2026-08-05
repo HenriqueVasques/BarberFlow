@@ -1,13 +1,23 @@
-﻿using BarberFlow.API.Models;
+﻿using BarberFlow.API.DTOs.Servico;
+using BarberFlow.API.Models;
 
 namespace BarberFlow.API.Interfaces
 {
     public interface IServicoRepository
     {
+        #region Persistência e Comandos (Escrita)
+
         Task Adicionar(Servico servico);
         Task Atualizar(Servico servico);
         Task Deletar(Servico servico);
-        Task<Servico?> ObterPorId(long id);
-        Task<IEnumerable<Servico>> ObterPorEmpresa(long empresaId);
+
+        #endregion
+
+        #region Consultas (Leitura)
+
+        Task<Servico?> ObterPorId(long id, bool apenasAtivos = true, bool incluirDeletados = false);
+        Task<IEnumerable<ServicoResponseDto>> ObterPorEmpresa(long empresaId, bool apenasAtivos = true, bool incluirDeletados = false);
+
+        #endregion
     }
 }

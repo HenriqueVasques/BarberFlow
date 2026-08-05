@@ -1,5 +1,4 @@
 ﻿using BarberFlow.API.DTOs.Servico;
-using BarberFlow.API.Models;
 using BarberFlow.API.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,19 +15,16 @@ namespace BarberFlow.API.Controllers
             _servicoService = servicoService;
         }
 
+        #region Endpoints Administrativos (Admin)
+
+        //[Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CriarServico([FromBody] ServicoCreateDto dto)
         {
             try
             {
                 var servico = await _servicoService.CriarServico(dto);
-
-                var response = MapearParaResponseDto(servico);
-                return StatusCode(201, new
-                {
-                    message = "Serviço criado com sucesso!",
-                    dados = response
-                });
+                return StatusCode(201, new { message = "Serviço criado com sucesso!", dados = servico });
             }
             catch (Exception ex)
             {
@@ -36,24 +32,14 @@ namespace BarberFlow.API.Controllers
             }
         }
 
+        //[Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> AtualizarServico(long id, [FromBody] ServicoUpdateDto dto)
         {
             try
             {
-                var servico = await _servicoService.AtualizarServico(id, dto);
-
-                if (servico == null)
-                {
-                    return NotFound(new { message = $"Serviço com id '{id}' não encontrado." });
-                }
-
-                var response = MapearParaResponseDto(servico);
-                return Ok(new
-                {
-                    message = "Serviço atualizado com sucesso!",
-                    dados = response
-                });
+                await _servicoService.AtualizarServico(id, dto);
+                return Ok(new { message = "Serviço atualizado com sucesso!" });
             }
             catch (Exception ex)
             {
@@ -61,24 +47,14 @@ namespace BarberFlow.API.Controllers
             }
         }
 
+        //[Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletarServico(long id)
         {
             try
             {
-                var servico = await _servicoService.DeletarServico(id);
-
-                if (servico == null)
-                {
-                    return NotFound(new { message = $"Serviço com id '{id}' não encontrado." });
-                }
-
-                var response = MapearParaResponseDto(servico);
-                return Ok(new
-                {
-                    message = "Serviço deletado com sucesso!",
-                    dados = response
-                });
+                await _servicoService.DeletarServico(id);
+                return Ok(new { message = "Serviço deletado com sucesso!" });
             }
             catch (Exception ex)
             {
@@ -86,47 +62,40 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ObterServicosPorEmpresa([FromQuery] long empresaId)
+        //[Authorize(Roles = "Admin")]
+        [HttpGet("admin/obter-por-empresa/{empresaId}")]
+        public async Task<IActionResult> ObterServicosPorEmpresaAdmin(long empresaId)
         {
             try
             {
-                var servicos = await _servicoService.ObterServicosPorEmpresa(empresaId);
-                var response = servicos.Select(s => new ServicoResponseDto
-                {
-                    Id = s.Id,
-                    Nome = s.Nome,
-                    NomeEmpresa = s.Empresa.Nome,
-                    DuracaoMinutos = s.DuracaoMinutos,
-                    PrecoBase = s.PrecoBase,
-                    DataCriacao = s.DataCriacao,
-                    Ativo = s.Ativo
-                });
-                return Ok(new
-                {
-                    message = "Serviços obtidos com sucesso!",
-                    dados = response
-                });
+                var servicos = await _servicoService.ObterServicosPorEmpresaAdmin(empresaId);
+                return Ok(new { message = "Serviços recuperados com sucesso!", dados = servicos });
             }
             catch (Exception ex)
             {
                 return BadRequest(new { error = ex.Message });
             }
-            
         }
 
-        private static ServicoResponseDto MapearParaResponseDto(Servico servico)
+        #endregion
+
+        #region Endpoints Públicos / Cliente
+
+        //[Authorize(Roles = "Cliente")]
+        [HttpGet("cliente/obter-por-empresa/{empresaId}")]
+        public async Task<IActionResult> ObterServicosPorEmpresaCliente(long empresaId)
         {
-            return new ServicoResponseDto
+            try
             {
-                Id = servico.Id,
-                Nome = servico.Nome,
-                NomeEmpresa = servico.Empresa?.Nome ?? "N/A",
-                DuracaoMinutos = servico.DuracaoMinutos,
-                PrecoBase = servico.PrecoBase,
-                DataCriacao = servico.DataCriacao,
-                Ativo = servico.Ativo
-            };
+                var servicos = await _servicoService.ObterServicosPorEmpresaCliente(empresaId);
+                return Ok(new { message = "Serviços recuperados com sucesso!", dados = servicos });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
-    } 
+
+        #endregion
+    }
 }
