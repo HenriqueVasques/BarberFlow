@@ -83,8 +83,8 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var serviços = await _profissionalServicoService.ObterPorProfissionalIdAdmin(profissionalId);
-                return Ok(new { message = "Serviços do Profissional recuperados com sucesso!", dados = serviços });
+                var servicos = await _profissionalServicoService.ObterPorProfissionalIdAdmin(profissionalId);
+                return Ok(new { message = "Serviços do Profissional recuperados com sucesso!", dados = servicos });
             }
             catch (Exception ex)
             {
@@ -117,8 +117,8 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var serviços = await _profissionalServicoService.ObterPorProfissionalIdCliente(profissionalId);
-                return Ok(new { message = "Serviços do Profissional recuperados com sucesso!", dados = serviços });
+                var servicos = await _profissionalServicoService.ObterPorProfissionalIdCliente(profissionalId);
+                return Ok(new { message = "Serviços do Profissional recuperados com sucesso!", dados = servicos });
             }
             catch (Exception ex)
             {
