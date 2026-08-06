@@ -17,6 +17,7 @@ namespace BarberFlow.API.Controllers
 
         #region Comandos: Escrita (Admin)
 
+        // Cria uma nova configuração de horário para um determinado profissional
         [HttpPost]
         public async Task<IActionResult> CriarHorarioProfissional([FromBody] HorarioProfissionalCreateDto dto)
         {
@@ -31,6 +32,7 @@ namespace BarberFlow.API.Controllers
             }
         }
 
+        // Atualiza os dados de um horário de trabalho existente de um profissional
         [HttpPut("{id}")]
         public async Task<IActionResult> AtualizarHorarioProfissional(long id, [FromBody] HorarioProfissionalUpdateDto dto)
         {
@@ -45,6 +47,7 @@ namespace BarberFlow.API.Controllers
             }
         }
 
+        // Remove (soft delete) uma configuração de horário do profissional
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletarHorarioProfissional(long id)
         {
@@ -63,6 +66,7 @@ namespace BarberFlow.API.Controllers
 
         #region Consultas: Leitura
 
+        // Obtém os detalhes de um horário específico do profissional pelo ID
         [HttpGet("{id}")]
         public async Task<IActionResult> ObterPorId(long id)
         {
@@ -77,6 +81,7 @@ namespace BarberFlow.API.Controllers
             }
         }
 
+        // Lista a grade completa de horários cadastrados para um profissional específico
         [HttpGet("profissional/{profissionalId}")]
         public async Task<IActionResult> ObterPorProfissionalId(long profissionalId)
         {
