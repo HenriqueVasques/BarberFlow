@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using BarberFlow.API.Enums;
 
 namespace BarberFlow.API.DTOs.Usuario
 {

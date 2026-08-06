@@ -1,4 +1,5 @@
 ﻿using BarberFlow.API.Data.Context;
+using BarberFlow.API.DTOs.Usuario;
 using BarberFlow.API.Interfaces;
 using BarberFlow.API.Models;
 using Microsoft.EntityFrameworkCore;
@@ -14,50 +15,82 @@ namespace BarberFlow.API.Data.Repositories
             _appDbContext = appDbContext;
         }
 
+        #region Comandos (Escrita)
+
+        // Adiciona um novo usuário no banco de dados
         public async Task Adicionar(Usuario usuario)
         {
             await _appDbContext.Usuarios.AddAsync(usuario);
             await _appDbContext.SaveChangesAsync();
         }
 
-        public async Task AlterarSenha(Usuario usuario)
-        {
-             _appDbContext.Usuarios.Update(usuario);
-            await _appDbContext.SaveChangesAsync();
-        }
-
+        // Atualiza os dados cadastrais do usuário
         public async Task Atualizar(Usuario usuario)
         {
             _appDbContext.Usuarios.Update(usuario);
             await _appDbContext.SaveChangesAsync();
         }
 
+        // Executa o update para fins de Soft Delete ou inativação do usuário
         public async Task Deletar(Usuario usuario)
         {
             _appDbContext.Usuarios.Update(usuario);
             await _appDbContext.SaveChangesAsync();
         }
 
+        // Persiste a alteração da senha do usuário
+        public async Task AlterarSenha(Usuario usuario)
+        {
+            _appDbContext.Usuarios.Update(usuario);
+            await _appDbContext.SaveChangesAsync();
+        }
+
+        #endregion
+
+        #region Consultas (Leitura)
+
+        // Verifica se já existe um usuário ativo registrado com o e-mail informado
         public async Task<bool> ExisteEmail(string email)
         {
-            if (await _appDbContext.Usuarios.AnyAsync(u => u.Email == email && !u.IsDeleted && u.Ativo))
-            {
-                return true;
-            }
-            return false;
+            return await _appDbContext.Usuarios
+                .AnyAsync(u => u.Email == email && !u.IsDeleted && u.Ativo);
         }
 
-        public async Task<Usuario?> ObterPorId(long id)
-        {
-            return await _appDbContext.Usuarios.FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted && u.Ativo);  
-        }
-
-        public async Task<IEnumerable<Usuario>> ObterPorEmpresa(long empresaId)
+        // Busca um usuário por ID aplicando filtros de status e soft delete
+        public async Task<Usuario?> ObterPorId(long id, bool apenasAtivos = true, bool incluirDeletados = false)
         {
             return await _appDbContext.Usuarios
-                .Where(u => u.EmpresaId == empresaId && !u.IsDeleted && u.Ativo)
+                .Where(u => u.Id == id &&
+                            (!apenasAtivos || u.Ativo) &&
+                            (incluirDeletados || !u.IsDeleted))
+                .FirstOrDefaultAsync();
+        }
+
+        // Retorna a listagem otimizada (AsNoTracking) de usuários vinculados a uma empresa
+        public async Task<List<UsuarioResponseDto>> ObterPorEmpresa(long empresaId, bool apenasAtivos = true, bool incluirDeletados = false)
+        {
+            return await _appDbContext.Usuarios
                 .AsNoTracking()
+                .Where(u => u.EmpresaId == empresaId &&
+                            (!apenasAtivos || u.Ativo) &&
+                            (incluirDeletados || !u.IsDeleted))
+                .Select(u => new UsuarioResponseDto
+                {
+                    EmpresaId = u.EmpresaId,
+                    Id = u.Id,
+                    Nome = u.Nome,
+                    Email = u.Email,
+                    Perfil = u.Perfil,
+                    Telefone = u.Telefone,
+                    Whatsapp = u.Whatsapp,
+                    DataCriacao = u.DataCriacao,
+                    DataAtualizacao = u.DataAtualizacao,
+                    IsDeleted = u.IsDeleted,
+                    Ativo = u.Ativo
+                })
                 .ToListAsync();
         }
+
+        #endregion
     }
 }
