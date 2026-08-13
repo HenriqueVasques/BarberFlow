@@ -1,5 +1,4 @@
-﻿using BarberFlow.API.DTOs.Auth;
-using BarberFlow.API.DTOs.Usuario;
+﻿using BarberFlow.API.DTOs.Usuario;
 using BarberFlow.API.Models;
 
 namespace BarberFlow.API.Interfaces
