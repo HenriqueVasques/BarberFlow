@@ -1,4 +1,5 @@
 ﻿using BarberFlow.API.Data.Context;
+using BarberFlow.API.DTOs.Auth;
 using BarberFlow.API.DTOs.Usuario;
 using BarberFlow.API.Interfaces;
 using BarberFlow.API.Models;
@@ -64,6 +65,12 @@ namespace BarberFlow.API.Data.Repositories
                             (!apenasAtivos || u.Ativo) &&
                             (incluirDeletados || !u.IsDeleted))
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<Usuario?> ObterPorEmail(string email)
+        {
+            return await _appDbContext.Usuarios
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower().Trim() && !u.IsDeleted);
         }
 
         // Retorna a listagem otimizada (AsNoTracking) de usuários vinculados a uma empresa
