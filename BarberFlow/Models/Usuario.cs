@@ -29,20 +29,7 @@ namespace BarberFlow.API.Models
         #region Construtores
         public Usuario() { }
 
-        public Usuario(string nome, string email, string telefone, string whatsapp, string senhaHash, long empresaId, PerfilUsuario perfil)
-        {
-            EmpresaId = empresaId;
-            Nome = nome;
-            Email = email;
-            Telefone = telefone;
-            Whatsapp = whatsapp;
-            Perfil = perfil;
-            SenhaHash = senhaHash;
-            Ativo = true;
-            IsDeleted = false;
-            DataCriacao = DateTime.UtcNow;
-            DataAtualizacao = DateTime.UtcNow;
-        }
+        
         #endregion
     }
 }

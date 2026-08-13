@@ -1,6 +1,5 @@
 ﻿using BarberFlow.API.DTOs.Agendamento;
 using BarberFlow.API.Enums;
-using BarberFlow.API.Models;
 using BarberFlow.API.Services;
 using Microsoft.AspNetCore.Mvc;
 
