@@ -110,12 +110,28 @@ namespace BarberFlow.API.Services
         }
 
         // Recupera a model completa por ID para operações internas ou edição
-        public async Task<HorarioFuncionamentoEmpresa> ObterPorId(long id, bool apenasAtivos = true, bool incluirDeletados = false)
+        public async Task<HorarioFuncionamentoEmpresaResponseDto> ObterPorId(long id, bool apenasAtivos = true, bool incluirDeletados = false)
         {
-            return await _horarioFuncionamentoEmpresaRepository.ObterPorId(id, apenasAtivos, incluirDeletados)
+            var horario = await _horarioFuncionamentoEmpresaRepository.ObterPorId(id, apenasAtivos, incluirDeletados)
                 ?? throw new Exception($"Configuração de horário com id {id} não encontrada.");
+
+            return MapToResponseDto(horario);
         }
 
         #endregion
+
+        private static HorarioFuncionamentoEmpresaResponseDto MapToResponseDto(HorarioFuncionamentoEmpresa horario)
+        {
+            return new HorarioFuncionamentoEmpresaResponseDto
+            {
+                Id = horario.Id,
+                EmpresaId = horario.EmpresaId,
+                DiaSemana = horario.DiaSemana,
+                HoraAbertura = horario.HoraAbertura,
+                HoraFechamento = horario.HoraFechamento,
+                Ativo = horario.Ativo,
+                EstaFechado = horario.EstaFechado
+            };
+        }
     }
 }

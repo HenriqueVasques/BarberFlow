@@ -44,15 +44,16 @@ namespace BarberFlow.API.Services
 
                 string senhaHash = BCrypt.Net.BCrypt.HashPassword(dto.Senha);
 
-                var usuario = new Usuario(
-                    dto.Nome,
-                    dto.Email,
-                    dto.Telefone,
-                    dto.Email,
-                    senhaHash,
-                    dto.EmpresaId,
-                    PerfilUsuario.Cliente
-                );
+                var usuario = new Usuario
+                {
+                    Nome = dto.Nome,
+                    Email = dto.Email,
+                    Telefone = dto.Telefone,
+                    Whatsapp = dto.Whatsapp,
+                    SenhaHash = senhaHash,
+                    EmpresaId = dto.EmpresaId,
+                    Perfil = PerfilUsuario.Cliente,
+                };
 
                 await _usuarioRepository.Adicionar(usuario);
 
@@ -60,10 +61,6 @@ namespace BarberFlow.API.Services
                 {
                     EmpresaId = dto.EmpresaId,
                     UsuarioId = usuario.Id,
-                    Ativo = true,
-                    IsDeleted = false,
-                    DataAtualizacao = DateTime.UtcNow,
-                    DataCriacao = DateTime.UtcNow
                 };
 
                 await _clienteRepository.Adicionar(cliente);

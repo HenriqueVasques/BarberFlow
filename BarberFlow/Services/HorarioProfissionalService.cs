@@ -56,8 +56,6 @@ namespace BarberFlow.API.Services
                 HoraFim = dto.HoraFim,
                 HoraInicioAlmoco = dto.HoraInicioAlmoco,
                 HoraFimAlmoco = dto.HoraFimAlmoco,
-                DataCriacao = DateTime.UtcNow,
-                DataAtualizacao = DateTime.UtcNow
             };
 
             await _horarioProfissionalRepository.Adicionar(horarioProfissional);
@@ -127,10 +125,10 @@ namespace BarberFlow.API.Services
 
         public async Task<HorarioProfissionalResponseDto> ObterPorId(long id)
         {
-            var horario = await _horarioProfissionalRepository.ObterPorId(id)
+            var horarioProfissional = await _horarioProfissionalRepository.ObterPorId(id)
                 ?? throw new Exception("Horário do Profissional não encontrado.");
 
-            return MapToResponseDto(horario);
+            return MapToResponseDto(horarioProfissional);
         }
 
         public async Task<List<HorarioProfissionalResponseDto>> ObterPorProfissionalId(long profissionalId)
@@ -160,19 +158,19 @@ namespace BarberFlow.API.Services
                 throw new Exception("O horário de almoço deve estar contido dentro do horário de trabalho do profissional.");
         }
 
-        private HorarioProfissionalResponseDto MapToResponseDto(HorarioProfissional model)
+        private HorarioProfissionalResponseDto MapToResponseDto(HorarioProfissional horarioProfissional)
         {
             return new HorarioProfissionalResponseDto
             {
-                Id = model.Id,
-                ProfissionalId = model.ProfissionalId,
-                EmpresaId = model.EmpresaId,
-                DiaSemana = model.DiaSemana,
-                HoraInicio = model.HoraInicio,
-                HoraFim = model.HoraFim,
-                HoraInicioAlmoco = model.HoraInicioAlmoco,
-                HoraFimAlmoco = model.HoraFimAlmoco,
-                Ativo = model.Ativo
+                Id = horarioProfissional.Id,
+                ProfissionalId = horarioProfissional.ProfissionalId,
+                EmpresaId = horarioProfissional.EmpresaId,
+                DiaSemana = horarioProfissional.DiaSemana,
+                HoraInicio = horarioProfissional.HoraInicio,
+                HoraFim = horarioProfissional.HoraFim,
+                HoraInicioAlmoco = horarioProfissional.HoraInicioAlmoco,
+                HoraFimAlmoco = horarioProfissional.HoraFimAlmoco,
+                Ativo = horarioProfissional.Ativo
             };
         }
 

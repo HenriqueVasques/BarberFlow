@@ -69,7 +69,7 @@ namespace BarberFlow.API.Services
                 new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, usuario.Email),
                 new Claim("nome", usuario.Nome),
-                new Claim("perfil", usuario.Perfil.ToString()),
+                new Claim(ClaimTypes.Role, usuario.Perfil.ToString()),
                 new Claim("empresaId", usuario.EmpresaId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };

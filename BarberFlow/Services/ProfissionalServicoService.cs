@@ -54,7 +54,7 @@ namespace BarberFlow.API.Services
             };
 
             await _profissionalServicoRepository.Adicionar(profissionalServico);
-            return MapToResponseDto(profissionalServico, servico.Nome, profissional.Usuario?.Nome);
+            return MapToResponseDto(profissionalServico);
         }
 
         // Atualiza a duração e/ou preço personalizado do serviço oferecido pelo profissional
@@ -131,15 +131,15 @@ namespace BarberFlow.API.Services
         #region Métodos Auxiliares Privados
 
         // Mapeia a entidade de domínio ProfissionalServico para o DTO de resposta da API
-        private ProfissionalServicoResponseDto MapToResponseDto(ProfissionalServico profissionalServico, string? nomeServico = null, string? nomeProfissional = null, string? nomeEmpresa = null, string? email = null)
+        private ProfissionalServicoResponseDto MapToResponseDto(ProfissionalServico profissionalServico)
         {
             return new ProfissionalServicoResponseDto
             {
                 Id = profissionalServico.Id,
                 ProfissionalId = profissionalServico.ProfissionalId,
                 ServicoId = profissionalServico.ServicoId,
-                NomeServico = nomeServico ?? profissionalServico.Servico?.Nome ?? string.Empty,
-                NomeProfissional = nomeProfissional ?? profissionalServico.Profissional?.Usuario?.Nome ?? string.Empty,
+                NomeServico = profissionalServico.Servico?.Nome ?? string.Empty,
+                NomeProfissional = profissionalServico.Profissional?.Usuario?.Nome ?? string.Empty,
                 PrecoPersonalizado = profissionalServico.PrecoPersonalizado,
                 DuracaoPersonalizadaMinutos = profissionalServico.DuracaoPersonalizadaMinutos,
                 DataCriacao = profissionalServico.DataCriacao,

@@ -48,15 +48,17 @@ namespace BarberFlow.API.Services
             {
                 string senhaHash = BCrypt.Net.BCrypt.HashPassword(dto.Senha);
 
-                var usuario = new Usuario(
-                    dto.Nome,
-                    dto.Email,
-                    dto.Telefone,
-                    dto.Whatsapp,
-                    senhaHash,
-                    dto.EmpresaId,
-                    PerfilUsuario.Profissional
-                );
+                var usuario = new Usuario
+                {
+                    Nome = dto.Nome,
+                    Email = dto.Email,
+                    Telefone = dto.Telefone,
+                    Whatsapp = dto.Whatsapp,
+                    SenhaHash = senhaHash,
+                    EmpresaId = dto.EmpresaId,
+                    Perfil = PerfilUsuario.Profissional,
+
+                };
 
                 await _usuarioRepository.Adicionar(usuario);
 
@@ -69,7 +71,7 @@ namespace BarberFlow.API.Services
                 await _profissionalRepository.Adicionar(profissional);
                 await transaction.CommitAsync();
 
-                return MapToResponseDto(profissional, usuario.Nome, empresa.Nome, usuario.Email);
+                return MapToResponseDto(profissional);
             }
             catch
             {
@@ -190,16 +192,16 @@ namespace BarberFlow.API.Services
 
         #region Métodos Auxiliares Privados
 
-        private ProfissionalResponseDto MapToResponseDto(Profissional profissional, string? nome = null, string? nomeEmpresa = null, string? email = null)
+        private static ProfissionalResponseDto MapToResponseDto(Profissional profissional)
         {
             return new ProfissionalResponseDto
             {
                 Id = profissional.Id,
                 EmpresaId = profissional.EmpresaId,
                 UsuarioId = profissional.UsuarioId,
-                Nome = nome ?? profissional.Usuario?.Nome,
-                NomeEmpresa = nomeEmpresa ?? profissional.Empresa?.Nome,
-                Email = email ?? profissional.Usuario?.Email,
+                Nome = profissional.Usuario?.Nome ?? string.Empty,
+                NomeEmpresa = profissional.Empresa?.Nome ?? string.Empty,
+                Email = profissional.Usuario?.Email ?? string.Empty,
                 PercentualComissao = profissional.PercentualComissao,
                 DataCriacao = profissional.DataCriacao,
                 DataAtualizacao = profissional.DataAtualizacao,

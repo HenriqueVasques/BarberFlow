@@ -47,7 +47,7 @@ namespace BarberFlow.API.Services
 
             await _servicoRepository.Adicionar(servico);
 
-            return MapToResponseDto(servico, empresa.Nome);
+            return MapToResponseDto(servico);
         }
 
         // Atualiza as informações bases do serviço (nome, duração e preço)
@@ -117,13 +117,13 @@ namespace BarberFlow.API.Services
         #region Métodos Auxiliares Privados
 
         // Mapeia a entidade de domínio Servico para o DTO de resposta da API
-        private static ServicoResponseDto MapToResponseDto(Servico servico, string? nomeEmpresa = null)
+        private static ServicoResponseDto MapToResponseDto(Servico servico)
         {
             return new ServicoResponseDto
             {
                 Id = servico.Id,
                 Nome = servico.Nome,
-                NomeEmpresa = nomeEmpresa ?? servico.Empresa?.Nome ?? string.Empty,
+                NomeEmpresa = servico.Empresa?.Nome ?? string.Empty,
                 DuracaoMinutos = servico.DuracaoMinutos,
                 PrecoBase = servico.PrecoBase,
                 DataCriacao = servico.DataCriacao,
