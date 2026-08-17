@@ -8,17 +8,18 @@ using BarberFlow.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. CONFIGURAÇÃO DE INFRAESTRUTURA (BANCO DE DADOS)
+// 1. INFRAESTRUTURA & BANCO DE DADOS
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-// 2. REGISTRO DE DEPENDÊNCIAS (INJEÇÃO DE DEPENDÊNCIA - D.I.)
+// 2. INJEÇÃO DE DEPENDÊNCIA (D.I.)
 
 // Repositórios (Acesso a Dados)
 builder.Services.AddScoped<IEmpresaRepository, EmpresaRepository>();
@@ -32,12 +33,12 @@ builder.Services.AddScoped<IHorarioFuncionamentoEmpresaRepository, HorarioFuncio
 builder.Services.AddScoped<IProfissionalServicoRepository, ProfissionalServicoRepository>();
 builder.Services.AddScoped<IHorarioProfissionalRepository, HorarioProfissionalRepository>();
 
-// Serviços (Lógica de Negócio)
+// Serviços (Regras de Negócio)
 builder.Services.AddScoped<EmpresaService>();
 builder.Services.AddScoped<ServicoService>();
 builder.Services.AddScoped<ProfissionalService>();
 builder.Services.AddScoped<UsuarioService>();
-builder.Services.AddScoped<AuthService>(); 
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<BloqueioHorarioService>();
 builder.Services.AddScoped<AgendamentoService>();
 builder.Services.AddScoped<ClienteService>();
@@ -45,8 +46,22 @@ builder.Services.AddScoped<HorarioFuncionamentoEmpresaService>();
 builder.Services.AddScoped<ProfissionalServicoService>();
 builder.Services.AddScoped<HorarioProfissionalService>();
 
-// 3. SEGURANÇA (AUTENTICAÇÃO E AUTORIZAÇÃO JWT)
+// 3. SEGURANÇA (CORS, AUTENTICAÇÃO E AUTORIZAÇÃO JWT)
 
+// Configuração do CORS
+var allowedOrigins = builder.Configuration["CorsSettings:AllowedOrigins"] ?? "http://localhost:5173";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+// Configuração do JWT
 var jwtSecret = builder.Configuration["JwtSettings:Secret"]
     ?? throw new InvalidOperationException("A chave secreta do JWT (JwtSettings:Secret) não foi configurada.");
 
@@ -68,36 +83,49 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidAudience = builder.Configuration["JwtSettings:Audience"],
         ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero // Remove qualquer tolerância extra no tempo de expiração
+        ClockSkew = TimeSpan.Zero
     };
 });
 
 builder.Services.AddAuthorization();
 
-// 4. SERVIÇOS DO FRAMEWORK (ASP.NET CORE)
+// 4. SERVIÇOS DO FRAMEWORK E DOCUMENTAÇÃO
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // Força o JSON a interpretar qualquer data que chegue como UTC
+        // Converter global para interpretar datas recebidas como UTC
         options.JsonSerializerOptions.Converters.Add(new JsonDateTimeConverter());
     });
 
-// Documentação (Scalar / OpenAPI)
-builder.Services.AddOpenApi();
+// Configuração do OpenAPI com suporte a autenticação JWT no Scalar
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        var securityScheme = new OpenApiSecurityScheme
+        {
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            In = ParameterLocation.Header,
+            Description = "Cole seu token JWT abaixo:"
+        };
 
-// 5. CONSTRUÇÃO DA APLICAÇÃO (BUILD)
+        document.Components ??= new OpenApiComponents();
+        document.Components.SecuritySchemes.Add("Bearer", securityScheme);
+
+        return Task.CompletedTask;
+    });
+});
+
+// 5. CONSTRUÇÃO E PIPELINE DE MIDDLEWARES
 
 var app = builder.Build();
 
-// 6. PIPELINE DE EXECUÇÃO DOS MIDDLEWARES
-
 if (app.Environment.IsDevelopment())
 {
-    // Gera o arquivo JSON da especificação OpenAPI
     app.MapOpenApi();
-
-    // Interface gráfica do Scalar API Reference
     app.MapScalarApiReference(options =>
     {
         options.WithTitle("BarberFlow API")
@@ -107,9 +135,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
-app.UseAuthorization();  
+app.UseAuthorization();
 
 app.MapControllers();
 
