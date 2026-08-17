@@ -44,8 +44,8 @@ namespace BarberFlow.API.Services
             {
                 Nome = dto.Nome,
                 Email = dto.Email,
-                Telefone = telefoneSanitizado,
-                Whatsapp = whatsappSanitizado,
+                Telefone = telefoneSanitizado ?? string.Empty,
+                Whatsapp = whatsappSanitizado ?? string.Empty,
                 SenhaHash = senhaHash,
                 EmpresaId = dto.EmpresaId,
                 Perfil = PerfilUsuario.Administrador,
@@ -80,8 +80,8 @@ namespace BarberFlow.API.Services
                 throw new Exception("O nome precisa ser preenchido.");
 
             usuario.Nome = dto.Nome;
-            usuario.Telefone = ValidarESanitizarTelefone(dto.Telefone, "Telefone");
-            usuario.Whatsapp = ValidarESanitizarTelefone(dto.Whatsapp, "WhatsApp");
+            usuario.Telefone = ValidarESanitizarTelefone(dto.Telefone, "Telefone") ?? string.Empty;
+            usuario.Whatsapp = ValidarESanitizarTelefone(dto.Whatsapp, "WhatsApp") ?? string.Empty;
             usuario.DataAtualizacao = DateTime.UtcNow;
 
             await _usuarioRepository.Atualizar(usuario);

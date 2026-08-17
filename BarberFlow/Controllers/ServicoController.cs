@@ -1,5 +1,6 @@
 ﻿using BarberFlow.API.DTOs.Servico;
 using BarberFlow.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BarberFlow.API.Controllers
@@ -17,7 +18,7 @@ namespace BarberFlow.API.Controllers
 
         #region Endpoints Administrativos (Admin)
 
-        //[Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Administrador")]
         [HttpPost]
         public async Task<IActionResult> CriarServico([FromBody] ServicoCreateDto dto)
         {
@@ -32,7 +33,7 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        //[Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Administrador")]
         [HttpPut("{id}")]
         public async Task<IActionResult> AtualizarServico(long id, [FromBody] ServicoUpdateDto dto)
         {
@@ -47,7 +48,7 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        //[Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Administrador")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletarServico(long id)
         {
@@ -62,7 +63,7 @@ namespace BarberFlow.API.Controllers
             }
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Administrador")]
         [HttpGet("admin/obter-por-empresa/{empresaId}")]
         public async Task<IActionResult> ObterServicosPorEmpresaAdmin(long empresaId)
         {
@@ -81,7 +82,7 @@ namespace BarberFlow.API.Controllers
 
         #region Endpoints Públicos / Cliente
 
-        //[Authorize(Roles = "Cliente")]
+        [Authorize(Roles = "Cliente, Administrador")]
         [HttpGet("cliente/obter-por-empresa/{empresaId}")]
         public async Task<IActionResult> ObterServicosPorEmpresaCliente(long empresaId)
         {
