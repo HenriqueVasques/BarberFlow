@@ -14,16 +14,16 @@
         public DateTime DataAtualizacao { get; set; } = DateTime.UtcNow;
         #endregion
 
-        #region Privacidade e Consentimento
+        #region Privacidade e Consentimento (LGPD)
         public bool AceitouTermosPrivacidade { get; set; }
         public DateTime? DataConsentimento { get; set; }
         public string? IpConsentimento { get; set; }
         #endregion
 
         #region Propriedades de Navegação
-        public virtual Empresa Empresa { get; set; }
-        public virtual Usuario Usuario { get; set; }
-        public virtual ICollection<Agendamento> Agendamentos { get; set; }
+        public virtual Empresa Empresa { get; set; } = null!;
+        public virtual Usuario Usuario { get; set; } = null!;
+        public virtual ICollection<Agendamento> Agendamentos { get; set; } = new List<Agendamento>();
         #endregion
     }
 }

@@ -35,13 +35,13 @@ namespace BarberFlow.API.Services
         public async Task<ProfissionalResponseDto> CriarProfissional(ProfissionalCreateDto dto)
         {
             if (dto == null)
-                throw new Exception("Os dados não foram preenchidos.");
+                throw new ArgumentNullException(nameof(dto), "Os dados não foram preenchidos.");
 
             if (await _usuarioRepository.ExisteEmail(dto.Email))
-                throw new Exception("Este e-mail já está em uso.");
+                throw new InvalidOperationException("Este e-mail já está em uso.");
 
             var empresa = await _empresaRepository.ObterPorId(dto.EmpresaId)
-                ?? throw new Exception($"Empresa com ID {dto.EmpresaId} não encontrada.");
+                ?? throw new KeyNotFoundException($"Empresa com ID {dto.EmpresaId} não encontrada.");
 
             using IDbContextTransaction transaction = await _appDbContext.Database.BeginTransactionAsync();
             try
@@ -52,21 +52,26 @@ namespace BarberFlow.API.Services
                 {
                     Nome = dto.Nome,
                     Email = dto.Email,
-                    Telefone = dto.Telefone,
-                    Whatsapp = dto.Whatsapp,
+                    Telefone = dto.Telefone, // Aceita null nativamente
+                    Whatsapp = dto.Whatsapp, // Aceita null nativamente
                     SenhaHash = senhaHash,
                     EmpresaId = dto.EmpresaId,
-                    Perfil = PerfilUsuario.Profissional,
-
+                    Perfil = PerfilUsuario.Profissional
                 };
 
                 await _usuarioRepository.Adicionar(usuario);
 
-                var profissional = new Profissional(
-                    dto.EmpresaId,
-                    usuario.Id,
-                    dto.PercentualComissao
-                );
+                var profissional = new Profissional
+                {
+                    EmpresaId = dto.EmpresaId,
+                    UsuarioId = usuario.Id,
+                    PercentualComissao = dto.PercentualComissao,
+                    Ativo = true,
+                    DataCriacao = DateTime.UtcNow,
+                    DataAtualizacao = DateTime.UtcNow,
+                    Usuario = usuario,
+                    Empresa = empresa
+                };
 
                 await _profissionalRepository.Adicionar(profissional);
                 await transaction.CommitAsync();
@@ -84,15 +89,16 @@ namespace BarberFlow.API.Services
         public async Task AtualizarProfissional(long id, ProfissionalUpdateDto dto)
         {
             if (dto == null)
-                throw new Exception("Os dados não foram preenchidos.");
+                throw new ArgumentNullException(nameof(dto), "Os dados não foram preenchidos.");
 
             var profissional = await _profissionalRepository.ObterPorId(id)
-                ?? throw new Exception($"Profissional com ID {id} não encontrado.");
+                ?? throw new KeyNotFoundException($"Profissional com ID {id} não encontrado.");
 
+            // Validação de E-mail duplicado ao alterar
             if (!string.IsNullOrWhiteSpace(dto.Email) && profissional.Usuario.Email != dto.Email)
             {
                 if (await _usuarioRepository.ExisteEmail(dto.Email))
-                    throw new Exception("Este e-mail já está em uso por outro usuário.");
+                    throw new InvalidOperationException("Este e-mail já está em uso por outro usuário.");
 
                 profissional.Usuario.Email = dto.Email;
             }
@@ -100,13 +106,11 @@ namespace BarberFlow.API.Services
             if (!string.IsNullOrWhiteSpace(dto.Nome))
                 profissional.Usuario.Nome = dto.Nome;
 
-            if (!string.IsNullOrWhiteSpace(dto.Telefone))
-                profissional.Usuario.Telefone = dto.Telefone;
-
-            if (!string.IsNullOrWhiteSpace(dto.Whatsapp))
-                profissional.Usuario.Whatsapp = dto.Whatsapp;
-
+            // Atribuição direta permite atualizar para um valor nulo se enviado assim no DTO
+            profissional.Usuario.Telefone = dto.Telefone;
+            profissional.Usuario.Whatsapp = dto.Whatsapp;
             profissional.Usuario.DataAtualizacao = DateTime.UtcNow;
+
             profissional.PercentualComissao = dto.PercentualComissao;
             profissional.DataAtualizacao = DateTime.UtcNow;
 
@@ -117,7 +121,7 @@ namespace BarberFlow.API.Services
         public async Task DeletarProfissional(long id)
         {
             var profissional = await _profissionalRepository.ObterPorId(id)
-                ?? throw new Exception($"Profissional com ID {id} não encontrado.");
+                ?? throw new KeyNotFoundException($"Profissional com ID {id} não encontrado.");
 
             var hoje = DateOnly.FromDateTime(DateTime.UtcNow);
             var futuroProximo = hoje.AddYears(2);
@@ -138,27 +142,38 @@ namespace BarberFlow.API.Services
 
             if (agendamentosFuturos != null && agendamentosFuturos.Any())
             {
-                throw new Exception($"Não é possível deletar o profissional {profissional.Usuario.Nome}. " +
-                                    $"Existem {agendamentosFuturos.Count} agendamento(s) pendente(s) ou confirmado(s) na agenda dele.");
+                throw new InvalidOperationException(
+                    $"Não é possível deletar o profissional {profissional.Usuario.Nome}. " +
+                    $"Existem {agendamentosFuturos.Count()} agendamento(s) pendente(s) ou confirmado(s) na agenda dele.");
             }
 
-            // Desativa o registro do Profissional
-            profissional.IsDeleted = true;
-            profissional.Ativo = false;
-            profissional.DataAtualizacao = DateTime.UtcNow;
-
-            // Anonimização LGPD para a conta de usuário associada
-            if (profissional.Usuario != null)
+            using IDbContextTransaction transaction = await _appDbContext.Database.BeginTransactionAsync();
+            try
             {
-                profissional.Usuario.Telefone = "000000000";
-                profissional.Usuario.Whatsapp = "000000000";
-                profissional.Usuario.Nome = "Usuário Excluído";
-                profissional.Usuario.Email = $"excluido_{profissional.Id}@barberflow.com.br";
-                profissional.Usuario.SenhaHash = string.Empty;
-                profissional.Usuario.DataAtualizacao = DateTime.UtcNow;
-            }
+                profissional.IsDeleted = true;
+                profissional.Ativo = false;
+                profissional.DataAtualizacao = DateTime.UtcNow;
 
-            await _profissionalRepository.Deletar(profissional);
+                if (profissional.Usuario != null)
+                {
+                    profissional.Usuario.Telefone = null;
+                    profissional.Usuario.Whatsapp = null;
+                    profissional.Usuario.Nome = "Usuário Excluído";
+                    profissional.Usuario.Email = $"excluido_{profissional.Id}@barberflow.com.br";
+                    profissional.Usuario.SenhaHash = string.Empty;
+                    profissional.Usuario.IsDeleted = true;
+                    profissional.Usuario.Ativo = false;
+                    profissional.Usuario.DataAtualizacao = DateTime.UtcNow;
+                }
+
+                await _profissionalRepository.Deletar(profissional);
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         #endregion
@@ -169,7 +184,7 @@ namespace BarberFlow.API.Services
         public async Task<ProfissionalResponseDto> ObterPorId(long id)
         {
             var profissional = await _profissionalRepository.ObterPorId(id)
-                ?? throw new Exception($"Profissional com ID {id} não encontrado.");
+                ?? throw new KeyNotFoundException($"Profissional com ID {id} não encontrado.");
 
             return MapToResponseDto(profissional);
         }
@@ -178,12 +193,12 @@ namespace BarberFlow.API.Services
         public async Task<IEnumerable<ProfissionalResponseDto>> ObterProfissionaisPorEmpresa(long empresaId)
         {
             var empresa = await _empresaRepository.ObterPorId(empresaId)
-                ?? throw new Exception($"Empresa com ID {empresaId} não encontrada.");
+                ?? throw new KeyNotFoundException($"Empresa com ID {empresaId} não encontrada.");
 
             var profissionais = await _profissionalRepository.ObterPorEmpresa(empresaId);
 
             if (profissionais == null || !profissionais.Any())
-                throw new Exception($"Empresa com ID {empresaId} não possui profissionais cadastrados.");
+                return Enumerable.Empty<ProfissionalResponseDto>();
 
             return profissionais;
         }
@@ -202,6 +217,8 @@ namespace BarberFlow.API.Services
                 Nome = profissional.Usuario?.Nome ?? string.Empty,
                 NomeEmpresa = profissional.Empresa?.Nome ?? string.Empty,
                 Email = profissional.Usuario?.Email ?? string.Empty,
+                Telefone = profissional.Usuario?.Telefone,
+                Whatsapp = profissional.Usuario?.Whatsapp,
                 PercentualComissao = profissional.PercentualComissao,
                 DataCriacao = profissional.DataCriacao,
                 DataAtualizacao = profissional.DataAtualizacao,

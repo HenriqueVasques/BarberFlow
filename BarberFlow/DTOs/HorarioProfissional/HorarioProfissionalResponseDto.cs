@@ -13,8 +13,8 @@
         public DayOfWeek DiaSemana { get; set; }
         public TimeOnly HoraInicio { get; set; }
         public TimeOnly HoraFim { get; set; }
-        public TimeOnly HoraInicioAlmoco { get; set; }
-        public TimeOnly HoraFimAlmoco { get; set; }
+        public TimeOnly? HoraInicioAlmoco { get; set; }
+        public TimeOnly? HoraFimAlmoco { get; set; }
         #endregion
 
         #region Status

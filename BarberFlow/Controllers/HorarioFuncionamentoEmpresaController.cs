@@ -34,7 +34,7 @@ namespace BarberFlow.API.Controllers
 
         // Atualiza os dados de um horário de funcionamento existente
         [HttpPut("admin/atualizar/{id}")]
-        public async Task<IActionResult> AtualizarHorarioFuncionamentoEmpresa(long id, [FromBody] HorarioFuncionamentoEmpresaUpadteDto dto)
+        public async Task<IActionResult> AtualizarHorarioFuncionamentoEmpresa(long id, [FromBody] HorarioFuncionamentoEmpresaUpdateDto dto)
         {
             try
             {

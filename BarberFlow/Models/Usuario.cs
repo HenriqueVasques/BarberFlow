@@ -7,11 +7,12 @@ namespace BarberFlow.API.Models
         #region Propriedades de Persistência
         public long Id { get; set; }
         public long EmpresaId { get; set; }
-        public string Nome { get; set; }
-        public string Email { get; set; }
-        public string Telefone { get; set; }
-        public string Whatsapp { get; set; }
-        public string SenhaHash { get; set; }
+        public string Nome { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string SenhaHash { get; set; } = string.Empty;
+        public string? Telefone { get; set; }
+        public string? Whatsapp { get; set; }
+
         public PerfilUsuario Perfil { get; set; }
         public bool Ativo { get; set; } = true;
         #endregion
@@ -23,13 +24,11 @@ namespace BarberFlow.API.Models
         #endregion
 
         #region Propriedades de Navegação (Relacionamentos)
-        public virtual Empresa Empresa { get; set; }
+        public virtual Empresa Empresa { get; set; } = null!;
         #endregion
 
         #region Construtores
         public Usuario() { }
-
-        
         #endregion
     }
 }

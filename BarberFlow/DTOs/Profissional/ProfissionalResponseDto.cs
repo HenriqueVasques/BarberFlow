@@ -11,6 +11,9 @@
         #region Dados Cadastrais e Perfil
         public string Nome { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+        public string? Telefone { get; set; }
+        public string? Whatsapp { get; set; }
+
         public string NomeEmpresa { get; set; } = string.Empty;
         public decimal PercentualComissao { get; set; }
         #endregion

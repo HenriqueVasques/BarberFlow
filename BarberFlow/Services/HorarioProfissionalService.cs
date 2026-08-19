@@ -29,14 +29,11 @@ namespace BarberFlow.API.Services
             if (dto == null)
                 throw new Exception("Os dados não foram preenchidos.");
 
-            var profissional = await _profissionalRepository.ObterPorId(dto.ProfissionalId)
+            var profissional = await _profissionalRepository.ObterPorId(dto.ProfissionalId!.Value)
                 ?? throw new Exception($"Profissional ID {dto.ProfissionalId} não encontrado.");
 
-            var empresaComHorario = await _empresaRepository.ObterPorIdComHorarioEmpresa(dto.EmpresaId)
-                ?? throw new Exception($"Empresa ID {dto.EmpresaId} não encontrada.");
-
-            if (profissional.EmpresaId != empresaComHorario.Id)
-                throw new Exception($"O Profissional com ID {dto.ProfissionalId} não pertence à empresa com ID {dto.EmpresaId}.");
+            var empresaComHorario = await _empresaRepository.ObterPorIdComHorarioEmpresa(profissional.EmpresaId)
+                ?? throw new Exception($"Empresa ID {profissional.EmpresaId} não encontrada.");
 
             if (profissional.HorariosProfissionais.Any(hp => hp.DiaSemana == dto.DiaSemana && !hp.IsDeleted && hp.Ativo))
                 throw new Exception("Já existe um horário cadastrado para este profissional neste dia.");
@@ -45,15 +42,15 @@ namespace BarberFlow.API.Services
                 .FirstOrDefault(hfe => hfe.DiaSemana == dto.DiaSemana && !hfe.IsDeleted && hfe.Ativo && !hfe.EstaFechado)
                 ?? throw new Exception("A empresa não abre ou não possui horário configurado para este dia.");
 
-            ValidarIntervalosHorario(dto.HoraInicio, dto.HoraFim, dto.HoraInicioAlmoco, dto.HoraFimAlmoco, regraEmpresa);
+            ValidarIntervalosHorario(dto.HoraInicio!.Value, dto.HoraFim!.Value, dto.HoraInicioAlmoco, dto.HoraFimAlmoco, regraEmpresa);
 
             var horarioProfissional = new HorarioProfissional
             {
-                ProfissionalId = dto.ProfissionalId,
-                EmpresaId = dto.EmpresaId,
-                DiaSemana = dto.DiaSemana,
-                HoraInicio = dto.HoraInicio,
-                HoraFim = dto.HoraFim,
+                ProfissionalId = dto.ProfissionalId!.Value,
+                EmpresaId = profissional.EmpresaId,
+                DiaSemana = dto.DiaSemana!.Value,
+                HoraInicio = dto.HoraInicio!.Value,
+                HoraFim = dto.HoraFim!.Value,
                 HoraInicioAlmoco = dto.HoraInicioAlmoco,
                 HoraFimAlmoco = dto.HoraFimAlmoco,
             };
@@ -66,9 +63,6 @@ namespace BarberFlow.API.Services
         // Atualiza os horários permitindo alteração parcial dos campos
         public async Task AtualizarHorarioProfissional(long id, HorarioProfissionalUpdateDto dto)
         {
-            if (dto == null)
-                throw new Exception("Os dados não foram preenchidos.");
-
             var horario = await _horarioProfissionalRepository.ObterPorId(id)
                 ?? throw new Exception("Horário do Profissional não encontrado.");
 
@@ -143,19 +137,28 @@ namespace BarberFlow.API.Services
 
         #region Métodos Auxiliares Privados
 
-        private void ValidarIntervalosHorario(TimeOnly inicio, TimeOnly fim, TimeOnly almocoInicio, TimeOnly almocoFim, HorarioFuncionamentoEmpresa regraEmpresa)
+        private static void ValidarIntervalosHorario(TimeOnly inicio, TimeOnly fim, TimeOnly? almocoInicio,TimeOnly? almocoFim, HorarioFuncionamentoEmpresa regraEmpresa)
         {
             if (inicio >= fim)
                 throw new Exception("O horário de início deve ser menor que o de término.");
 
-            if (almocoInicio >= almocoFim)
-                throw new Exception("O início do almoço deve ser menor que o término.");
+            if (regraEmpresa.HoraAbertura.HasValue && inicio < regraEmpresa.HoraAbertura.Value)
+                throw new Exception($"O horário de início ({inicio}) é anterior ao horário de abertura da empresa ({regraEmpresa.HoraAbertura.Value}).");
 
-            if (inicio < regraEmpresa.HoraAbertura || fim > regraEmpresa.HoraFechamento)
-                throw new Exception($"O horário do profissional excede o funcionamento da empresa ({regraEmpresa.HoraAbertura} às {regraEmpresa.HoraFechamento}).");
+            if (regraEmpresa.HoraFechamento.HasValue && fim > regraEmpresa.HoraFechamento.Value)
+                throw new Exception($"O horário de término ({fim}) ultrapassa o horário de fechamento da empresa ({regraEmpresa.HoraFechamento.Value}).");
 
-            if (almocoInicio < inicio || almocoFim > fim)
-                throw new Exception("O horário de almoço deve estar contido dentro do horário de trabalho do profissional.");
+            if (almocoInicio.HasValue || almocoFim.HasValue)
+            {
+                if (!almocoInicio.HasValue || !almocoFim.HasValue)
+                    throw new Exception("É necessário informar o início e o fim do horário de almoço.");
+
+                if (almocoInicio.Value >= almocoFim.Value)
+                    throw new Exception("O início do almoço deve ser menor que o término.");
+
+                if (almocoInicio.Value < inicio || almocoFim.Value > fim)
+                    throw new Exception("O horário de almoço deve estar contido dentro do expediente do profissional.");
+            }
         }
 
         private HorarioProfissionalResponseDto MapToResponseDto(HorarioProfissional horarioProfissional)

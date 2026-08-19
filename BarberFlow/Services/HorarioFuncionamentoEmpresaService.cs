@@ -1,4 +1,5 @@
 ﻿using BarberFlow.API.DTOs;
+using BarberFlow.API.DTOs.HorarioFuncionamentoEmpresa;
 using BarberFlow.API.Interfaces;
 using BarberFlow.API.Models;
 
@@ -28,15 +29,21 @@ namespace BarberFlow.API.Services
             var empresa = await _empresaRepository.ObterPorId(empresaId)
                 ?? throw new Exception($"Empresa com id {empresaId} não encontrada.");
 
-            if (!dto.EstaFechado && dto.HoraAbertura >= dto.HoraFechamento)
-                throw new Exception("A hora de abertura precisa ser menor que a hora de fechamento.");
+            if (!dto.EstaFechado)
+            {
+                if (!dto.HoraAbertura.HasValue || !dto.HoraFechamento.HasValue)
+                    throw new Exception("Informe os horários de abertura e fechamento para dias em que a empresa funciona.");
+
+                if (dto.HoraAbertura >= dto.HoraFechamento)
+                    throw new Exception("A hora de abertura precisa ser menor que a hora de fechamento.");
+            }
 
             var horarioFuncionamentoEmpresa = new HorarioFuncionamentoEmpresa
             {
                 EmpresaId = empresaId,
-                DiaSemana = dto.DiaSemana,
-                HoraAbertura = dto.HoraAbertura,
-                HoraFechamento = dto.HoraFechamento,
+                DiaSemana = dto.DiaSemana!.Value,
+                HoraAbertura = dto.EstaFechado ? null : dto.HoraAbertura,
+                HoraFechamento = dto.EstaFechado ? null : dto.HoraFechamento,
                 EstaFechado = dto.EstaFechado,
                 DataCriacao = DateTime.UtcNow,
                 DataAtualizacao = DateTime.UtcNow
@@ -57,7 +64,7 @@ namespace BarberFlow.API.Services
         }
 
         // Atualiza horários existentes tratando campos nulos como manutenção do valor atual
-        public async Task AtualizarHorarioFuncionamentoEmpresa(HorarioFuncionamentoEmpresaUpadteDto dto, long id)
+        public async Task AtualizarHorarioFuncionamentoEmpresa(HorarioFuncionamentoEmpresaUpdateDto dto, long id)
         {
             if (dto == null)
                 throw new Exception("Os dados não foram preenchidos.");
@@ -68,12 +75,19 @@ namespace BarberFlow.API.Services
             var aberturaFinal = dto.HoraAbertura ?? horario.HoraAbertura;
             var fechamentoFinal = dto.HoraFechamento ?? horario.HoraFechamento;
 
-            if (!dto.EstaFechado && aberturaFinal >= fechamentoFinal)
-                throw new Exception("A hora de abertura precisa ser menor que a hora de fechamento.");
+            if (!dto.EstaFechado)
+            {
+                if (!aberturaFinal.HasValue || !fechamentoFinal.HasValue)
+                    throw new Exception("Informe os horários de abertura e fechamento para dias em que a empresa funciona.");
 
-            horario.DiaSemana = dto.DiaSemana;
-            horario.HoraAbertura = dto.HoraAbertura ?? horario.HoraAbertura;
-            horario.HoraFechamento = dto.HoraFechamento ?? horario.HoraFechamento;
+                if (aberturaFinal >= fechamentoFinal)
+                    throw new Exception("A hora de abertura precisa ser menor que a hora de fechamento.");
+            }
+
+            horario.DiaSemana = dto.DiaSemana!.Value;
+            horario.HoraAbertura = dto.EstaFechado ? null : aberturaFinal;
+            horario.HoraFechamento = dto.EstaFechado ? null : fechamentoFinal;
+
             horario.EstaFechado = dto.EstaFechado;
             horario.DataAtualizacao = DateTime.UtcNow;
 

@@ -25,27 +25,7 @@
         #endregion
 
         #region Construtores
-        public Profissional()
-        {
-            ProfissionalServicos = new List<ProfissionalServico>();
-            Agendamentos = new List<Agendamento>();
-            HorariosProfissionais = new List<HorarioProfissional>();
-        }
-
-        public Profissional(long empresaId, long usuarioId, decimal percentualComissao)
-        {
-            EmpresaId = empresaId;
-            UsuarioId = usuarioId;
-            PercentualComissao = percentualComissao;
-            Ativo = true;
-            IsDeleted = false;
-            DataCriacao = DateTime.UtcNow;
-            DataAtualizacao = DateTime.UtcNow;
-
-            ProfissionalServicos = new List<ProfissionalServico>();
-            Agendamentos = new List<Agendamento>();
-            HorariosProfissionais = new List<HorarioProfissional>();
-        }
+        public Profissional(){ }
         #endregion
     }
 }
