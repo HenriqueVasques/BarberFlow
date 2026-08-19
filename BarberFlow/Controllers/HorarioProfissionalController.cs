@@ -1,4 +1,4 @@
-﻿using BarberFlow.API.DTOs;
+﻿using BarberFlow.API.DTOs.HorarioProfissional;
 using BarberFlow.API.Services;
 using Microsoft.AspNetCore.Mvc;
 

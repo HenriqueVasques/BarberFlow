@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using BarberFlow.API.DTOs;
 using BarberFlow.API.Services;
+using BarberFlow.API.DTOs.HorarioFuncionamentoEmpresa;
 
 namespace BarberFlow.API.Controllers
 {
