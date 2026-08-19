@@ -31,16 +31,25 @@ namespace BarberFlow.API.Services
         // Orquestra a criação do cliente e usuário vinculado dentro de uma transação única
         public async Task<ClienteResponseDto> CriarCliente(ClienteCreateDto dto)
         {
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto), "O objeto dto não pode ser nulo.");
+
+            if (!dto.EmpresaId.HasValue)
+            {
+                throw new InvalidOperationException("A empresa é obrigatória.");
+            }
+
+            long empresaId = dto.EmpresaId.Value;
+
             using IDbContextTransaction transaction = await _appDbContext.Database.BeginTransactionAsync();
             try
             {
-                if (dto == null)
-                    throw new ArgumentNullException(nameof(dto), "O objeto dto não pode ser nulo.");
+                var empresa = await _empresaRepository.ObterPorId(empresaId);
+                if (empresa == null)
+                    throw new KeyNotFoundException($"Empresa com ID {empresaId} não encontrada.");
 
-                var empresa = await _empresaRepository.ObterPorId(dto.EmpresaId);
-                if (empresa == null) throw new Exception($"Empresa com ID {dto.EmpresaId} não encontrada.");
-
-                if (await _usuarioRepository.ExisteEmail(dto.Email)) throw new Exception($"O email {dto.Email} já está em uso.");
+                if (await _usuarioRepository.ExisteEmail(dto.Email))
+                    throw new InvalidOperationException($"O email {dto.Email} já está em uso.");
 
                 string senhaHash = BCrypt.Net.BCrypt.HashPassword(dto.Senha);
 
@@ -51,7 +60,7 @@ namespace BarberFlow.API.Services
                     Telefone = dto.Telefone,
                     Whatsapp = dto.Whatsapp,
                     SenhaHash = senhaHash,
-                    EmpresaId = dto.EmpresaId,
+                    EmpresaId = empresaId,
                     Perfil = PerfilUsuario.Cliente,
                 };
 
@@ -59,7 +68,7 @@ namespace BarberFlow.API.Services
 
                 var cliente = new Cliente
                 {
-                    EmpresaId = dto.EmpresaId,
+                    EmpresaId = empresaId,
                     UsuarioId = usuario.Id,
                 };
 
@@ -80,7 +89,7 @@ namespace BarberFlow.API.Services
                     Ativo = cliente.Ativo,
                 };
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 await transaction.RollbackAsync();
                 throw;
@@ -94,7 +103,7 @@ namespace BarberFlow.API.Services
                 throw new ArgumentNullException(nameof(dto), "O objeto dto não pode ser nulo.");
 
             var cliente = await _clienteRepository.ObterClienteComUsuario(id)
-                ?? throw new Exception($"Cliente com ID {id} não encontrado.");
+                ?? throw new KeyNotFoundException($"Cliente com ID {id} não encontrado.");
 
             if (!string.IsNullOrWhiteSpace(dto.Nome))
                 cliente.Usuario.Nome = dto.Nome;
@@ -114,13 +123,14 @@ namespace BarberFlow.API.Services
         public async Task DeletarCliente(long id)
         {
             var cliente = await _clienteRepository.ObterClienteComUsuario(id)
-                ?? throw new Exception($"Cliente com ID {id} não encontrado.");
+                ?? throw new KeyNotFoundException($"Cliente com ID {id} não encontrado.");
 
             cliente.IsDeleted = true;
             cliente.Ativo = false;
             cliente.DataAtualizacao = DateTime.UtcNow;
 
-            if (cliente.Usuario == null) throw new Exception($"Cliente com ID {id} não tem usuário associado.");
+            if (cliente.Usuario == null)
+                throw new InvalidOperationException($"Cliente com ID {id} não tem usuário associado.");
 
             cliente.Usuario.Telefone = "000000000";
             cliente.Usuario.Whatsapp = "000000000";
@@ -141,7 +151,7 @@ namespace BarberFlow.API.Services
         public async Task<ClienteResponseDto> ObterClientePorId(long id, bool incluirDeletados)
         {
             var cliente = await _clienteRepository.ObterPorId(id, incluirDeletados)
-                ?? throw new Exception($"Cliente com ID {id} não encontrado.");
+                ?? throw new KeyNotFoundException($"Cliente com ID {id} não encontrado.");
 
             return MapearParaResponseDto(cliente);
         }
@@ -150,7 +160,8 @@ namespace BarberFlow.API.Services
         public async Task<IEnumerable<ClienteResponseDto>> ObterClientesPorEmpresa(long empresaId, bool incluirDeletados, int pagina)
         {
             var empresa = await _empresaRepository.ObterPorId(empresaId);
-            if (empresa == null) throw new Exception($"Empresa com ID {empresaId} não encontrada.");
+            if (empresa == null)
+                throw new KeyNotFoundException($"Empresa com ID {empresaId} não encontrada.");
 
             var clientes = await _clienteRepository.ObterPorEmpresa(empresaId, incluirDeletados, pagina);
 

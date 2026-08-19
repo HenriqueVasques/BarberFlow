@@ -34,28 +34,39 @@ namespace BarberFlow.API.Services
         public async Task<BloqueioHorarioResponseDto> CriarBloqueioHorario(BloqueioHorarioCreateDto dto)
         {
             if (dto == null)
-                throw new Exception("Os dados não foram preenchidos.");
+                throw new ArgumentNullException(nameof(dto), "Os dados não foram preenchidos.");
 
-            if (dto.DataHoraFim <= dto.DataHoraInicio)
-                throw new Exception("A data de término do bloqueio deve ser posterior à data de início.");
+            if (!dto.EmpresaId.HasValue || !dto.ProfissionalId.HasValue || !dto.DataHoraInicio.HasValue || !dto.DataHoraFim.HasValue)
+            {
+                throw new InvalidOperationException("Todos os campos obrigatórios do bloqueio devem ser preenchidos.");
+            }
 
-            var empresa = await _repositoryEmpresa.ObterPorId(dto.EmpresaId)
-                ?? throw new Exception($"Empresa com id {dto.EmpresaId} não encontrada.");
+            // Extrai os valores não nulos
+            long empresaId = dto.EmpresaId.Value;
+            long profissionalId = dto.ProfissionalId.Value;
+            DateTime dataHoraInicio = dto.DataHoraInicio.Value;
+            DateTime dataHoraFim = dto.DataHoraFim.Value;
 
-            var profissional = await _repositoryProfissional.ObterPorId(dto.ProfissionalId)
-                ?? throw new Exception($"Profissional com id {dto.ProfissionalId} não encontrado.");
+            if (dataHoraFim <= dataHoraInicio)
+                throw new InvalidOperationException("A data de término do bloqueio deve ser posterior à data de início.");
+
+            var empresa = await _repositoryEmpresa.ObterPorId(empresaId)
+                ?? throw new KeyNotFoundException($"Empresa com id {empresaId} não encontrada.");
+
+            var profissional = await _repositoryProfissional.ObterPorId(profissionalId)
+                ?? throw new KeyNotFoundException($"Profissional com id {profissionalId} não encontrado.");
 
             // Verifica se o horário já está ocupado por agendamentos ou outros bloqueios
-            var ocupado = await _repositoryAgendamento.EstaOcupado(profissional.Id, dto.DataHoraInicio, dto.DataHoraFim);
+            var ocupado = await _repositoryAgendamento.EstaOcupado(profissional.Id, dataHoraInicio, dataHoraFim);
             if (ocupado)
-                throw new Exception("O profissional já possui um agendamento, bloqueio ou o horário está fora do expediente.");
+                throw new InvalidOperationException("O profissional já possui um agendamento, bloqueio ou o horário está fora do expediente.");
 
             var bloqueioHorario = new BloqueioHorario
             {
-                EmpresaId = dto.EmpresaId,
-                ProfissionalId = dto.ProfissionalId,
-                DataHoraInicio = dto.DataHoraInicio,
-                DataHoraFim = dto.DataHoraFim,
+                EmpresaId = empresaId,
+                ProfissionalId = profissionalId,
+                DataHoraInicio = dataHoraInicio,
+                DataHoraFim = dataHoraFim,
                 Motivo = dto.Motivo,
                 DataCriacao = DateTime.UtcNow,
                 DataAtualizacao = DateTime.UtcNow
@@ -78,21 +89,29 @@ namespace BarberFlow.API.Services
         public async Task AtualizarBloqueioHorario(long id, BloqueioHorarioUpdateDto dto)
         {
             if (dto == null)
-                throw new Exception("Os dados não foram preenchidos.");
+                throw new ArgumentNullException(nameof(dto), "Os dados não foram preenchidos.");
 
-            if (dto.DataHoraFim <= dto.DataHoraInicio)
-                throw new Exception("A data de término do bloqueio deve ser posterior à data de início.");
+            if (!dto.DataHoraInicio.HasValue || !dto.DataHoraFim.HasValue)
+            {
+                throw new InvalidOperationException("As datas de início e fim devem ser preenchidas.");
+            }
+
+            DateTime dataHoraInicio = dto.DataHoraInicio.Value;
+            DateTime dataHoraFim = dto.DataHoraFim.Value;
+
+            if (dataHoraFim <= dataHoraInicio)
+                throw new InvalidOperationException("A data de término do bloqueio deve ser posterior à data de início.");
 
             var bloqueio = await _repositoryBloqueioHorario.ObterPorId(id)
-                ?? throw new Exception($"Bloqueio de horário com id {id} não encontrado.");
+                ?? throw new KeyNotFoundException($"Bloqueio de horário com id {id} não encontrado.");
 
             // Valida ocupação ignorando o próprio ID do bloqueio que está sendo editado
-            var ocupado = await _repositoryAgendamento.EstaOcupado(bloqueio.ProfissionalId, dto.DataHoraInicio, dto.DataHoraFim, bloqueioIdParaIgnorar: id);
+            var ocupado = await _repositoryAgendamento.EstaOcupado(bloqueio.ProfissionalId, dataHoraInicio, dataHoraFim, bloqueioIdParaIgnorar: id);
             if (ocupado)
-                throw new Exception("O profissional já possui um agendamento, bloqueio ou o horário está fora do expediente.");
+                throw new InvalidOperationException("O profissional já possui um agendamento, bloqueio ou o horário está fora do expediente.");
 
-            bloqueio.DataHoraInicio = dto.DataHoraInicio;
-            bloqueio.DataHoraFim = dto.DataHoraFim;
+            bloqueio.DataHoraInicio = dataHoraInicio;
+            bloqueio.DataHoraFim = dataHoraFim;
             bloqueio.Motivo = dto.Motivo ?? bloqueio.Motivo;
             bloqueio.DataAtualizacao = DateTime.UtcNow;
 
@@ -103,7 +122,7 @@ namespace BarberFlow.API.Services
         public async Task DeletarBloqueioHorario(long id)
         {
             var bloqueio = await _repositoryBloqueioHorario.ObterPorId(id)
-                ?? throw new Exception($"Bloqueio com id {id} não encontrado.");
+                ?? throw new KeyNotFoundException($"Bloqueio com id {id} não encontrado.");
 
             bloqueio.IsDeleted = true;
             bloqueio.DataAtualizacao = DateTime.UtcNow;
@@ -119,10 +138,10 @@ namespace BarberFlow.API.Services
         public async Task<IEnumerable<BloqueioHorarioResponseDto>> ObterPorEmpresaId(long empresaId, DateOnly inicio, DateOnly fim, int pagina, bool incluirDeletados)
         {
             if (inicio == default || fim == default)
-                throw new Exception("As datas de início e fim devem ser informadas.");
+                throw new InvalidOperationException("As datas de início e fim devem ser informadas.");
 
             if (inicio > fim)
-                throw new Exception("A data de início deve ser anterior ou igual à data de término.");
+                throw new InvalidOperationException("A data de início deve ser anterior ou igual à data de término.");
 
             if (pagina <= 0) pagina = 1;
 
@@ -135,10 +154,10 @@ namespace BarberFlow.API.Services
         public async Task<IEnumerable<BloqueioHorarioResponseDto>> ObterPorProfissionalId(long profissionalId, DateOnly inicio, DateOnly fim, int pagina, bool incluirDeletados)
         {
             if (inicio == default || fim == default)
-                throw new Exception("As datas de início e fim devem ser informadas.");
+                throw new InvalidOperationException("As datas de início e fim devem ser informadas.");
 
             if (inicio > fim)
-                throw new Exception("A data de início deve ser anterior ou igual à data de término.");
+                throw new InvalidOperationException("A data de início deve ser anterior ou igual à data de término.");
 
             if (pagina <= 0) pagina = 1;
 

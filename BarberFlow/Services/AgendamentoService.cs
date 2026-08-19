@@ -13,11 +13,11 @@ namespace BarberFlow.API.Services
 
         public AgendamentoService(
             IAgendamentoRepository agendamentoRepository,
-            IProfissionalServicoRepository profissionalservicoRepository,
+            IProfissionalServicoRepository profissionalServicoRepository,
             IClienteRepository clienteRepository)
         {
             _agendamentoRepository = agendamentoRepository;
-            _profissionalServicoRepository = profissionalservicoRepository;
+            _profissionalServicoRepository = profissionalServicoRepository;
             _clienteRepository = clienteRepository;
         }
 
@@ -27,29 +27,40 @@ namespace BarberFlow.API.Services
         public async Task<AgendamentoResponseDto> CriarAgendamento(AgendamentoCreateDto dto)
         {
             if (dto == null)
-                throw new Exception("Os dados não foram preenchidos.");
+                throw new ArgumentNullException(nameof(dto), "Os dados não foram preenchidos.");
 
-            var profissionalServico = await _profissionalServicoRepository.ObterPorId(dto.ProfissionalServicoId)
-                ?? throw new Exception($"Serviço ID {dto.ProfissionalServicoId} não encontrado.");
+            if (!dto.EmpresaId.HasValue || !dto.ClienteId.HasValue || !dto.ProfissionalServicoId.HasValue || !dto.DataHoraInicio.HasValue)
+            {
+                throw new InvalidOperationException("Todos os campos obrigatórios do agendamento devem ser preenchidos.");
+            }
 
-            var cliente = await _clienteRepository.ObterPorId(dto.ClienteId)
-                ?? throw new Exception($"Cliente ID {dto.ClienteId} não encontrado.");
+            // Extrai os valores não nulos
+            long empresaId = dto.EmpresaId.Value;
+            long clienteId = dto.ClienteId.Value;
+            long profissionalServicoId = dto.ProfissionalServicoId.Value;
+            DateTime dataHoraInicio = dto.DataHoraInicio.Value;
 
-            var dataFimCalculada = dto.DataHoraInicio.AddMinutes(profissionalServico.DuracaoPersonalizadaMinutos ?? profissionalServico.Servico.DuracaoMinutos);
+            var profissionalServico = await _profissionalServicoRepository.ObterPorId(profissionalServicoId)
+                ?? throw new KeyNotFoundException($"Serviço ID {profissionalServicoId} não encontrado.");
 
-            var ocupado = await _agendamentoRepository.EstaOcupado(profissionalServico.ProfissionalId, dto.DataHoraInicio, dataFimCalculada);
+            var cliente = await _clienteRepository.ObterPorId(clienteId)
+                ?? throw new KeyNotFoundException($"Cliente ID {clienteId} não encontrado.");
+
+            var dataFimCalculada = dataHoraInicio.AddMinutes(profissionalServico.DuracaoPersonalizadaMinutos ?? profissionalServico.Servico.DuracaoMinutos);
+
+            var ocupado = await _agendamentoRepository.EstaOcupado(profissionalServico.ProfissionalId, dataHoraInicio, dataFimCalculada);
             if (ocupado)
             {
-                throw new Exception("O profissional já possui um agendamento, bloqueio ou ainda, não trabalha neste horário.");
-            }   
+                throw new InvalidOperationException("O profissional já possui um agendamento, bloqueio ou ainda, não trabalha neste horário.");
+            }
 
             var agendamento = new Agendamento
             {
-                EmpresaId = dto.EmpresaId,
-                ClienteId = dto.ClienteId,
-                ProfissionalServicoId = dto.ProfissionalServicoId,
+                EmpresaId = empresaId,
+                ClienteId = clienteId,
+                ProfissionalServicoId = profissionalServicoId,
                 PrecoNoMomento = profissionalServico.PrecoPersonalizado ?? profissionalServico.Servico.PrecoBase,
-                DataHoraInicio = dto.DataHoraInicio,
+                DataHoraInicio = dataHoraInicio,
                 DataHoraFim = dataFimCalculada,
                 Status = StatusAgendamento.Pendente,
                 DataCriacao = DateTime.UtcNow,
@@ -59,7 +70,7 @@ namespace BarberFlow.API.Services
             await _agendamentoRepository.Adicionar(agendamento);
 
             var agendamentoRecuperado = await _agendamentoRepository.ObterPorId(agendamento.Id)
-                ?? throw new Exception("Erro crítico ao recuperar o agendamento após a criação.");
+                ?? throw new InvalidOperationException("Erro crítico ao recuperar o agendamento após a criação.");
 
             return MapearParaResponseDto(agendamentoRecuperado);
         }
@@ -68,10 +79,10 @@ namespace BarberFlow.API.Services
         public async Task Cancelar(long id)
         {
             var agendamento = await _agendamentoRepository.ObterPorId(id)
-                ?? throw new Exception($"Agendamento ID {id} não encontrado.");
+                ?? throw new KeyNotFoundException($"Agendamento ID {id} não encontrado.");
 
             if (agendamento.Status == StatusAgendamento.Cancelado || agendamento.Status == StatusAgendamento.Finalizado)
-                throw new Exception("Não é possível cancelar um agendamento que já foi finalizado ou cancelado.");
+                throw new InvalidOperationException("Não é possível cancelar um agendamento que já foi finalizado ou cancelado.");
 
             agendamento.Status = StatusAgendamento.Cancelado;
             agendamento.DataAtualizacao = DateTime.UtcNow;
@@ -83,10 +94,10 @@ namespace BarberFlow.API.Services
         public async Task Finalizar(long id)
         {
             var agendamento = await _agendamentoRepository.ObterPorId(id)
-                ?? throw new Exception($"Agendamento ID {id} não encontrado.");
+                ?? throw new KeyNotFoundException($"Agendamento ID {id} não encontrado.");
 
             if (agendamento.Status == StatusAgendamento.Cancelado || agendamento.Status == StatusAgendamento.Finalizado)
-                throw new Exception("Não é possível finalizar um agendamento que já foi finalizado ou cancelado.");
+                throw new InvalidOperationException("Não é possível finalizar um agendamento que já foi finalizado ou cancelado.");
 
             agendamento.Status = StatusAgendamento.Finalizado;
             agendamento.DataAtualizacao = DateTime.UtcNow;
@@ -101,8 +112,8 @@ namespace BarberFlow.API.Services
         // Recupera um agendamento específico via repositório
         public async Task<AgendamentoResponseDto> ObterPorId(long id)
         {
-            var agendamento =  await _agendamentoRepository.ObterPorId(id)
-                ?? throw new Exception($"Agendamento ID {id} não encontrado.");
+            var agendamento = await _agendamentoRepository.ObterPorId(id)
+                ?? throw new KeyNotFoundException($"Agendamento ID {id} não encontrado.");
 
             return MapearParaResponseDto(agendamento);
         }
@@ -121,7 +132,7 @@ namespace BarberFlow.API.Services
         public async Task<List<AgendamentoResponseDto>> ObterUltimosAgendamentosPorCliente(long clienteId)
         {
             if (clienteId <= 0)
-                throw new Exception("ID do cliente inválido.");
+                throw new InvalidOperationException("ID do cliente inválido.");
 
             return await _agendamentoRepository.ObterUltimosAgendamentosPorCliente(clienteId, 10);
         }
@@ -134,16 +145,16 @@ namespace BarberFlow.API.Services
         public async Task<List<AgendamentoResponseDto>> ObterAgendaPorPeriodo(long? profissionalId, long empresaId, DateOnly inicio, DateOnly fim, List<StatusAgendamento> statusFiltro)
         {
             if (inicio == default)
-                throw new Exception("A data inicial precisa ser preenchida.");
+                throw new InvalidOperationException("A data inicial precisa ser preenchida.");
 
             if (fim == default)
-                throw new Exception("A data final precisa ser preenchida.");
+                throw new InvalidOperationException("A data final precisa ser preenchida.");
 
             if (inicio > fim)
-                throw new Exception("A data final precisa ser maior que a inicial.");
+                throw new InvalidOperationException("A data final precisa ser maior que a inicial.");
 
             if ((fim.DayNumber - inicio.DayNumber) > 365)
-                throw new Exception("O período máximo de consulta é de 1 ano.");
+                throw new InvalidOperationException("O período máximo de consulta é de 1 ano.");
 
             return await _agendamentoRepository.ObterAgendaPorPeriodo(profissionalId, empresaId, inicio, fim, statusFiltro);
         }
@@ -152,11 +163,11 @@ namespace BarberFlow.API.Services
         public async Task<DashboardResumoDto> ObterResumoPorDia(long empresaId, DateOnly data)
         {
             if (data == default)
-                throw new Exception("A data precisa ser preenchida.");
+                throw new InvalidOperationException("A data precisa ser preenchida.");
 
             var hoje = DateOnly.FromDateTime(DateTime.Today);
             if (data > hoje)
-                throw new Exception("A data não pode ser maior que o dia de hoje.");
+                throw new InvalidOperationException("A data não pode ser maior que o dia de hoje.");
 
             var totalFaturamento = await _agendamentoRepository.ObterFaturamentoPorDia(empresaId, data);
             var quantidadeAtendimentos = await _agendamentoRepository.ContarAgendamentoPorDia(empresaId, data);
