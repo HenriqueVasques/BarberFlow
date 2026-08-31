@@ -1,5 +1,5 @@
 ﻿using BarberFlow.API.DTOs.Empresa;
-using BarberFlow.API.Services;
+using BarberFlow.API.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BarberFlow.API.Controllers
@@ -8,9 +8,9 @@ namespace BarberFlow.API.Controllers
     [ApiController]
     public class EmpresaController : ControllerBase
     {
-        private readonly EmpresaService _empresaService;
+        private readonly IEmpresaService _empresaService;
 
-        public EmpresaController(EmpresaService empresaService)
+        public EmpresaController(IEmpresaService empresaService)
         {
             _empresaService = empresaService;
         }

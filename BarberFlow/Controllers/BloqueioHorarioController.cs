@@ -1,5 +1,5 @@
 ﻿using BarberFlow.API.DTOs.BloqueioHorario;
-using BarberFlow.API.Services;
+using BarberFlow.API.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BarberFlow.API.Controllers
@@ -8,9 +8,9 @@ namespace BarberFlow.API.Controllers
     [ApiController]
     public class BloqueioHorarioController : ControllerBase
     {
-        private readonly BloqueioHorarioService _bloqueioHorarioService;
+        private readonly IBloqueioHorarioService _bloqueioHorarioService;
 
-        public BloqueioHorarioController(BloqueioHorarioService bloqueioHorarioService)
+        public BloqueioHorarioController(IBloqueioHorarioService bloqueioHorarioService)
         {
             _bloqueioHorarioService = bloqueioHorarioService;
         }
@@ -24,12 +24,7 @@ namespace BarberFlow.API.Controllers
             try
             {
                 var bloqueioHorario = await _bloqueioHorarioService.CriarBloqueioHorario(dto);
-
-                return CreatedAtAction(nameof(ObterPorEmpresaId), new { empresaId = dto.EmpresaId }, new
-                {
-                    message = "Bloqueio de horário criado com sucesso!",
-                    dados = bloqueioHorario
-                });
+                return Ok(new { message = "Bloqueio de horário criado com sucesso!", dados = bloqueioHorario});
             }
             catch (Exception ex)
             {
@@ -77,13 +72,9 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var bloqueioHorario = await _bloqueioHorarioService.ObterPorEmpresaId(empresaId, inicio, fim, pagina, incluirDeletados: false);
+                var bloqueioHorario = await _bloqueioHorarioService.ObterPorEmpresaId(empresaId, inicio, fim, pagina);
 
-                return Ok(new
-                {
-                    message = "Bloqueios ativos da empresa obtidos com sucesso!",
-                    dados = bloqueioHorario
-                });
+                return Ok(new { message = "Bloqueios ativos da empresa obtidos com sucesso!", dados = bloqueioHorario });
             }
             catch (Exception ex)
             {
@@ -97,13 +88,9 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var bloqueioHorario = await _bloqueioHorarioService.ObterPorEmpresaId(empresaId, inicio, fim, pagina, incluirDeletados: true);
+                var bloqueioHorario = await _bloqueioHorarioService.ObterPorEmpresaId(empresaId, inicio, fim, pagina);
 
-                return Ok(new
-                {
-                    message = "Histórico de bloqueios da empresa obtido com sucesso!",
-                    dados = bloqueioHorario
-                });
+                return Ok(new { message = "Histórico de bloqueios da empresa obtido com sucesso!", dados = bloqueioHorario });
             }
             catch (Exception ex)
             {
@@ -121,13 +108,9 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var bloqueioHorario = await _bloqueioHorarioService.ObterPorProfissionalId(profissionalId, inicio, fim, pagina, incluirDeletados: false);
+                var bloqueioHorario = await _bloqueioHorarioService.ObterPorProfissionalId(profissionalId, inicio, fim, pagina);
 
-                return Ok(new
-                {
-                    message = "Bloqueios ativos do profissional obtidos com sucesso!",
-                    dados = bloqueioHorario
-                });
+                return Ok(new { message = "Bloqueios ativos do profissional obtidos com sucesso!", dados = bloqueioHorario });
             }
             catch (Exception ex)
             {
@@ -141,13 +124,9 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var bloqueioHorario = await _bloqueioHorarioService.ObterPorProfissionalId(profissionalId, inicio, fim, pagina, incluirDeletados: true);
+                var bloqueioHorario = await _bloqueioHorarioService.ObterPorProfissionalId(profissionalId, inicio, fim, pagina);
 
-                return Ok(new
-                {
-                    message = "Histórico de bloqueios do profissional obtido com sucesso!",
-                    dados = bloqueioHorario
-                });
+                return Ok(new { message = "Histórico de bloqueios do profissional obtido com sucesso!", dados = bloqueioHorario });
             }
             catch (Exception ex)
             {

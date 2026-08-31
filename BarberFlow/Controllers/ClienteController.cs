@@ -1,5 +1,5 @@
 ﻿using BarberFlow.API.DTOs.Cliente;
-using BarberFlow.API.Services;
+using BarberFlow.API.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BarberFlow.API.Controllers
@@ -8,9 +8,9 @@ namespace BarberFlow.API.Controllers
     [ApiController]
     public class ClienteController : ControllerBase
     {
-        private readonly ClienteService _clienteService;
+        private readonly IClienteService _clienteService;
 
-        public ClienteController(ClienteService clienteService)
+        public ClienteController(IClienteService clienteService)
         {
             _clienteService = clienteService;
         }
@@ -72,7 +72,7 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var clientes = await _clienteService.ObterClientesPorEmpresa(empresaId, incluirDeletados: false, pagina);
+                var clientes = await _clienteService.ObterClientesPorEmpresa(empresaId, pagina);
                 return Ok(new { message = "Clientes obtidos com sucesso!", dados = clientes });
             }
             catch (Exception ex)
@@ -87,7 +87,7 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var clientes = await _clienteService.ObterClientesPorEmpresa(empresaId, incluirDeletados: true, pagina);
+                var clientes = await _clienteService.ObterClientesPorEmpresa(empresaId, pagina);
                 return Ok(new { message = "Histórico obtido com sucesso!", dados = clientes });
             }
             catch (Exception ex)
@@ -102,7 +102,7 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var cliente = await _clienteService.ObterClientePorId(id, incluirDeletados: false);
+                var cliente = await _clienteService.ObterClientePorId(id);
                 return Ok(new { message = "Cliente obtido com sucesso!", dados = cliente });
             }
             catch (Exception ex)
@@ -117,7 +117,7 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var cliente = await _clienteService.ObterClientePorId(id, incluirDeletados: true);
+                var cliente = await _clienteService.ObterClientePorId(id);
                 return Ok(new { message = "Cliente histórico obtido com sucesso!", dados = cliente });
             }
             catch (Exception ex)

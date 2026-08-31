@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using BarberFlow.API.Services;
 using BarberFlow.API.DTOs.HorarioFuncionamentoEmpresa;
+using BarberFlow.API.Interfaces.IServices;
 
 namespace BarberFlow.API.Controllers
 {
@@ -8,9 +8,9 @@ namespace BarberFlow.API.Controllers
     [Route("api/[controller]")]
     public class HorarioFuncionamentoController : ControllerBase
     {
-        private readonly HorarioFuncionamentoEmpresaService _horarioFuncionamentoEmpresaService;
+        private readonly IHorarioFuncionamentoEmpresaService _horarioFuncionamentoEmpresaService;
 
-        public HorarioFuncionamentoController(HorarioFuncionamentoEmpresaService horarioFuncionamentoEmpresaService)
+        public HorarioFuncionamentoController(IHorarioFuncionamentoEmpresaService horarioFuncionamentoEmpresaService)
         {
             _horarioFuncionamentoEmpresaService = horarioFuncionamentoEmpresaService;
         }
@@ -72,7 +72,7 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var dados = await _horarioFuncionamentoEmpresaService.ObterPorEmpresa(empresaId, apenasAtivos: true, incluirDeletados: false);
+                var dados = await _horarioFuncionamentoEmpresaService.ObterPorEmpresa(empresaId);
                 return Ok(new { message = "Dados recuperados com sucesso!", dados });
             }
             catch (Exception ex)
@@ -87,7 +87,7 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var dados = await _horarioFuncionamentoEmpresaService.ObterPorEmpresa(empresaId, apenasAtivos: false, incluirDeletados: true);
+                var dados = await _horarioFuncionamentoEmpresaService.ObterPorEmpresa(empresaId);
                 return Ok(new { message = "Histórico recuperado com sucesso!", dados });
             }
             catch (Exception ex)
@@ -102,7 +102,7 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var dados = await _horarioFuncionamentoEmpresaService.ObterPorId(id, apenasAtivos: true, incluirDeletados: false);
+                var dados = await _horarioFuncionamentoEmpresaService.ObterPorId(id);
                 return Ok(new { message = "Horário recuperado com sucesso!", dados });
             }
             catch (Exception ex)
@@ -117,7 +117,7 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var dados = await _horarioFuncionamentoEmpresaService.ObterPorId(id, apenasAtivos: false, incluirDeletados: true);
+                var dados = await _horarioFuncionamentoEmpresaService.ObterPorId(id);
                 return Ok(new { message = "Dados históricos recuperados com sucesso!", dados });
             }
             catch (Exception ex)
@@ -132,7 +132,7 @@ namespace BarberFlow.API.Controllers
         {
             try
             {
-                var dados = await _horarioFuncionamentoEmpresaService.ObterPorDia(empresaId, diaDaSemana, apenasAtivos: true, incluirDeletados: false);
+                var dados = await _horarioFuncionamentoEmpresaService.ObterPorDia(empresaId, diaDaSemana);
                 return Ok(new { message = "Horário do dia recuperado com sucesso!", dados });
             }
             catch (Exception ex)

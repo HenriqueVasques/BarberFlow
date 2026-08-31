@@ -1,11 +1,12 @@
 ﻿using BarberFlow.API.DTOs.Empresa;
 using BarberFlow.API.Helpers;
-using BarberFlow.API.Interfaces;
+using BarberFlow.API.Interfaces.IRepository;
+using BarberFlow.API.Interfaces.IServices;
 using BarberFlow.API.Models;
 
 namespace BarberFlow.API.Services
 {
-    public class EmpresaService
+    public class EmpresaService : IEmpresaService
     {
         private readonly IEmpresaRepository _empresaRepository;
 

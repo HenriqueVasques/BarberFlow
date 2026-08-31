@@ -1,4 +1,5 @@
 ﻿using BarberFlow.API.DTOs.Servico;
+using BarberFlow.API.Interfaces.IServices;
 using BarberFlow.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,9 +10,9 @@ namespace BarberFlow.API.Controllers
     [ApiController]
     public class ServicoController : ControllerBase
     {
-        private readonly ServicoService _servicoService;
+        private readonly IServicoService _servicoService;
 
-        public ServicoController(ServicoService servicoService)
+        public ServicoController(IServicoService servicoService)
         {
             _servicoService = servicoService;
         }

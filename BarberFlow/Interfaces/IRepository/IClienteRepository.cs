@@ -1,7 +1,7 @@
 ﻿using BarberFlow.API.DTOs.Cliente;
 using BarberFlow.API.Models;
 
-namespace BarberFlow.API.Interfaces
+namespace BarberFlow.API.Interfaces.IRepository
 {
     public interface IClienteRepository
     {
@@ -17,7 +17,7 @@ namespace BarberFlow.API.Interfaces
 
         Task<Cliente?> ObterPorId(long id, bool incluirDeletados = false);
         Task<Cliente?> ObterClienteComUsuario(long id);
-        Task<IEnumerable<ClienteResponseDto>> ObterPorEmpresa(long empresaId, bool incluirDeletados = false, int pagina = 1);
+        Task<IEnumerable<ClienteResponseDto>> ObterPorEmpresa(long empresaId, int pagina = 1, bool incluirDeletados = false);
 
         #endregion
     }

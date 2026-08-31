@@ -1,8 +1,9 @@
-using System.Text;
 using BarberFlow.API.Configuration;
 using BarberFlow.API.Data.Context;
 using BarberFlow.API.Data.Repositories;
 using BarberFlow.API.Interfaces;
+using BarberFlow.API.Interfaces.IRepository;
+using BarberFlow.API.Interfaces.IServices;
 using BarberFlow.API.Repositories;
 using BarberFlow.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +22,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 // 2. INJEÇÃO DE DEPENDÊNCIA (D.I.)
+
+// Infraestrutura / Transações
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Repositórios (Acesso a Dados)
 builder.Services.AddScoped<IEmpresaRepository, EmpresaRepository>();
@@ -33,19 +38,18 @@ builder.Services.AddScoped<IHorarioFuncionamentoEmpresaRepository, HorarioFuncio
 builder.Services.AddScoped<IProfissionalServicoRepository, ProfissionalServicoRepository>();
 builder.Services.AddScoped<IHorarioProfissionalRepository, HorarioProfissionalRepository>();
 
-// Serviços (Regras de Negócio)
-builder.Services.AddScoped<EmpresaService>();
-builder.Services.AddScoped<ServicoService>();
-builder.Services.AddScoped<ProfissionalService>();
-builder.Services.AddScoped<UsuarioService>();
-builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<BloqueioHorarioService>();
-builder.Services.AddScoped<AgendamentoService>();
-builder.Services.AddScoped<ClienteService>();
-builder.Services.AddScoped<HorarioFuncionamentoEmpresaService>();
-builder.Services.AddScoped<ProfissionalServicoService>();
-builder.Services.AddScoped<HorarioProfissionalService>();
-
+// Serviços (Regras de Negócio - Mapeados para suas respectivas Interfaces)
+builder.Services.AddScoped<IEmpresaService, EmpresaService>();
+builder.Services.AddScoped<IServicoService, ServicoService>();
+builder.Services.AddScoped<IProfissionalService, ProfissionalService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IBloqueioHorarioService, BloqueioHorarioService>();
+builder.Services.AddScoped<IAgendamentoService, AgendamentoService>();
+builder.Services.AddScoped<IClienteService, ClienteService>();
+builder.Services.AddScoped<IHorarioFuncionamentoEmpresaService, HorarioFuncionamentoEmpresaService>();
+builder.Services.AddScoped<IProfissionalServicoService, ProfissionalServicoService>();
+builder.Services.AddScoped<IHorarioProfissionalService, HorarioProfissionalService>();
 // 3. SEGURANÇA (CORS, AUTENTICAÇÃO E AUTORIZAÇÃO JWT)
 
 // Configuração do CORS

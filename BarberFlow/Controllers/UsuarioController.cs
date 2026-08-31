@@ -1,4 +1,5 @@
 ﻿using BarberFlow.API.DTOs.Usuario;
+using BarberFlow.API.Interfaces.IServices;
 using BarberFlow.API.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,9 +9,9 @@ namespace BarberFlow.API.Controllers
     [Route("api/[controller]")]
     public class UsuarioController : ControllerBase
     {
-        private readonly UsuarioService _usuarioService;
+        private readonly IUsuarioService _usuarioService;
 
-        public UsuarioController(UsuarioService usuarioService)
+        public UsuarioController(IUsuarioService usuarioService)
         {
             _usuarioService = usuarioService;
         }

@@ -2,13 +2,14 @@
 using System.Security.Claims;
 using System.Text;
 using BarberFlow.API.DTOs.Auth;
-using BarberFlow.API.Interfaces;
+using BarberFlow.API.Interfaces.IRepository;
+using BarberFlow.API.Interfaces.IServices;
 using BarberFlow.API.Models;
 using Microsoft.IdentityModel.Tokens;
 
 namespace BarberFlow.API.Services
 {
-    public class AuthService
+    public class AuthService : IAuthService
     {
         #region Atributos e Construtor
 

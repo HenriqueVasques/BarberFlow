@@ -1,7 +1,7 @@
 ﻿using BarberFlow.API.Data.Context;
 using BarberFlow.API.DTOs.Auth;
 using BarberFlow.API.DTOs.Usuario;
-using BarberFlow.API.Interfaces;
+using BarberFlow.API.Interfaces.IRepository;
 using BarberFlow.API.Models;
 using Microsoft.EntityFrameworkCore;
 

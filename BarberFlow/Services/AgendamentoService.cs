@@ -1,11 +1,12 @@
 ﻿using BarberFlow.API.DTOs.Agendamento;
 using BarberFlow.API.Enums;
-using BarberFlow.API.Interfaces;
+using BarberFlow.API.Interfaces.IRepository;
+using BarberFlow.API.Interfaces.IServices;
 using BarberFlow.API.Models;
 
 namespace BarberFlow.API.Services
 {
-    public class AgendamentoService
+    public class AgendamentoService : IAgendamentoService
     {
         private readonly IAgendamentoRepository _agendamentoRepository;
         private readonly IProfissionalServicoRepository _profissionalServicoRepository;

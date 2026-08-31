@@ -1,6 +1,6 @@
-﻿using BarberFlow.API.Controllers;
-using BarberFlow.API.Data.Context;
-using BarberFlow.API.Interfaces;
+﻿using BarberFlow.API.Data.Context;
+using BarberFlow.API.DTOs.BloqueioHorario;
+using BarberFlow.API.Interfaces.IRepository;
 using BarberFlow.API.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -55,7 +55,7 @@ namespace BarberFlow.API.Data.Repositories
         }
 
         // Lista bloqueios de uma empresa por período com projeção para DTO
-        public async Task<IEnumerable<BloqueioHorarioResponseDto>> ObterPorEmpresaId(long empresaId, DateOnly inicio, DateOnly fim, bool incluirDeletados = false, int pagina = 1)
+        public async Task<IEnumerable<BloqueioHorarioResponseDto>> ObterPorEmpresaId(long empresaId, DateOnly inicio, DateOnly fim, int pagina = 1, bool incluirDeletados = false)
         {
             return await _appDbContext.BloqueioHorarios
                 .AsNoTracking()
@@ -81,7 +81,7 @@ namespace BarberFlow.API.Data.Repositories
         }
 
         // Lista bloqueios de um profissional por período com projeção para DTO
-        public async Task<IEnumerable<BloqueioHorarioResponseDto>> ObterPorProfissionalId(long profissionalId, DateOnly inicio, DateOnly fim, bool incluirDeletados = false, int pagina = 1)
+        public async Task<IEnumerable<BloqueioHorarioResponseDto>> ObterPorProfissionalId(long profissionalId, DateOnly inicio, DateOnly fim, int pagina = 1, bool incluirDeletados = false)
         {
             return await _appDbContext.BloqueioHorarios
                 .AsNoTracking()

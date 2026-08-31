@@ -1,6 +1,6 @@
 ﻿using BarberFlow.API.Data.Context;
 using BarberFlow.API.DTOs.Cliente;
-using BarberFlow.API.Interfaces;
+using BarberFlow.API.Interfaces.IRepository;
 using BarberFlow.API.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -63,7 +63,7 @@ namespace BarberFlow.API.Data.Repositories
         }
 
         // Lista clientes de uma empresa com paginação e projeção para DTO
-        public async Task<IEnumerable<ClienteResponseDto>> ObterPorEmpresa(long empresaId, bool incluirDeletados = false, int pagina = 1)
+        public async Task<IEnumerable<ClienteResponseDto>> ObterPorEmpresa(long empresaId, int pagina = 1, bool incluirDeletados = false)
         {
             return await _appDbContext.Clientes
                 .AsNoTracking()

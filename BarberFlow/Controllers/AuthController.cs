@@ -1,5 +1,5 @@
 ﻿using BarberFlow.API.DTOs.Auth;
-using BarberFlow.API.Services;
+using BarberFlow.API.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BarberFlow.API.Controllers
@@ -10,9 +10,9 @@ namespace BarberFlow.API.Controllers
     {
         #region Atributos e Construtor
 
-        private readonly AuthService _authService;
+        private readonly IAuthService _authService;
 
-        public AuthController(AuthService authService)
+        public AuthController(IAuthService authService)
         {
             _authService = authService;
         }

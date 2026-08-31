@@ -1,11 +1,12 @@
 ﻿using BarberFlow.API.DTOs;
 using BarberFlow.API.DTOs.HorarioFuncionamentoEmpresa;
-using BarberFlow.API.Interfaces;
+using BarberFlow.API.Interfaces.IRepository;
+using BarberFlow.API.Interfaces.IServices;
 using BarberFlow.API.Models;
 
 namespace BarberFlow.API.Services
 {
-    public class HorarioFuncionamentoEmpresaService
+    public class HorarioFuncionamentoEmpresaService: IHorarioFuncionamentoEmpresaService
     {
         private readonly IHorarioFuncionamentoEmpresaRepository _horarioFuncionamentoEmpresaRepository;
         private readonly IEmpresaRepository _empresaRepository;
@@ -112,21 +113,21 @@ namespace BarberFlow.API.Services
         #region Consultas e Visões
 
         // Busca configuração de um dia específico para validar disponibilidade no App
-        public async Task<HorarioFuncionamentoEmpresaResponseDto?> ObterPorDia(long empresaId, DayOfWeek diaDaSemana, bool apenasAtivos = true, bool incluirDeletados = false)
+        public async Task<HorarioFuncionamentoEmpresaResponseDto?> ObterPorDia(long empresaId, DayOfWeek diaDaSemana)
         {
-            return await _horarioFuncionamentoEmpresaRepository.ObterPorDia(empresaId, diaDaSemana, apenasAtivos, incluirDeletados);
+            return await _horarioFuncionamentoEmpresaRepository.ObterPorDia(empresaId, diaDaSemana);
         }
 
         // Retorna todos os horários de uma empresa projetados para ResponseDto
-        public async Task<List<HorarioFuncionamentoEmpresaResponseDto>> ObterPorEmpresa(long empresaId, bool apenasAtivos = true, bool incluirDeletados = false)
+        public async Task<List<HorarioFuncionamentoEmpresaResponseDto>> ObterPorEmpresa(long empresaId)
         {
-            return await _horarioFuncionamentoEmpresaRepository.ObterTodosPorEmpresa(empresaId, apenasAtivos, incluirDeletados);
+            return await _horarioFuncionamentoEmpresaRepository.ObterTodosPorEmpresa(empresaId);
         }
 
         // Recupera a model completa por ID para operações internas ou edição
-        public async Task<HorarioFuncionamentoEmpresaResponseDto> ObterPorId(long id, bool apenasAtivos = true, bool incluirDeletados = false)
+        public async Task<HorarioFuncionamentoEmpresaResponseDto> ObterPorId(long id)
         {
-            var horario = await _horarioFuncionamentoEmpresaRepository.ObterPorId(id, apenasAtivos, incluirDeletados)
+            var horario = await _horarioFuncionamentoEmpresaRepository.ObterPorId(id)
                 ?? throw new Exception($"Configuração de horário com id {id} não encontrada.");
 
             return MapToResponseDto(horario);

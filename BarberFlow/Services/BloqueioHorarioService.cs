@@ -1,11 +1,11 @@
-﻿using BarberFlow.API.Controllers;
-using BarberFlow.API.DTOs.BloqueioHorario;
-using BarberFlow.API.Interfaces;
+﻿using BarberFlow.API.DTOs.BloqueioHorario;
+using BarberFlow.API.Interfaces.IRepository;
+using BarberFlow.API.Interfaces.IServices;
 using BarberFlow.API.Models;
 
 namespace BarberFlow.API.Services
 {
-    public class BloqueioHorarioService
+    public class BloqueioHorarioService : IBloqueioHorarioService
     {
         #region Readonly Fields
         private readonly IBloqueioHorarioRepository _repositoryBloqueioHorario;
@@ -135,7 +135,7 @@ namespace BarberFlow.API.Services
         #region Visão: Profissional / Admin (Agenda e Relatórios)
 
         // Recupera bloqueios de uma empresa específica dentro de um intervalo de datas
-        public async Task<IEnumerable<BloqueioHorarioResponseDto>> ObterPorEmpresaId(long empresaId, DateOnly inicio, DateOnly fim, int pagina, bool incluirDeletados)
+        public async Task<IEnumerable<BloqueioHorarioResponseDto>> ObterPorEmpresaId(long empresaId, DateOnly inicio, DateOnly fim, int pagina)
         {
             if (inicio == default || fim == default)
                 throw new InvalidOperationException("As datas de início e fim devem ser informadas.");
@@ -145,13 +145,13 @@ namespace BarberFlow.API.Services
 
             if (pagina <= 0) pagina = 1;
 
-            var bloqueios = await _repositoryBloqueioHorario.ObterPorEmpresaId(empresaId, inicio, fim, incluirDeletados, pagina);
+            var bloqueios = await _repositoryBloqueioHorario.ObterPorEmpresaId(empresaId, inicio, fim, pagina);
 
             return bloqueios ?? Enumerable.Empty<BloqueioHorarioResponseDto>();
         }
 
         // Recupera bloqueios de um profissional específico para visualização na agenda pessoal
-        public async Task<IEnumerable<BloqueioHorarioResponseDto>> ObterPorProfissionalId(long profissionalId, DateOnly inicio, DateOnly fim, int pagina, bool incluirDeletados)
+        public async Task<IEnumerable<BloqueioHorarioResponseDto>> ObterPorProfissionalId(long profissionalId, DateOnly inicio, DateOnly fim, int pagina)
         {
             if (inicio == default || fim == default)
                 throw new InvalidOperationException("As datas de início e fim devem ser informadas.");
@@ -161,7 +161,7 @@ namespace BarberFlow.API.Services
 
             if (pagina <= 0) pagina = 1;
 
-            var bloqueios = await _repositoryBloqueioHorario.ObterPorProfissionalId(profissionalId, inicio, fim, incluirDeletados, pagina);
+            var bloqueios = await _repositoryBloqueioHorario.ObterPorProfissionalId(profissionalId, inicio, fim, pagina);
 
             return bloqueios ?? Enumerable.Empty<BloqueioHorarioResponseDto>();
         }

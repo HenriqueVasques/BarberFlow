@@ -1,28 +1,28 @@
-﻿using BarberFlow.API.Data.Context;
-using BarberFlow.API.DTOs.Cliente;
+﻿using BarberFlow.API.DTOs.Cliente;
 using BarberFlow.API.Enums;
 using BarberFlow.API.Interfaces;
+using BarberFlow.API.Interfaces.IRepository;
+using BarberFlow.API.Interfaces.IServices;
 using BarberFlow.API.Models;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace BarberFlow.API.Services
 {
-    public class ClienteService
+    public class ClienteService : IClienteService
     {
         #region Readonly Fields
         private readonly IClienteRepository _clienteRepository;
         private readonly IEmpresaRepository _empresaRepository;
         private readonly IUsuarioRepository _usuarioRepository;
-        private readonly AppDbContext _appDbContext;
+        private readonly IUnitOfWork _unitOfWork;
         #endregion
 
         #region Construtor
-        public ClienteService(IClienteRepository clienteRepository, IEmpresaRepository empresaRepository, IUsuarioRepository usuarioRepository, AppDbContext appDbContext)
+        public ClienteService(IClienteRepository clienteRepository, IEmpresaRepository empresaRepository, IUsuarioRepository usuarioRepository, IUnitOfWork unitOfWork)
         {
             _clienteRepository = clienteRepository;
             _empresaRepository = empresaRepository;
             _usuarioRepository = usuarioRepository;
-            _appDbContext = appDbContext;
+            _unitOfWork = unitOfWork;
         }
         #endregion
 
@@ -41,7 +41,7 @@ namespace BarberFlow.API.Services
 
             long empresaId = dto.EmpresaId.Value;
 
-            using IDbContextTransaction transaction = await _appDbContext.Database.BeginTransactionAsync();
+            await _unitOfWork.BeginTransactionAsync();
             try
             {
                 var empresa = await _empresaRepository.ObterPorId(empresaId);
@@ -73,7 +73,7 @@ namespace BarberFlow.API.Services
                 };
 
                 await _clienteRepository.Adicionar(cliente);
-                await transaction.CommitAsync();
+                await _unitOfWork.CommitAsync();
 
                 return new ClienteResponseDto
                 {
@@ -91,11 +91,12 @@ namespace BarberFlow.API.Services
             }
             catch (Exception)
             {
-                await transaction.RollbackAsync();
+                await _unitOfWork.RollbackAsync();
                 throw;
             }
         }
 
+  
         // Atualiza os dados de contato do usuário vinculado ao cliente
         public async Task AtualizarCliente(long id, ClienteUpdateDto dto)
         {
@@ -148,22 +149,22 @@ namespace BarberFlow.API.Services
         #region Consultas (Leitura)
 
         // Busca os dados básicos de um cliente específico
-        public async Task<ClienteResponseDto> ObterClientePorId(long id, bool incluirDeletados)
+        public async Task<ClienteResponseDto> ObterClientePorId(long id)
         {
-            var cliente = await _clienteRepository.ObterPorId(id, incluirDeletados)
+            var cliente = await _clienteRepository.ObterPorId(id)
                 ?? throw new KeyNotFoundException($"Cliente com ID {id} não encontrado.");
 
             return MapearParaResponseDto(cliente);
         }
 
         // Recupera a listagem de clientes de uma empresa com suporte a paginação
-        public async Task<IEnumerable<ClienteResponseDto>> ObterClientesPorEmpresa(long empresaId, bool incluirDeletados, int pagina)
+        public async Task<IEnumerable<ClienteResponseDto>> ObterClientesPorEmpresa(long empresaId, int pagina)
         {
             var empresa = await _empresaRepository.ObterPorId(empresaId);
             if (empresa == null)
                 throw new KeyNotFoundException($"Empresa com ID {empresaId} não encontrada.");
 
-            var clientes = await _clienteRepository.ObterPorEmpresa(empresaId, incluirDeletados, pagina);
+            var clientes = await _clienteRepository.ObterPorEmpresa(empresaId, pagina);
 
             return clientes ?? Enumerable.Empty<ClienteResponseDto>();
         }

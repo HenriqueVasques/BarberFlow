@@ -1,5 +1,5 @@
 ﻿using BarberFlow.API.DTOs.HorarioProfissional;
-using BarberFlow.API.Services;
+using BarberFlow.API.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BarberFlow.API.Controllers
@@ -8,9 +8,9 @@ namespace BarberFlow.API.Controllers
     [ApiController]
     public class HorarioProfissionalController : ControllerBase
     {
-        private readonly HorarioProfissionalService _horarioProfissionalService;
+        private readonly IHorarioProfissionalService _horarioProfissionalService;
 
-        public HorarioProfissionalController(HorarioProfissionalService horarioProfissionalService)
+        public HorarioProfissionalController(IHorarioProfissionalService horarioProfissionalService)
         {
             _horarioProfissionalService = horarioProfissionalService;
         }

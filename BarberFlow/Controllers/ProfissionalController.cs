@@ -1,5 +1,5 @@
 ﻿using BarberFlow.API.DTOs.Profissional;
-using BarberFlow.API.Services;
+using BarberFlow.API.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BarberFlow.API.Controllers
@@ -8,9 +8,9 @@ namespace BarberFlow.API.Controllers
     [ApiController]
     public class ProfissionalController : ControllerBase
     {
-        private readonly ProfissionalService _profissionalService;
+        private readonly IProfissionalService _profissionalService;
 
-        public ProfissionalController(ProfissionalService profissionalService)
+        public ProfissionalController(IProfissionalService profissionalService)
         {
             _profissionalService = profissionalService;
         }

@@ -1,32 +1,32 @@
-﻿using BarberFlow.API.Data.Context;
-using BarberFlow.API.DTOs.Profissional;
+﻿using BarberFlow.API.DTOs.Profissional;
 using BarberFlow.API.Enums;
 using BarberFlow.API.Interfaces;
+using BarberFlow.API.Interfaces.IRepository;
+using BarberFlow.API.Interfaces.IServices;
 using BarberFlow.API.Models;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace BarberFlow.API.Services
 {
-    public class ProfissionalService
+    public class ProfissionalService : IProfissionalService
     {
         private readonly IProfissionalRepository _profissionalRepository;
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IEmpresaRepository _empresaRepository;
         private readonly IAgendamentoRepository _agendamentoRepository;
-        private readonly AppDbContext _appDbContext;
+        private readonly IUnitOfWork _unitOfWork;
 
         public ProfissionalService(
             IProfissionalRepository profissionalRepository,
             IUsuarioRepository usuarioRepository,
             IEmpresaRepository empresaRepository,
             IAgendamentoRepository agendamentoRepository,
-            AppDbContext appDbContext)
+            IUnitOfWork unitOfWork)
         {
             _profissionalRepository = profissionalRepository;
             _usuarioRepository = usuarioRepository;
             _empresaRepository = empresaRepository;
             _agendamentoRepository = agendamentoRepository;
-            _appDbContext = appDbContext;
+            _unitOfWork = unitOfWork;
         }
 
         #region Comandos: Escrita (Admin / Gestão)
@@ -43,7 +43,7 @@ namespace BarberFlow.API.Services
             var empresa = await _empresaRepository.ObterPorId(dto.EmpresaId)
                 ?? throw new KeyNotFoundException($"Empresa com ID {dto.EmpresaId} não encontrada.");
 
-            using IDbContextTransaction transaction = await _appDbContext.Database.BeginTransactionAsync();
+            await _unitOfWork.BeginTransactionAsync();
             try
             {
                 string senhaHash = BCrypt.Net.BCrypt.HashPassword(dto.Senha);
@@ -74,13 +74,13 @@ namespace BarberFlow.API.Services
                 };
 
                 await _profissionalRepository.Adicionar(profissional);
-                await transaction.CommitAsync();
+                await _unitOfWork.CommitAsync();
 
                 return MapToResponseDto(profissional);
             }
             catch
             {
-                await transaction.RollbackAsync();
+                await _unitOfWork.RollbackAsync();
                 throw;
             }
         }
@@ -147,7 +147,7 @@ namespace BarberFlow.API.Services
                     $"Existem {agendamentosFuturos.Count()} agendamento(s) pendente(s) ou confirmado(s) na agenda dele.");
             }
 
-            using IDbContextTransaction transaction = await _appDbContext.Database.BeginTransactionAsync();
+            await _unitOfWork.BeginTransactionAsync();
             try
             {
                 profissional.IsDeleted = true;
@@ -167,11 +167,11 @@ namespace BarberFlow.API.Services
                 }
 
                 await _profissionalRepository.Deletar(profissional);
-                await transaction.CommitAsync();
+                await _unitOfWork.CommitAsync();
             }
             catch
             {
-                await transaction.RollbackAsync();
+                await _unitOfWork.RollbackAsync();
                 throw;
             }
         }

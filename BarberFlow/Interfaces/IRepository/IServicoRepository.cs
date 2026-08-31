@@ -1,7 +1,7 @@
 ﻿using BarberFlow.API.DTOs.Servico;
 using BarberFlow.API.Models;
 
-namespace BarberFlow.API.Interfaces
+namespace BarberFlow.API.Interfaces.IRepository
 {
     public interface IServicoRepository
     {

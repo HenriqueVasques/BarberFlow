@@ -1,11 +1,11 @@
-﻿using BarberFlow.API.DTOs;
-using BarberFlow.API.DTOs.HorarioProfissional;
-using BarberFlow.API.Interfaces;
+﻿using BarberFlow.API.DTOs.HorarioProfissional;
+using BarberFlow.API.Interfaces.IRepository;
+using BarberFlow.API.Interfaces.IServices;
 using BarberFlow.API.Models;
 
 namespace BarberFlow.API.Services
 {
-    public class HorarioProfissionalService
+    public class HorarioProfissionalService : IHorarioProfissionalService
     {
         private readonly IHorarioProfissionalRepository _horarioProfissionalRepository;
         private readonly IProfissionalRepository _profissionalRepository;

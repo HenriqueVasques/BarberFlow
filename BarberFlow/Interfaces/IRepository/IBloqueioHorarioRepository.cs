@@ -1,7 +1,7 @@
-﻿using BarberFlow.API.Controllers;
+﻿using BarberFlow.API.DTOs.BloqueioHorario;
 using BarberFlow.API.Models;
 
-namespace BarberFlow.API.Interfaces
+namespace BarberFlow.API.Interfaces.IRepository
 {
     public interface IBloqueioHorarioRepository
     {
@@ -16,8 +16,8 @@ namespace BarberFlow.API.Interfaces
         #endregion
 
         #region Visão: Admin / Profissional (Listagens e Filtros)
-        Task<IEnumerable<BloqueioHorarioResponseDto>> ObterPorEmpresaId(long empresaId, DateOnly inicio, DateOnly fim, bool incluirDeletados = false, int pagina = 1);
-        Task<IEnumerable<BloqueioHorarioResponseDto>> ObterPorProfissionalId(long profissionalId, DateOnly inicio, DateOnly fim, bool incluirDeletados = false, int pagina = 1);
+        Task<IEnumerable<BloqueioHorarioResponseDto>> ObterPorEmpresaId(long empresaId, DateOnly inicio, DateOnly fim, int pagina = 1, bool incluirDeletados = false);
+        Task<IEnumerable<BloqueioHorarioResponseDto>> ObterPorProfissionalId(long profissionalId, DateOnly inicio, DateOnly fim, int pagina = 1, bool incluirDeletados = false);
         #endregion
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace BarberFlow.API.Controllers
+﻿namespace BarberFlow.API.DTOs.BloqueioHorario
 {
     public class BloqueioHorarioResponseDto
     {

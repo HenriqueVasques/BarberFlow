@@ -1,10 +1,11 @@
 ﻿using BarberFlow.API.DTOs.Servico;
-using BarberFlow.API.Interfaces;
+using BarberFlow.API.Interfaces.IRepository;
+using BarberFlow.API.Interfaces.IServices;
 using BarberFlow.API.Models;
 
 namespace BarberFlow.API.Services
 {
-    public class ServicoService
+    public class ServicoService : IServicoService
     {
         private readonly IServicoRepository _servicoRepository;
         private readonly IEmpresaRepository _empresaRepository;

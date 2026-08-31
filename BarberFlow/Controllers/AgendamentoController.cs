@@ -1,6 +1,6 @@
 ﻿using BarberFlow.API.DTOs.Agendamento;
 using BarberFlow.API.Enums;
-using BarberFlow.API.Services;
+using BarberFlow.API.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BarberFlow.API.Controllers
@@ -9,9 +9,9 @@ namespace BarberFlow.API.Controllers
     [ApiController]
     public class AgendamentoController : ControllerBase
     {
-        private readonly AgendamentoService _agendamentoService;
+        private readonly IAgendamentoService _agendamentoService;
 
-        public AgendamentoController(AgendamentoService agendamentoService)
+        public AgendamentoController(IAgendamentoService agendamentoService)
         {
             _agendamentoService = agendamentoService;
         }
@@ -20,17 +20,13 @@ namespace BarberFlow.API.Controllers
 
         // Solicita a criação de um novo agendamento após validações de negócio
         [HttpPost]
-        public async Task<IActionResult> CriarAgendamento(AgendamentoCreateDto dto)
+        public async Task<IActionResult> CriarAgendamento([FromBody] AgendamentoCreateDto dto)
         {
             try
             {
                 var agendamento = await _agendamentoService.CriarAgendamento(dto);
 
-                return CreatedAtAction(nameof(ObterPorId), new { id = agendamento.Id }, new
-                {
-                    message = "Agendamento criado com sucesso!",
-                    dados = agendamento
-                });
+                return Ok(new { message = "Agendamento criado com sucesso!", dados = agendamento });
             }
             catch (Exception ex)
             {
@@ -82,11 +78,7 @@ namespace BarberFlow.API.Controllers
             {
                 var agendamento = await _agendamentoService.ObterPorId(id);
 
-                return Ok(new
-                {
-                    message = "Agendamento obtido com sucesso!",
-                    dados = agendamento
-                });
+                return Ok(new { message = "Agendamento obtido com sucesso!",dados = agendamento });
             }
             catch (Exception ex)
             {
@@ -107,13 +99,9 @@ namespace BarberFlow.API.Controllers
                 var proximo = await _agendamentoService.ObterProximoAgendamentoCliente(clienteId);
 
                 if (proximo == null)
-                    return Ok(new
-                    {
-                        message = "Nenhum agendamento futuro encontrado.",
-                        dados = ""
-                    });
+                    return Ok(new { message = "Nenhum agendamento futuro encontrado.", dados = (object?)null });
 
-                 return Ok(new { message = "Próximo agendamento recuperado!", dados = proximo });
+                    return Ok(new { message = "Próximo agendamento recuperado!", dados = proximo });
             }
             catch (Exception ex)
             {
@@ -129,11 +117,7 @@ namespace BarberFlow.API.Controllers
             {
                 var agendamentos = await _agendamentoService.ObterUltimosAgendamentosPorCliente(clienteId);
 
-                return Ok(new
-                {
-                    message = "Histórico do cliente recuperado!",
-                    dados = agendamentos
-                });
+                return Ok(new { message = "Histórico do cliente recuperado!", dados = agendamentos });
             }
             catch (Exception ex)
             {
@@ -158,11 +142,7 @@ namespace BarberFlow.API.Controllers
 
                 var agenda = await _agendamentoService.ObterAgendaPorPeriodo(profissionalId, empresaId, inicio, fim, statusAtivos);
 
-                return Ok(new
-                {
-                    message = "Agenda do profissional obtida!",
-                    dados = agenda
-                });
+                return Ok(new  { message = "Agenda do profissional obtida!", dados = agenda });
             }
             catch (Exception ex)
             {
@@ -181,11 +161,7 @@ namespace BarberFlow.API.Controllers
             try
             {
                 var response = await _agendamentoService.ObterResumoPorDia(empresaId, data);
-                return Ok(new
-                {
-                    message = "Resumo financeiro obtido!",
-                    dados = response
-                });
+                return Ok(new { message = "Resumo financeiro obtido!", dados = response });
             }
             catch (Exception ex)
             {
@@ -203,11 +179,7 @@ namespace BarberFlow.API.Controllers
 
                 var agenda = await _agendamentoService.ObterAgendaPorPeriodo(null, empresaId, inicio, fim, todosStatus);
 
-                return Ok(new
-                {
-                    message = "Relatório geral da empresa obtido!",
-                    dados = agenda
-                });
+                return Ok(new { message = "Relatório geral da empresa obtido!", dados = agenda });
             }
             catch (Exception ex)
             {

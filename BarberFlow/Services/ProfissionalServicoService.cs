@@ -1,10 +1,11 @@
 ﻿using BarberFlow.API.DTOs.ProfissionalServico;
-using BarberFlow.API.Interfaces;
+using BarberFlow.API.Interfaces.IRepository;
+using BarberFlow.API.Interfaces.IServices;
 using BarberFlow.API.Models;
 
 namespace BarberFlow.API.Services
 {
-    public class ProfissionalServicoService
+    public class ProfissionalServicoService : IProfissionalServicoService
     {
         private readonly IProfissionalServicoRepository _profissionalServicoRepository;
         private readonly IProfissionalRepository _profissionalRepository;

@@ -1,12 +1,13 @@
 ﻿using BarberFlow.API.DTOs.Usuario;
 using BarberFlow.API.Enums;
-using BarberFlow.API.Interfaces;
+using BarberFlow.API.Interfaces.IRepository;
+using BarberFlow.API.Interfaces.IServices;
 using BarberFlow.API.Models;
 using BCryptLib = BCrypt.Net.BCrypt;
 
 namespace BarberFlow.API.Services
 {
-    public class UsuarioService
+    public class UsuarioService : IUsuarioService
     {
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IEmpresaRepository _empresaRepository;
