@@ -7,6 +7,7 @@ namespace BarberFlow.API.Interfaces.IServices
         #region Regras de Negócio (Autenticação)
 
         Task<LoginResponseDto> Login(LoginDto dto);
+        Task<string> LoginComGoogle(GoogleLoginDto dto);
 
         #endregion
     }

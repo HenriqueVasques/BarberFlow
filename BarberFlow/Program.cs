@@ -50,6 +50,7 @@ builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IHorarioFuncionamentoEmpresaService, HorarioFuncionamentoEmpresaService>();
 builder.Services.AddScoped<IProfissionalServicoService, ProfissionalServicoService>();
 builder.Services.AddScoped<IHorarioProfissionalService, HorarioProfissionalService>();
+
 // 3. SEGURANÇA (CORS, AUTENTICAÇÃO E AUTORIZAÇÃO JWT)
 
 // Configuração do CORS
@@ -126,6 +127,21 @@ builder.Services.AddOpenApi(options =>
 // 5. CONSTRUÇÃO E PIPELINE DE MIDDLEWARES
 
 var app = builder.Build();
+
+// ==========================================
+// APLICAR MIGRAÇÕES E POPULAR MASSA DE DADOS (SEED) TCC
+// ==========================================
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<AppDbContext>();
+
+    // Garante que o banco está criado e aplica migrações pendentes
+    context.Database.Migrate();
+
+    // Executa o seeder gerando o primeiro patamar de testes (10.000 agendamentos)
+    DbSeeder.SeedData(context, quantidadeAgendamentos: 10000);
+}
 
 if (app.Environment.IsDevelopment())
 {

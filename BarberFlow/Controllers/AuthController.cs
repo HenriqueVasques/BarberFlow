@@ -21,7 +21,29 @@ namespace BarberFlow.API.Controllers
 
         #region Endpoints HTTP (Autenticação)
 
-        // Realiza o login do usuário no sistema e retorna o token JWT
+        [HttpPost("google")]
+        public async Task<IActionResult> LoginComGoogle([FromBody] GoogleLoginDto dto)
+        {
+            try
+            {
+                var token = await _authService.LoginComGoogle(dto);
+                return Ok(new { message = "Login realizado com sucesso!", token });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro interno ao processar a autenticação com o Google." });
+            }
+        }
+
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {

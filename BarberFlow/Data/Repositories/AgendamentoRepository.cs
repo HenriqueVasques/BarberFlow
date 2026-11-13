@@ -41,8 +41,7 @@ namespace BarberFlow.API.Data.Repositories
         #region Consultas: Visão Geral
 
         // Busca completa de um agendamento por ID com todos os relacionamentos
-        public async Task<Agendamento?> ObterPorId(long id) //to do remover inclde e usar DTO para resposta, com select,
-                                                            //deixar dinamico os filtros de ativo e deletado também
+        public async Task<Agendamento?> ObterPorId(long id)
         {
             return await _appDbContext.Agendamentos
                 .IgnoreQueryFilters()
@@ -53,6 +52,8 @@ namespace BarberFlow.API.Data.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(a => a.Id == id);
         }
+        //-----------------------------------------------------------------------------------TCC--------------------------------------------------------------------------------------------------------
+
 
         // Busca agenda filtrada por período (Pode ser de um profissional específico ou da empresa toda)]
             public async Task<List<AgendamentoResponseDto>> ObterAgendaPorPeriodo(long? profissionalId, long empresaId, DateOnly inicio, DateOnly fim, List<StatusAgendamento> statusFiltro, int pagina = 1)
@@ -97,9 +98,19 @@ namespace BarberFlow.API.Data.Repositories
                     .ToListAsync();
             }
 
+
+
+
+        //-----------------------------------------------------------------------------------TCC--------------------------------------------------------------------------------------------------------
+
+
+
+
         #endregion
 
         #region Consultas: Dashboards (Admin)
+
+
 
         // Soma o valor total de agendamentos confirmados/finalizados no dia
         public async Task<decimal> ObterFaturamentoPorDia(long empresaId, DateOnly data)
